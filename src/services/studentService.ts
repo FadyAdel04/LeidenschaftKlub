@@ -185,6 +185,10 @@ export async function fetchProfile(userId: string): Promise<Profile> {
   // 2. Row exists — return it
   if (data) {
     const profile = data as Profile;
+    // Guard against legacy rows with missing level.
+    if (!profile.current_level || !String(profile.current_level).trim()) {
+      profile.current_level = 'A1';
+    }
     const signedAvatar = await getSignedAvatarUrl(profile.avatar_url);
     if (signedAvatar) profile.avatar_url = signedAvatar;
     return profile;
@@ -271,13 +275,51 @@ export async function getSignedAvatarUrl(fileUrlOrPath: string | null | undefine
 // ─── Level ────────────────────────────────────────────────────────────────────
 
 export async function fetchLevelByName(levelName: string): Promise<Level> {
-  const { data, error } = await supabase
+  const requestedRaw = String(levelName ?? '').trim();
+  const requestedUpper = requestedRaw.toUpperCase();
+  const cefrToken = requestedUpper.match(/\b(A1|A2|B1|B2|C1|C2)\b/)?.[1] ?? null;
+
+  // Build multiple candidates to handle values like:
+  // "B1", "b1", "Level B1", "B1 - Intermediate", etc.
+  const candidates = Array.from(new Set([
+    requestedRaw,
+    requestedUpper,
+    requestedRaw.replace(/^level\s+/i, '').trim(),
+    cefrToken ?? '',
+  ].filter(Boolean)));
+
+  // 1) Try exact / case-insensitive matches first.
+  for (const candidate of candidates) {
+    const { data, error } = await supabase
+      .from('levels')
+      .select('*')
+      .ilike('name', candidate)
+      .limit(1);
+    if (error) throw new Error(error.message);
+    if (data?.[0]) return data[0] as Level;
+  }
+
+  // 2) Try prefix matching (e.g. "B1%" for "B1 - Intermediate")
+  if (cefrToken) {
+    const { data, error } = await supabase
+      .from('levels')
+      .select('*')
+      .ilike('name', `${cefrToken}%`)
+      .limit(1);
+    if (error) throw new Error(error.message);
+    if (data?.[0]) return data[0] as Level;
+  }
+
+  // 3) Fallback: first available level so student portal never hard-crashes.
+  const { data: fallback, error: fallbackError } = await supabase
     .from('levels')
     .select('*')
-    .eq('name', levelName)
-    .single();
-  if (error) throw new Error(error.message);
-  return data as Level;
+    .order('name', { ascending: true })
+    .limit(1)
+    .maybeSingle();
+  if (fallbackError) throw new Error(fallbackError.message);
+  if (!fallback) throw new Error('No levels found. Please create at least one level in admin.');
+  return fallback as Level;
 }
 
 // ─── Materials ────────────────────────────────────────────────────────────────
