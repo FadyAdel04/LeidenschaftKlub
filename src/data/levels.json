@@ -1,0 +1,688 @@
+[
+  {
+    "key": "A1",
+    "name": "A1",
+    "badge": "Beginner",
+    "headline": "Discovery Foundations",
+    "summary": "Build the core system: sounds, survival phrases, and high-frequency grammar for daily interactions.",
+    "duration": "8 Weeks",
+    "intensity": "Moderate (4hrs/week)",
+    "nextCohort": "Oct 1, 2024",
+    "whoFor": {
+      "title": "Who is this for?",
+      "description": "Perfect for absolute beginners with no prior German knowledge.",
+      "bullets": [
+        {
+          "title": "Complete Beginners",
+          "description": "No prior German knowledge required."
+        },
+        {
+          "title": "Travel Enthusiasts",
+          "description": "Prepare for your first trip to German-speaking countries."
+        }
+      ]
+    },
+    "prerequisite": {
+      "title": "Prerequisite",
+      "description": "No previous knowledge required.",
+      "ctaLabel": "Start Your Journey →",
+      "ctaHref": "/register"
+    },
+    "heroImage": "https://images.unsplash.com/photo-1546410531-bb4caa6b424d?w=1200&h=400&fit=crop",
+    "highlights": [
+      "Pronunciation & alphabet mastery",
+      "Daily routines and self-introduction",
+      "Core present tense + question forms"
+    ],
+    "outcomes": [
+      "Introduce yourself and others",
+      "Ask/answer simple questions",
+      "Understand common classroom language"
+    ],
+    "curriculum": [
+      { "title": "Starter Kit", "items": ["Alphabet & sounds", "Numbers & time", "Greetings"] },
+      { "title": "Daily Life", "items": ["Home & family", "Food & ordering", "Directions"] }
+    ],
+    "curriculumHighlights": [
+      {
+        "subtitle": "Module 01",
+        "title": "Pronunciation & Sound System",
+        "description": "Master German phonetics with our unique sound mapping system. Learn to distinguish and produce all German sounds with native-like precision.",
+        "tags": ["Phonetics", "Accent Training", "Audio Exercises"],
+        "tone": "light",
+        "image": "https://images.unsplash.com/photo-1516972810927-80185027ca84?w=600&h=400&fit=crop",
+        "icon": "🎤"
+      },
+      {
+        "title": "Conversational Basics",
+        "description": "Build confidence in everyday situations through role-play and real-life scenarios. Order food, introduce yourself, and navigate simple interactions.",
+        "tags": ["Role-play", "Practical German", "Speaking"],
+        "tone": "sand",
+        "image": "https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?w=600&h=400&fit=crop",
+        "icon": "💬"
+      }
+    ],
+    "gallery": {
+      "image": "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&h=500&fit=crop",
+      "eyebrow": "Interactive Learning",
+      "title": "Small Group Classes",
+      "alt": "A1 German class"
+    },
+    "testimonial": {
+      "quote": "A1 was the foundation I needed. The pronunciation training completely changed how I approach German.",
+      "author": "Maria Garcia",
+      "role": "A1 Graduate, Currently B1",
+      "initials": "MG"
+    },
+    "capabilities": [
+      {
+        "title": "Basic Communication",
+        "description": "Handle simple conversations about familiar topics like family, work, and hobbies."
+      },
+      {
+        "title": "Reading Comprehension",
+        "description": "Understand short, simple texts and basic advertisements."
+      },
+      {
+        "title": "Cultural Awareness",
+        "description": "Recognize basic cultural norms and etiquette in German-speaking countries."
+      }
+    ],
+    "readyToMaster": {
+      "headline": "Ready to Start Your German Journey?",
+      "description": "Join our A1 cohort and take your first steps toward German fluency. Perfect for absolute beginners.",
+      "bullets": [
+        "No prior knowledge required",
+        "Small group classes (max 8 students)",
+        "Flexible morning & evening sessions",
+        "Comprehensive learning materials included"
+      ]
+    },
+    "lessonShowcase": {
+      "leftImage": "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=600&h=400&fit=crop",
+      "leftLabel": "Interactive Learning Environment",
+      "quote": {
+        "text": "A1 was the foundation I needed. The pronunciation training completely changed how I approach German.",
+        "author": "Maria Garcia",
+        "role": "A1 Graduate, Currently B1"
+      }
+    },
+    "assessment": {
+      "format": "MCQ + short tasks",
+      "passingScore": 60,
+      "notes": "Focus on comprehension and basic production."
+    }
+  },
+  {
+    "key": "A2",
+    "name": "A2",
+    "badge": "Elementary",
+    "headline": "Waystage Momentum",
+    "summary": "Expand your range: more contexts, more verbs, and smoother listening in everyday situations.",
+    "duration": "10 Weeks",
+    "intensity": "Moderate (5hrs/week)",
+    "nextCohort": "Oct 15, 2024",
+    "whoFor": {
+      "title": "Who is this for?",
+      "description": "Designed for learners who have completed A1 or have basic German knowledge.",
+      "bullets": [
+        {
+          "title": "A1 Graduates",
+          "description": "Build on your foundation and expand your vocabulary."
+        },
+        {
+          "title": "Travel & Work",
+          "description": "Prepare for more complex travel and basic work scenarios."
+        }
+      ]
+    },
+    "prerequisite": {
+      "title": "Prerequisite",
+      "description": "Completion of Level A1 or equivalent knowledge.",
+      "ctaLabel": "Take Placement Test →",
+      "ctaHref": "/about#methodology"
+    },
+    "heroImage": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1200&h=400&fit=crop",
+    "highlights": [
+      "Past tense intro (Perfekt basics)",
+      "Shopping, travel, appointments",
+      "Longer sentences + connectors"
+    ],
+    "outcomes": [
+      "Handle routine transactions",
+      "Describe experiences in simple terms",
+      "Follow slow, clear speech on familiar topics"
+    ],
+    "curriculum": [
+      { "title": "Communication", "items": ["Requests", "Preferences", "Plans"] },
+      { "title": "Grammar Engine", "items": ["Cases intro", "Modal verbs", "Perfekt basics"] }
+    ],
+    "curriculumHighlights": [
+      {
+        "subtitle": "Grammar Deep Dive",
+        "title": "Master the Cases",
+        "description": "Understand the logic behind Nominative, Accusative, and Dative cases through visual learning aids and real-world examples.",
+        "tags": ["Grammar", "Cases", "Structure"],
+        "tone": "dark",
+        "image": "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=600&h=400&fit=crop",
+        "icon": "📚"
+      },
+      {
+        "title": "Travel & Culture",
+        "description": "Practical German for traveling through Germany, Austria, and Switzerland. Learn to navigate airports, hotels, and restaurants with confidence.",
+        "tags": ["Travel German", "Culture", "Practical"],
+        "tone": "light",
+        "image": "https://images.unsplash.com/photo-1534352956036-cd81e27e615c?w=600&h=400&fit=crop",
+        "icon": "✈️"
+      }
+    ],
+    "gallery": {
+      "image": "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&h=500&fit=crop",
+      "eyebrow": "Real-World Practice",
+      "title": "Conversation Workshops",
+      "alt": "A2 German conversation class"
+    },
+    "testimonial": {
+      "quote": "The travel-focused lessons made me confident enough to book my first trip to Berlin and actually speak German!",
+      "author": "James Wilson",
+      "role": "A2 Graduate",
+      "initials": "JW"
+    },
+    "capabilities": [
+      {
+        "title": "Independent Travel",
+        "description": "Navigate German-speaking countries confidently using the language."
+      },
+      {
+        "title": "Simple Storytelling",
+        "description": "Describe past experiences and future plans with basic narrative structures."
+      },
+      {
+        "title": "Professional Basics",
+        "description": "Handle simple workplace communications and understand basic job-related vocabulary."
+      }
+    ],
+    "readyToMaster": {
+      "headline": "Ready to Build Momentum?",
+      "description": "Take your German to the next level. A2 opens doors to real conversations and deeper connections.",
+      "bullets": [
+        "Build on your A1 foundation",
+        "Interactive speaking workshops",
+        "Cultural immersion sessions",
+        "Weekly conversation practice"
+      ]
+    },
+    "lessonShowcase": {
+      "leftImage": "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=600&h=400&fit=crop",
+      "leftLabel": "Real-World Practice",
+      "quote": {
+        "text": "The travel-focused lessons made me confident enough to book my first trip to Berlin and actually speak German!",
+        "author": "James Wilson",
+        "role": "A2 Graduate"
+      }
+    },
+    "assessment": {
+      "format": "MCQ + guided writing",
+      "passingScore": 60,
+      "notes": "Balance accuracy with fluency."
+    }
+  },
+  {
+    "key": "B1",
+    "name": "B1",
+    "badge": "Intermediate",
+    "headline": "Threshold Independence",
+    "summary": "Become independent: speak with confidence, understand real conversations, and write structured messages.",
+    "duration": "12 Weeks",
+    "intensity": "High (6hrs/week)",
+    "nextCohort": "Sept 15, 2024",
+    "whoFor": {
+      "title": "Who is this for?",
+      "description": "This level is designed for learners who have mastered the basics of German (A2) and are ready to tackle professional and academic environments.",
+      "bullets": [
+        {
+          "title": "Career Climbers",
+          "description": "Professionals aiming for employment in DACH region companies."
+        },
+        {
+          "title": "Academic Pursuits",
+          "description": "Students preparing for German university entrance or internships."
+        }
+      ]
+    },
+    "prerequisite": {
+      "title": "Prerequisite",
+      "description": "Completion of Level A2 or equivalent placement test score.",
+      "ctaLabel": "Take Placement Test →",
+      "ctaHref": "/about#methodology"
+    },
+    "heroImage": "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=1200&h=400&fit=crop",
+    "highlights": [
+      "Narration: past/present/future",
+      "Opinions + reasons + examples",
+      "Listening for meaning (not words)"
+    ],
+    "curriculumHighlights": [
+      {
+        "subtitle": "Module 01",
+        "title": "Advanced Grammar & Logic",
+        "description": "Mastering the Passive Voice, Subjunctive I (Konjunktiv I), and connector logic for precise, professional German syntax.",
+        "tags": ["Passive Voice", "Subjunctive I", "Connector Logic"],
+        "tone": "dark",
+        "image": "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=600&h=400&fit=crop",
+        "icon": "📖"
+      },
+      {
+        "title": "Professional Vocabulary",
+        "description": "Transition from “restaurant German” to boardroom German with sector-specific terminology and workplace scenarios.",
+        "tags": ["Workplace Scenarios"],
+        "tone": "light",
+        "image": "https://images.unsplash.com/photo-1557804506-669a67965ba0?w=600&h=400&fit=crop",
+        "icon": "💼"
+      },
+      {
+        "title": "Cultural Nuances",
+        "description": "Understand “Du vs. Sie” in modern contexts and the art of German directness in professional settings.",
+        "tone": "light",
+        "image": "https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?w=600&h=400&fit=crop",
+        "icon": "🎭"
+      },
+      {
+        "title": "Oral Fluency & Spontaneity",
+        "description": "Intensive speaking workshops focused on debating, presenting, and expressing complex emotions without hesitation.",
+        "tone": "red",
+        "image": "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=600&h=400&fit=crop",
+        "icon": "🎙️"
+      }
+    ],
+    "gallery": {
+      "image": "https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&h=500&fit=crop",
+      "eyebrow": "Live Experience",
+      "title": "Collaborative Learning",
+      "alt": "B1 German class in action"
+    },
+    "testimonial": {
+      "quote": "B1 was the moment I stopped translating in my head and started feeling the language.",
+      "author": "Sarah Koenig",
+      "role": "B1 Graduate, Software Engineer",
+      "initials": "SK"
+    },
+    "outcomes": [
+      "Discuss familiar topics with clarity",
+      "Write structured emails/messages",
+      "Understand standard speech and key points"
+    ],
+    "capabilities": [
+      {
+        "title": "Workplace Agility",
+        "description": "Participate in business meetings and handle professional correspondence with clarity and proper etiquette."
+      },
+      {
+        "title": "Textual Analysis",
+        "description": "Understand the main points of complex technical texts in your field of specialization and standard news reports."
+      },
+      {
+        "title": "Abstract Thought",
+        "description": "Express viewpoints on contemporary issues, giving advantages and disadvantages of various options."
+      },
+      {
+        "title": "Social Sophistication",
+        "description": "Navigate most travel and social situations in German‑speaking countries with spontaneous fluency."
+      }
+    ],
+    "readyToMaster": {
+      "headline": "Ready to Master B1?",
+      "description": "Join our next cohort — limited seats to ensure personalized feedback and rapid progress.",
+      "bullets": [
+        "Official certification preparation",
+        "Peer‑to‑peer learning groups",
+        "Flexible evening & weekend slots",
+        "Exam simulation workshops"
+      ]
+    },
+    "lessonShowcase": {
+      "leftImage": "https://images.unsplash.com/photo-1552664730-d307ca884978?w=600&h=400&fit=crop",
+      "leftLabel": "Collaborative Learning",
+      "quote": {
+        "text": "B1 was the moment I stopped translating in my head and started feeling the language.",
+        "author": "Sarah Koenig",
+        "role": "Software Engineer, B1 Graduate"
+      }
+    },
+    "curriculum": [
+      {
+        "title": "Speaking Framework",
+        "items": ["Opinion structures", "Argument building", "Storytelling"]
+      },
+      {
+        "title": "Grammar Control",
+        "items": ["Nebensätze basics", "Konjunktiv II intro", "Prepositions & cases"]
+      },
+      {
+        "title": "Real-world Tasks",
+        "items": ["Job / study contexts", "Appointments & services", "Travel situations"]
+      }
+    ],
+    "assessment": {
+      "format": "MCQ exam + writing task",
+      "passingScore": 60,
+      "notes": "This level emphasizes independence and structured output."
+    }
+  },
+  {
+    "key": "B2",
+    "name": "B2",
+    "badge": "Upper-Intermediate",
+    "headline": "Vantage Fluency",
+    "summary": "Sound natural: complex grammar, better vocabulary, and confident interaction in professional contexts.",
+    "duration": "12 Weeks",
+    "intensity": "High (6hrs/week)",
+    "nextCohort": "Oct 1, 2024",
+    "whoFor": {
+      "title": "Who is this for?",
+      "description": "For learners ready to achieve professional fluency in German.",
+      "bullets": [
+        {
+          "title": "Professionals",
+          "description": "Advance your career in German-speaking environments."
+        },
+        {
+          "title": "University Bound",
+          "description": "Prepare for academic studies in German."
+        }
+      ]
+    },
+    "prerequisite": {
+      "title": "Prerequisite",
+      "description": "Completion of Level B1 or equivalent.",
+      "ctaLabel": "Take Placement Test →",
+      "ctaHref": "/about#methodology"
+    },
+    "heroImage": "https://images.unsplash.com/photo-1501504905252-473c47e087f8?w=1200&h=400&fit=crop",
+    "highlights": [
+      "Complex clauses + style",
+      "Debate and negotiation",
+      "Listening to fast speech"
+    ],
+    "outcomes": [
+      "Participate in discussions smoothly",
+      "Write formal emails and reports",
+      "Understand most TV/news on familiar topics"
+    ],
+    "curriculum": [
+      { "title": "Advanced Communication", "items": ["Debate", "Meetings", "Presentations"] },
+      { "title": "Grammar Precision", "items": ["Advanced Nebensätze", "Passive", "Style"] }
+    ],
+    "curriculumHighlights": [
+      {
+        "subtitle": "Professional Communication",
+        "title": "Business German Mastery",
+        "description": "Navigate complex professional scenarios, lead meetings, and deliver compelling presentations in German.",
+        "tags": ["Business German", "Presentations", "Negotiations"],
+        "tone": "dark",
+        "image": "https://images.unsplash.com/photo-1552664730-d307ca884978?w=600&h=400&fit=crop",
+        "icon": "🏢"
+      },
+      {
+        "title": "Media Literacy",
+        "description": "Analyze news articles, opinion pieces, and professional publications. Understand subtle arguments and implied meanings.",
+        "tags": ["Media Analysis", "Critical Thinking"],
+        "tone": "light",
+        "image": "https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=600&h=400&fit=crop",
+        "icon": "📰"
+      }
+    ],
+    "gallery": {
+      "image": "https://images.unsplash.com/photo-1515187029135-8ee3e1a4d602?w=800&h=500&fit=crop",
+      "eyebrow": "Professional Environment",
+      "title": "Business German Workshop",
+      "alt": "B2 professional German class"
+    },
+    "testimonial": {
+      "quote": "B2 gave me the confidence to present to German clients. Now I lead meetings entirely in German.",
+      "author": "Thomas Müller",
+      "role": "Project Manager",
+      "initials": "TM"
+    },
+    "capabilities": [
+      {
+        "title": "Professional Fluency",
+        "description": "Lead professional discussions and present complex ideas with confidence."
+      },
+      {
+        "title": "Nuanced Expression",
+        "description": "Express opinions with appropriate register and subtlety for different contexts."
+      },
+      {
+        "title": "Academic Readiness",
+        "description": "Prepare for university-level study in German-speaking institutions."
+      }
+    ],
+    "readyToMaster": {
+      "headline": "Ready to Reach Fluency?",
+      "description": "B2 is your gateway to professional and academic opportunities in German-speaking countries.",
+      "bullets": [
+        "Career-focused curriculum",
+        "University preparation track",
+        "Industry-specific vocabulary modules",
+        "Networking opportunities"
+      ]
+    },
+    "lessonShowcase": {
+      "leftImage": "https://images.unsplash.com/photo-1515187029135-8ee3e1a4d602?w=600&h=400&fit=crop",
+      "leftLabel": "Professional Environment",
+      "quote": {
+        "text": "B2 gave me the confidence to present to German clients. Now I lead meetings entirely in German.",
+        "author": "Thomas Müller",
+        "role": "Project Manager"
+      }
+    },
+    "assessment": {
+      "format": "MCQ exam + writing + speaking rubric",
+      "passingScore": 60,
+      "notes": "Precision + fluency under time constraints."
+    }
+  },
+  {
+    "key": "C1",
+    "name": "C1",
+    "badge": "Advanced",
+    "headline": "Advanced Competence",
+    "summary": "Operate at a high level: nuanced speech, academic/professional writing, and strong comprehension.",
+    "duration": "12 Weeks",
+    "intensity": "Intensive (8hrs/week)",
+    "nextCohort": "Nov 1, 2024",
+    "whoFor": {
+      "title": "Who is this for?",
+      "description": "For advanced learners aiming for academic or executive-level proficiency.",
+      "bullets": [
+        {
+          "title": "University Applicants",
+          "description": "Prepare for German university entrance requirements."
+        },
+        {
+          "title": "Executives",
+          "description": "Achieve leadership-level communication skills."
+        }
+      ]
+    },
+    "prerequisite": {
+      "title": "Prerequisite",
+      "description": "Completion of Level B2 or equivalent.",
+      "ctaLabel": "Take Placement Test →",
+      "ctaHref": "/about#methodology"
+    },
+    "heroImage": "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=1200&h=400&fit=crop",
+    "highlights": [
+      "Nuance and register",
+      "Academic language",
+      "Fast listening comprehension"
+    ],
+    "outcomes": [
+      "Express yourself fluently with precision",
+      "Write well-structured essays",
+      "Understand long, complex texts"
+    ],
+    "curriculum": [
+      { "title": "Academic & Professional", "items": ["Essays", "Reports", "Presentations"] }
+    ],
+    "curriculumHighlights": [
+      {
+        "subtitle": "Academic Excellence",
+        "title": "University-Level German",
+        "description": "Master academic writing, research papers, and seminar participation required for German universities.",
+        "tags": ["Academic Writing", "Research", "Presentations"],
+        "tone": "dark",
+        "image": "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=600&h=400&fit=crop",
+        "icon": "🎓"
+      }
+    ],
+    "gallery": {
+      "image": "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&h=500&fit=crop",
+      "eyebrow": "Academic Environment",
+      "title": "University Preparation",
+      "alt": "C1 academic German class"
+    },
+    "testimonial": {
+      "quote": "C1 prepared me for my Master's at LMU Munich. I can now follow lectures and participate in seminars naturally.",
+      "author": "Dr. Anna Weber",
+      "role": "PhD Candidate",
+      "initials": "AW"
+    },
+    "capabilities": [
+      {
+        "title": "Academic Proficiency",
+        "description": "Study at German universities and participate fully in academic discourse."
+      },
+      {
+        "title": "Executive Communication",
+        "description": "Communicate at executive level with sophisticated vocabulary and cultural awareness."
+      }
+    ],
+    "readyToMaster": {
+      "headline": "Ready to Master Advanced German?",
+      "description": "C1 opens doors to top-tier academic programs and executive positions.",
+      "bullets": [
+        "University preparation intensive",
+        "Research paper writing workshop",
+        "Academic presentation training",
+        "Study abroad preparation"
+      ]
+    },
+    "lessonShowcase": {
+      "leftImage": "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=600&h=400&fit=crop",
+      "leftLabel": "Academic Environment",
+      "quote": {
+        "text": "C1 prepared me for my Master's at LMU Munich. I can now follow lectures and participate in seminars naturally.",
+        "author": "Dr. Anna Weber",
+        "role": "PhD Candidate"
+      }
+    },
+    "assessment": {
+      "format": "Mixed exam + long writing",
+      "passingScore": 60,
+      "notes": "Performance under complex prompts."
+    }
+  },
+  {
+    "key": "C2",
+    "name": "C2",
+    "badge": "Mastery",
+    "headline": "Mastery & Control",
+    "summary": "Near-native control: advanced nuance, idioms, and confident performance across any domain.",
+    "duration": "12 Weeks",
+    "intensity": "Elite (One-on-One)",
+    "nextCohort": "By Appointment",
+    "whoFor": {
+      "title": "Who is this for?",
+      "description": "For learners seeking native-level mastery for professional or personal excellence.",
+      "bullets": [
+        {
+          "title": "Language Professionals",
+          "description": "Achieve native-level proficiency for teaching or translation."
+        },
+        {
+          "title": "Cultural Ambassadors",
+          "description": "Master the subtleties of German culture and communication."
+        }
+      ]
+    },
+    "prerequisite": {
+      "title": "Prerequisite",
+      "description": "Completion of Level C1 or equivalent mastery.",
+      "ctaLabel": "Schedule Consultation →",
+      "ctaHref": "/contact"
+    },
+    "heroImage": "https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?w=1200&h=400&fit=crop",
+    "highlights": [
+      "Native-level idioms",
+      "Advanced register control",
+      "High-level comprehension"
+    ],
+    "outcomes": [
+      "Understand virtually everything heard/read",
+      "Summarize and debate complex topics",
+      "Write with style and nuance"
+    ],
+    "curriculum": [
+      { "title": "Mastery", "items": ["Nuance", "Style", "Advanced debate"] }
+    ],
+    "curriculumHighlights": [
+      {
+        "subtitle": "Native-Like Mastery",
+        "title": "Idiomatic & Stylistic Excellence",
+        "description": "Achieve near-native command of German idioms, regional variations, and sophisticated stylistic choices.",
+        "tags": ["Idioms", "Regional German", "Style"],
+        "tone": "dark",
+        "image": "https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?w=600&h=400&fit=crop",
+        "icon": "👑"
+      }
+    ],
+    "gallery": {
+      "image": "https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?w=800&h=500&fit=crop",
+      "eyebrow": "Elite Experience",
+      "title": "One-on-One Coaching",
+      "alt": "C2 mastery class"
+    },
+    "testimonial": {
+      "quote": "C2 transformed my German from functional to native-like. I now think, dream, and debate in German.",
+      "author": "Michael Chen",
+      "role": "Senior Diplomat",
+      "initials": "MC"
+    },
+    "capabilities": [
+      {
+        "title": "Native-Level Competence",
+        "description": "Function at the highest level in any professional, academic, or social context."
+      },
+      {
+        "title": "Cultural Mastery",
+        "description": "Navigate complex cultural nuances with the sophistication of a native speaker."
+      }
+    ],
+    "readyToMaster": {
+      "headline": "Ready to Achieve Mastery?",
+      "description": "C2 represents the pinnacle of German language proficiency. Join our elite cohort.",
+      "bullets": [
+        "One-on-one coaching",
+        "Specialized domain focus (choose your field)",
+        "Publication-ready writing workshop",
+        "Executive presentation training"
+      ]
+    },
+    "lessonShowcase": {
+      "leftImage": "https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?w=600&h=400&fit=crop",
+      "leftLabel": "Mastery Environment",
+      "quote": {
+        "text": "C2 transformed my German from functional to native-like. I now think, dream, and debate in German.",
+        "author": "Michael Chen",
+        "role": "Senior Diplomat"
+      }
+    },
+    "assessment": {
+      "format": "Portfolio + performance exam",
+      "passingScore": 60,
+      "notes": "Mastery-level output across contexts."
+    }
+  }
+]

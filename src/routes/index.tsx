@@ -9,6 +9,7 @@ import PublicOnlyRoute from '../components/shared/PublicOnlyRoute';
 
 const LandingPage        = lazy(() => import('../pages/public/LandingPage'));
 const AboutPage          = lazy(() => import('../pages/public/AboutPage'));
+const LevelDetailsPage   = lazy(() => import('../pages/public/LevelDetailsPage'));
 const LoginPage          = lazy(() => import('../pages/auth/LoginPage'));
 const RegisterPage       = lazy(() => import('../pages/auth/RegisterPage'));
 const ForgotPasswordPage = lazy(() => import('../pages/auth/ForgotPasswordPage'));
@@ -44,6 +45,7 @@ export default function AppRoutes() {
         <Route element={<MainLayout />}>
           <Route path="/" element={<LandingPage />} />
           <Route path="/about" element={<AboutPage />} />
+          <Route path="/levels/:level" element={<LevelDetailsPage />} />
         </Route>
 
         {/* ── Auth (unauthenticated) ────────────────────────────── */}

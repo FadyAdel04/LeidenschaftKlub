@@ -423,7 +423,7 @@ export default function LandingPage() {
                   whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: true }}
                   transition={{ delay: idx * 0.1 }}
-                  onClick={() => scrollToId('courses')}
+                  onClick={() => navigate(`/levels/${encodeURIComponent(lvl.tag)}`)}
                   className={`${lvl.col} bg-[#F5F5F0] p-6 sm:p-8 md:p-10 rounded-3xl sm:rounded-4xl border-l-8 border-[#C62828] group cursor-pointer transition-all hover:bg-[#1A1A1A] hover:border-[#D4A373] hover:shadow-2xl hover:shadow-[#1A1A1A]/20`}
                 >
                   <div className="flex justify-between items-start mb-4 sm:mb-6 md:mb-8">
