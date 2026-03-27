@@ -1,8 +1,8 @@
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
-import { FiCheckCircle, FiAlertCircle, FiLoader, FiExternalLink, FiEdit3, FiSave, FiX, FiInbox } from 'react-icons/fi';
+import { CheckCircle, AlertCircle, Loader, ExternalLink, Edit3, Save, X, Inbox } from 'lucide-react';
 import AdminSidebar from '../../components/shared/AdminSidebar';
-import { fetchAllSubmissions, gradeSubmission, fetchAllExamResults, type Submission, type Result } from '../../services/adminService';
+import { fetchAllSubmissions, gradeSubmission, fetchAllExamResults, fetchWritingAnswersForReview, gradeExamAnswer, type Submission, type Result, type ExamAnswer } from '../../services/adminService';
 
 const cv = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.05 } } };
 const ci = { hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } };
@@ -16,6 +16,7 @@ type ExamResultData = Result & {
 export default function AdminResults() {
   const [submissions, setSubmissions] = useState<SubData[]>([]);
   const [examResults, setExamResults] = useState<ExamResultData[]>([]);
+  const [writingAnswers, setWritingAnswers] = useState<ExamAnswer[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   
@@ -25,11 +26,17 @@ export default function AdminResults() {
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState('');
 
+  const [writingEditingId, setWritingEditingId] = useState<string | null>(null);
+  const [writingGrade, setWritingGrade] = useState('');
+  const [writingFeedback, setWritingFeedback] = useState('');
+  const [writingSaving, setWritingSaving] = useState(false);
+
   useEffect(() => {
-    Promise.all([fetchAllSubmissions(), fetchAllExamResults()])
-      .then(([subs, results]) => {
+    Promise.all([fetchAllSubmissions(), fetchAllExamResults(), fetchWritingAnswersForReview()])
+      .then(([subs, results, writing]) => {
         setSubmissions(subs);
         setExamResults(results);
+        setWritingAnswers(writing);
       })
       .catch(e => setError(e.message))
       .finally(() => setLoading(false));
@@ -59,6 +66,32 @@ export default function AdminResults() {
     }
   };
 
+  const handleWritingSave = async (answerId: string) => {
+    const numGrade = Number(writingGrade);
+    if (isNaN(numGrade) || numGrade < 0 || numGrade > 100) {
+      setError('Grade must be between 0 and 100');
+      return;
+    }
+
+    setWritingSaving(true);
+    setError('');
+    try {
+      await gradeExamAnswer({ answerId, grade: numGrade, feedback: writingFeedback });
+      setWritingAnswers(prev => prev.filter(a => a.id !== answerId));
+      setWritingEditingId(null);
+      setSaveMsg('Writing grade saved. Exam score updated.');
+      setTimeout(() => setSaveMsg(''), 3500);
+
+      // Refresh exam summary (score/pass may have changed)
+      const results = await fetchAllExamResults();
+      setExamResults(results);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Failed to save writing grade');
+    } finally {
+      setWritingSaving(false);
+    }
+  };
+
   return (
     <motion.div initial="hidden" animate="visible" variants={cv} className="min-h-screen bg-[#F5F5F0] lg:flex">
       <AdminSidebar />
@@ -76,13 +109,13 @@ export default function AdminResults() {
 
         {saveMsg && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mb-6 flex items-center gap-3 bg-green-50 border border-green-200 rounded-2xl p-4 relative z-10">
-            <FiCheckCircle className="w-4 h-4 text-green-600 shrink-0" />
+            <CheckCircle className="w-4 h-4 text-green-600 shrink-0" />
             <p className="text-xs font-bold text-green-700">{saveMsg}</p>
           </motion.div>
         )}
         {error && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mb-6 flex items-center gap-3 bg-red-50 border border-red-200 rounded-2xl p-4 relative z-10">
-            <FiAlertCircle className="w-4 h-4 text-[#C62828] shrink-0" />
+            <AlertCircle className="w-4 h-4 text-[#C62828] shrink-0" />
             <p className="text-xs font-bold text-[#C62828]">{error}</p>
           </motion.div>
         )}
@@ -92,7 +125,7 @@ export default function AdminResults() {
             ? <div className="p-10 space-y-4">{[1,2,3,4].map(i => <div key={i} className="h-16 bg-[#F5F5F0] rounded-2xl animate-pulse" />)}</div>
             : submissions.length === 0
               ? <div className="flex flex-col items-center justify-center py-32 text-center">
-                  <FiInbox className="w-12 h-12 text-[#1A1A1A]/10 mb-4" />
+                  <Inbox className="w-12 h-12 text-[#1A1A1A]/10 mb-4" />
                   <p className="font-black text-[#1A1A1A]/30 uppercase">No submissions found.</p>
                 </div>
               : (
@@ -100,7 +133,7 @@ export default function AdminResults() {
                   <table className="w-full text-left border-collapse">
                     <thead>
                       <tr className="border-b border-[#1A1A1A]/5 bg-[#F5F5F0]/50">
-                        {['Student', 'Assignment', 'File', 'Submitted', 'Status / Grade', 'Action'].map(h => (
+                        {['Student', 'Assignment', 'file', 'Submitted', 'Status / Grade', 'Action'].map(h => (
                           <th key={h} className="px-8 py-5 text-[9px] font-black uppercase tracking-[0.4em] text-[#D4A373] italic whitespace-nowrap">{h}</th>
                         ))}
                       </tr>
@@ -118,7 +151,7 @@ export default function AdminResults() {
                           <td className="px-8 py-5">
                             {s.file_url ? (
                               <a href={s.file_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-[#C62828] hover:underline whitespace-nowrap">
-                                <FiExternalLink className="w-3.5 h-3.5" /> View Work
+                                <ExternalLink className="w-3.5 h-3.5" /> View Work
                               </a>
                             ) : (
                               <span className="text-[10px] font-black uppercase tracking-widest text-[#1A1A1A]/25 whitespace-nowrap">
@@ -163,15 +196,15 @@ export default function AdminResults() {
                             {editingId === s.id ? (
                               <div className="flex items-center gap-2">
                                 <button onClick={() => handleSave(s.id)} disabled={saving} className="flex items-center gap-1.5 px-3 py-1.5 bg-[#C62828] text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:shadow-lg transition-all active:scale-95 disabled:opacity-60">
-                                  {saving ? <FiLoader className="w-3 h-3 animate-spin" /> : <FiSave className="w-3 h-3" />} Save
+                                  {saving ? <Loader className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />} Save
                                 </button>
                                 <button onClick={() => setEditingId(null)} className="p-1.5 bg-[#F5F5F0] rounded-xl text-[#1A1A1A]/40 hover:text-[#1A1A1A]">
-                                  <FiX className="w-4 h-4" />
+                                  <X className="w-4 h-4" />
                                 </button>
                               </div>
                             ) : (
                               <button onClick={() => { setEditingId(s.id); setEditGrade(s.grade?.toString() || ''); setEditFeedback(s.feedback ?? ''); }} className="flex items-center gap-2 px-3 py-1.5 bg-[#F5F5F0] hover:bg-[#1A1A1A] hover:text-white text-[#1A1A1A] rounded-xl font-black text-[10px] uppercase tracking-widest transition-all active:scale-95 border border-[#1A1A1A]/5">
-                                <FiEdit3 className="w-3 h-3" /> Grade
+                                <Edit3 className="w-3 h-3" /> Grade
                               </button>
                             )}
                           </td>
@@ -217,7 +250,9 @@ export default function AdminResults() {
                         <p className="font-black text-sm text-[#1A1A1A]">{r.exams?.title ?? 'Exam'}</p>
                       </td>
                       <td className="px-8 py-4">
-                        <p className="font-black text-sm text-[#1A1A1A]">{r.score.toFixed(0)}%</p>
+                        <p className="font-black text-sm text-[#1A1A1A]">
+                          {r.review_status === 'pending_review' || r.score == null ? '—' : `${r.score.toFixed(0)}%`}
+                        </p>
                       </td>
                       <td className="px-8 py-4">
                         <span className={`px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${r.passed ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-[#C62828] border border-red-200'}`}>
@@ -231,6 +266,114 @@ export default function AdminResults() {
                       </td>
                     </tr>
                   ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </motion.div>
+
+        <motion.div variants={ci} className="mt-10 bg-white rounded-[2.5rem] border border-[#1A1A1A]/5 shadow-sm overflow-hidden relative z-10">
+          <div className="px-8 py-6 border-b border-[#1A1A1A]/5">
+            <h3 className="font-black text-[#1A1A1A] tracking-tighter uppercase text-lg">Writing Question Review</h3>
+            <p className="text-[9px] font-black uppercase tracking-[0.4em] text-[#1A1A1A]/30 mt-1">
+              {writingAnswers.length} pending reviews
+            </p>
+          </div>
+
+          {loading ? (
+            <div className="p-8 space-y-3">{[1, 2, 3].map(i => <div key={i} className="h-16 bg-[#F5F5F0] rounded-2xl animate-pulse" />)}</div>
+          ) : writingAnswers.length === 0 ? (
+            <div className="p-12 text-center">
+              <p className="font-black text-[#1A1A1A]/30 uppercase">No writing answers need review.</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-[#1A1A1A]/5 bg-[#F5F5F0]/50">
+                    {['Student', 'Exam', 'Question', 'Answer', 'Grade', 'Action'].map(h => (
+                      <th key={h} className="px-6 py-5 text-[9px] font-black uppercase tracking-[0.4em] text-[#D4A373] italic whitespace-nowrap">{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {writingAnswers.map((a) => {
+                    const ansText = typeof a.answer === 'string' ? a.answer : a.answer ? JSON.stringify(a.answer) : '';
+                    return (
+                      <tr key={a.id} className="border-b border-[#1A1A1A]/5 hover:bg-[#F5F5F0]/40 transition-all">
+                        <td className="px-6 py-4">
+                          <p className="font-black text-sm text-[#1A1A1A]">{a.profiles?.name ?? 'Unknown'}</p>
+                          <p className="text-[10px] font-black uppercase tracking-widest text-[#1A1A1A]/30">{a.profiles?.email}</p>
+                        </td>
+                        <td className="px-6 py-4">
+                          <p className="font-black text-sm text-[#1A1A1A]">{a.exams?.title ?? 'Exam'}</p>
+                        </td>
+                        <td className="px-6 py-4">
+                          <p className="font-black text-sm text-[#1A1A1A] max-w-[240px] line-clamp-2">{a.questions?.question_text ?? 'Question'}</p>
+                        </td>
+                        <td className="px-6 py-4">
+                          <p className="text-xs font-black text-[#1A1A1A]/60 max-w-[260px] line-clamp-3 italic" title={ansText}>
+                            {ansText ? `${ansText.slice(0, 120)}${ansText.length > 120 ? '…' : ''}` : '—'}
+                          </p>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className="px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest bg-[#F5F5F0] text-[#1A1A1A]/40 border border-[#1A1A1A]/10">
+                            Pending
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          {writingEditingId === a.id ? (
+                            <div className="space-y-2">
+                              <input
+                                type="number"
+                                min="0"
+                                max="100"
+                                value={writingGrade}
+                                onChange={(e) => setWritingGrade(e.target.value)}
+                                placeholder="0-100"
+                                className="w-24 px-3 py-1.5 bg-[#F5F5F0] rounded-xl font-black text-sm outline-none border border-[#C62828]/20"
+                              />
+                              <textarea
+                                value={writingFeedback}
+                                onChange={(e) => setWritingFeedback(e.target.value)}
+                                placeholder="Feedback for student"
+                                rows={2}
+                                className="w-72 px-3 py-2 bg-[#F5F5F0] rounded-xl text-xs font-black outline-none border border-[#C62828]/20 resize-none"
+                              />
+                              <div className="flex gap-2 items-center">
+                                <button
+                                  onClick={() => handleWritingSave(a.id)}
+                                  disabled={writingSaving}
+                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#C62828] text-white rounded-xl text-[10px] font-black uppercase tracking-widest disabled:opacity-60"
+                                >
+                                  {writingSaving ? <Loader className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
+                                  Save
+                                </button>
+                                <button
+                                  onClick={() => { setWritingEditingId(null); setWritingGrade(''); setWritingFeedback(''); }}
+                                  className="p-1.5 bg-[#F5F5F0] rounded-xl text-[#1A1A1A]/40 hover:text-[#1A1A1A]"
+                                >
+                                  <X className="w-4 h-4" />
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => {
+                                setWritingEditingId(a.id);
+                                setWritingGrade('60');
+                                setWritingFeedback('');
+                                setError('');
+                              }}
+                              className="px-3 py-1.5 bg-[#F5F5F0] hover:bg-[#1A1A1A] hover:text-white text-[#1A1A1A] rounded-xl font-black text-[10px] uppercase tracking-widest transition-all active:scale-95 border border-[#1A1A1A]/5"
+                            >
+                              Review
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

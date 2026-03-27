@@ -12,6 +12,7 @@ import {
   fetchProfile,
   fetchAuthUser,
   fetchResultsByStudent,
+  type Result,
   updateProfile,
   uploadProfileImage,
   getSignedAvatarUrl,
@@ -52,7 +53,7 @@ export default function StudentProfile() {
 
   const [profile,  setProfile]  = useState<Profile | null>(null);
   const [authInfo, setAuthInfo] = useState<AuthUserInfo | null>(null);
-  const [results,  setResults]  = useState<{ score: number; passed: boolean; exam_id: string; taken_at: string; exams?: { title: string } }[]>([]);
+  const [results,  setResults]  = useState<Result[]>([]);
   const [loading,  setLoading]  = useState(true);
   const [error,    setError]    = useState('');
   const [levels,   setLevels]   = useState<Level[]>([]);
@@ -91,7 +92,7 @@ export default function StudentProfile() {
         }
         setAuthInfo(auth);
         setLevels(lvls);
-        setResults(ress as typeof results);
+        setResults(ress);
         setEditName(prof.name);
         setEditPhone(prof.phone ?? '');
       } catch (e: unknown) {
@@ -135,8 +136,11 @@ export default function StudentProfile() {
     }
   };
 
-  const passRate = results.length ? Math.round((results.filter(r => r.passed).length / results.length) * 100) : 0;
-  const avgScore = results.length ? Math.round(results.reduce((s, r) => s + r.score, 0) / results.length) : 0;
+  const graded = results.filter((r) => r.review_status === 'completed');
+  const passRate = graded.length ? Math.round((graded.filter((r) => r.passed).length / graded.length) * 100) : 0;
+  const avgScore = graded.length
+    ? Math.round(graded.reduce((s, r) => s + (r.score ?? 0), 0) / graded.length)
+    : 0;
   const currentLevel = profile?.current_level ?? 'A1';
   const levelNames = (levels.length ? levels.map(l => l.name) : [...FALLBACK_LEVELS]) as string[];
 
@@ -428,29 +432,35 @@ export default function StudentProfile() {
                   Exam History
                 </h3>
                 <div className="space-y-3">
-                  {results.slice(0, 8).map((r, i) => (
+                  {results.slice(0, 8).map((r, i) => {
+                    const pending = r.review_status === 'pending_review';
+                    return (
                     <div key={i} className="flex items-center gap-4 p-4 bg-[#F5F5F0] rounded-2xl group hover:bg-[#C62828]/5 transition-all">
-                      <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-white font-black text-xs shrink-0 ${r.passed ? 'bg-green-500' : 'bg-[#C62828]'}`}>
-                        {r.passed ? '✓' : '✗'}
+                      <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-white font-black text-xs shrink-0 ${pending ? 'bg-amber-500' : r.passed ? 'bg-green-500' : 'bg-[#C62828]'}`}>
+                        {pending ? '…' : r.passed ? '✓' : '✗'}
                       </div>
                       <div className="flex-1 min-w-0 space-y-1.5">
                         {r.exams?.title && (
                           <p className="text-xs font-black text-[#1A1A1A] truncate">{r.exams.title}</p>
                         )}
-                        <div className="h-1.5 bg-[#1A1A1A]/5 rounded-full overflow-hidden">
-                          <div className={`h-full rounded-full transition-all ${r.passed ? 'bg-green-400' : 'bg-[#C62828]'}`}
-                            style={{ width: `${r.score}%` }} />
-                        </div>
+                        {!pending && r.score != null && (
+                          <div className="h-1.5 bg-[#1A1A1A]/5 rounded-full overflow-hidden">
+                            <div className={`h-full rounded-full transition-all ${r.passed ? 'bg-green-400' : 'bg-[#C62828]'}`}
+                              style={{ width: `${r.score}%` }} />
+                          </div>
+                        )}
                       </div>
                       <div className="text-right shrink-0 space-y-0.5">
-                        <p className="font-black text-sm text-[#1A1A1A]">{r.score.toFixed(0)}%</p>
+                        <p className="font-black text-sm text-[#1A1A1A]">
+                          {pending ? '—' : `${(r.score ?? 0).toFixed(0)}%`}
+                        </p>
                         <p className="text-[8px] font-black uppercase tracking-wider text-[#1A1A1A]/30">{formatDate(r.taken_at)}</p>
                       </div>
-                      <span className={`text-[9px] font-black uppercase px-2.5 py-1 rounded-full shrink-0 ${r.passed ? 'bg-green-50 text-green-600' : 'bg-red-50 text-[#C62828]'}`}>
-                        {r.passed ? 'Pass' : 'Fail'}
+                      <span className={`text-[9px] font-black uppercase px-2.5 py-1 rounded-full shrink-0 ${pending ? 'bg-amber-50 text-amber-900' : r.passed ? 'bg-green-50 text-green-600' : 'bg-red-50 text-[#C62828]'}`}>
+                        {pending ? 'Review' : r.passed ? 'Pass' : 'Fail'}
                       </span>
                     </div>
-                  ))}
+                  );})}
                 </div>
               </motion.div>
             )}

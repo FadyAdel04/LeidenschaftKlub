@@ -1,8 +1,8 @@
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
-import { FiUsers, FiSearch, FiEdit2, FiSave, FiX, FiAlertCircle, FiCheckCircle, FiLoader } from 'react-icons/fi';
+import { Users, Search, Edit2, Save, X, AlertCircle, CheckCircle, Loader } from 'lucide-react';
 import AdminSidebar from '../../components/shared/AdminSidebar';
-import { fetchAllStudents, fetchAllLevels, updateStudentLevel, type Profile, type Level } from '../../services/adminService';
+import { fetchAllStudents, fetchAllLevels, updateStudentLevel, type profile, type Level } from '../../services/adminService';
 
 const cv = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.06 } } };
 const ci = { hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } };
@@ -14,11 +14,11 @@ function formatDate(iso: string) {
 }
 
 export default function AdminStudents() {
-  const [students,  setStudents]  = useState<Profile[]>([]);
+  const [students,  setStudents]  = useState<profile[]>([]);
   const [levels,    setLevels]    = useState<Level[]>([]);
-  const [filtered,  setFiltered]  = useState<Profile[]>([]);
+  const [ltered,  setltered]  = useState<profile[]>([]);
   const [search,    setSearch]    = useState('');
-  const [levelFilter, setLevelFilter] = useState('');
+  const [levellter, setLevellter] = useState('');
   const [loading,   setLoading]   = useState(true);
   const [error,     setError]     = useState('');
   // Inline level edit
@@ -31,7 +31,7 @@ export default function AdminStudents() {
     Promise.all([fetchAllStudents(), fetchAllLevels()])
       .then(([studentsData, levelsData]) => {
         setStudents(studentsData);
-        setFiltered(studentsData);
+        setltered(studentsData);
         setLevels(levelsData);
       })
       .catch(e => setError(e.message))
@@ -44,9 +44,9 @@ export default function AdminStudents() {
       const q = search.toLowerCase();
       list = list.filter(s => s.name?.toLowerCase().includes(q) || s.email.toLowerCase().includes(q));
     }
-    if (levelFilter) list = list.filter(s => s.current_level === levelFilter);
-    setFiltered(list);
-  }, [search, levelFilter, students]);
+    if (levellter) list = list.filter(s => s.current_level === levellter);
+    setltered(list);
+  }, [search, levellter, students]);
 
   const handleSaveLevel = async (studentId: string) => {
     setSaving(true);
@@ -84,21 +84,21 @@ export default function AdminStudents() {
         {/* Success */}
         {saveMsg && (
           <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-6 flex items-center gap-3 bg-green-50 border border-green-200 rounded-2xl p-4 relative z-10">
-            <FiCheckCircle className="w-4 h-4 text-green-600 shrink-0" />
+            <CheckCircle className="w-4 h-4 text-green-600 shrink-0" />
             <p className="text-xs font-bold text-green-700">{saveMsg}</p>
           </motion.div>
         )}
         {error && (
           <motion.div variants={ci} className="mb-6 flex items-center gap-3 bg-red-50 border border-red-200 rounded-2xl p-4 relative z-10">
-            <FiAlertCircle className="w-4 h-4 text-[#C62828] shrink-0" />
+            <AlertCircle className="w-4 h-4 text-[#C62828] shrink-0" />
             <p className="text-xs font-bold text-[#C62828]">{error}</p>
           </motion.div>
         )}
 
-        {/* Filters */}
+        {/* lters */}
         <motion.div variants={ci} className="flex flex-col sm:flex-row gap-4 mb-8 relative z-10">
           <div className="relative flex-1">
-            <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-[#1A1A1A]/20 w-4 h-4" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#1A1A1A]/20 w-4 h-4" />
             <input
               type="text" value={search} onChange={e => setSearch(e.target.value)}
               placeholder="Search by name or email…"
@@ -106,7 +106,7 @@ export default function AdminStudents() {
             />
           </div>
           <select
-            value={levelFilter} onChange={e => setLevelFilter(e.target.value)}
+            value={levellter} onChange={e => setLevelfilter(e.target.value)}
             className="px-5 py-3.5 bg-white border border-[#1A1A1A]/5 rounded-2xl font-black text-sm text-[#1A1A1A] outline-none focus:ring-4 focus:ring-[#C62828]/10 shadow-sm appearance-none cursor-pointer"
           >
             <option value="">All Levels</option>
@@ -118,9 +118,9 @@ export default function AdminStudents() {
         <motion.div variants={ci} className="bg-white rounded-[2.5rem] border border-[#1A1A1A]/5 shadow-sm overflow-hidden relative z-10">
           {loading
             ? <div className="p-10 space-y-4">{[1,2,3,4,5].map(i => <div key={i} className="h-16 bg-[#F5F5F0] rounded-2xl animate-pulse" />)}</div>
-            : filtered.length === 0
+            : ltered.length === 0
               ? <div className="flex flex-col items-center justify-center py-32 text-center">
-                  <FiUsers className="w-12 h-12 text-[#1A1A1A]/10 mb-4" />
+                  <Users className="w-12 h-12 text-[#1A1A1A]/10 mb-4" />
                   <p className="font-black text-[#1A1A1A]/30 uppercase">No students found.</p>
                 </div>
               : (
@@ -134,7 +134,7 @@ export default function AdminStudents() {
                       </tr>
                     </thead>
                     <tbody>
-                      {filtered.map(s => (
+                      {ltered.map(s => (
                         <tr key={s.id} className="border-b border-[#1A1A1A]/5 hover:bg-[#F5F5F0]/40 transition-all group">
                           {/* Name */}
                           <td className="px-8 py-5">
@@ -178,14 +178,14 @@ export default function AdminStudents() {
                                   disabled={saving}
                                   className="flex items-center gap-1.5 px-4 py-2 bg-[#C62828] text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:shadow-lg transition-all active:scale-95 disabled:opacity-60"
                                 >
-                                  {saving ? <FiLoader className="w-3 h-3 animate-spin" /> : <FiSave className="w-3 h-3" />}
+                                  {saving ? <Loader className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
                                   Save
                                 </button>
                                 <button
                                   onClick={() => setEditingId(null)}
                                   className="p-2 bg-[#F5F5F0] rounded-xl text-[#1A1A1A]/40 hover:text-[#1A1A1A] transition-colors"
                                 >
-                                  <FiX className="w-4 h-4" />
+                                  <X className="w-4 h-4" />
                                 </button>
                               </div>
                             ) : (
@@ -193,7 +193,7 @@ export default function AdminStudents() {
                                 onClick={() => { setEditingId(s.id); setEditLevel(s.current_level); }}
                                 className="flex items-center gap-2 px-4 py-2 bg-[#F5F5F0] hover:bg-[#1A1A1A] hover:text-white text-[#1A1A1A] rounded-xl font-black text-[10px] uppercase tracking-widest transition-all active:scale-95 border border-[#1A1A1A]/5"
                               >
-                                <FiEdit2 className="w-3 h-3" /> Level
+                                <Edit2 className="w-3 h-3" /> Level
                               </button>
                             )}
                           </td>
@@ -207,7 +207,7 @@ export default function AdminStudents() {
           {/* Footer */}
           <div className="px-8 py-5 bg-[#F5F5F0]/30 border-t border-[#1A1A1A]/5">
             <p className="text-[9px] font-black uppercase tracking-[0.4em] text-[#1A1A1A]/20 italic">
-              Showing {filtered.length} of {students.length} students
+              Showing {ltered.length} of {students.length} students
             </p>
           </div>
         </motion.div>

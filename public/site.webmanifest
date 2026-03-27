@@ -1,10 +1,25 @@
 {
   "name": "Leidenschaft Klub",
   "short_name": "Leidenschaft",
+  "description": "German learning — courses, exams, and materials. Add to Home Screen for quick access.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "orientation": "portrait-primary",
   "background_color": "#F5F5F0",
   "theme_color": "#C62828",
-  "icons": []
+  "icons": [
+    {
+      "src": "/icons.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
 }
-

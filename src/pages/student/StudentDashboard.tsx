@@ -75,6 +75,7 @@ export default function StudentDashboard() {
   }, [sidebarOpen]);
 
   const latestResult = results[0] ?? null;
+  const latestPendingReview = latestResult?.review_status === 'pending_review';
   const latestReviewed = submissions
     .filter(s => s.status === 'graded')
     .sort((a, b) => new Date(b.submitted_at).getTime() - new Date(a.submitted_at).getTime())[0] ?? null;
@@ -192,22 +193,37 @@ export default function StudentDashboard() {
               : latestResult
                 ? <>
                     <div className="space-y-4">
-                      <div className="flex items-baseline gap-2">
-                        <span className="text-6xl font-black text-[#1A1A1A] tracking-tighter">{latestResult.score.toFixed(0)}%</span>
-                        <span className="text-lg font-black text-[#1A1A1A]/20">/100</span>
-                      </div>
-                      <p className="text-xs font-black text-[#1A1A1A]/40 uppercase tracking-widest italic">
-                        {latestResult.exams?.title ?? 'Exam'}
-                      </p>
-                      <div className="h-2 w-full bg-[#F5F5F0] rounded-full overflow-hidden shadow-inner">
-                        <div
-                          className="h-full bg-[#C62828] rounded-full shadow-[0_0_12px_rgba(198,40,40,0.4)] transition-all duration-1000"
-                          style={{ width: `${latestResult.score}%` }}
-                        />
-                      </div>
-                      <span className={`text-xs font-black uppercase px-3 py-1 rounded-full ${latestResult.passed ? 'bg-green-50 text-green-600' : 'bg-red-50 text-[#C62828]'}`}>
-                        {latestResult.passed ? '✓ Passed' : '✗ Failed'}
-                      </span>
+                      {latestPendingReview ? (
+                        <>
+                          <p className="text-sm font-black text-amber-900 bg-amber-50 border border-amber-100 rounded-2xl px-4 py-3">
+                            Your latest exam is under review — final score will appear when writing sections are graded.
+                          </p>
+                          <p className="text-xs font-black text-[#1A1A1A]/40 uppercase tracking-widest italic">
+                            {latestResult.exams?.title ?? 'Exam'}
+                          </p>
+                        </>
+                      ) : (
+                        <>
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-6xl font-black text-[#1A1A1A] tracking-tighter">
+                              {(latestResult.score ?? 0).toFixed(0)}%
+                            </span>
+                            <span className="text-lg font-black text-[#1A1A1A]/20">/100</span>
+                          </div>
+                          <p className="text-xs font-black text-[#1A1A1A]/40 uppercase tracking-widest italic">
+                            {latestResult.exams?.title ?? 'Exam'}
+                          </p>
+                          <div className="h-2 w-full bg-[#F5F5F0] rounded-full overflow-hidden shadow-inner">
+                            <div
+                              className="h-full bg-[#C62828] rounded-full shadow-[0_0_12px_rgba(198,40,40,0.4)] transition-all duration-1000"
+                              style={{ width: `${latestResult.score ?? 0}%` }}
+                            />
+                          </div>
+                          <span className={`text-xs font-black uppercase px-3 py-1 rounded-full ${latestResult.passed ? 'bg-green-50 text-green-600' : 'bg-red-50 text-[#C62828]'}`}>
+                            {latestResult.passed ? '✓ Passed' : '✗ Failed'}
+                          </span>
+                        </>
+                      )}
                     </div>
                   </>
                 : <p className="text-sm text-[#1A1A1A]/30 font-black italic">No exams taken yet.</p>

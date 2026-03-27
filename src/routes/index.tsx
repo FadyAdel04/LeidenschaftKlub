@@ -18,7 +18,7 @@ const StudentCourses     = lazy(() => import('../pages/student/StudentCourses'))
 const StudentAssignments = lazy(() => import('../pages/student/StudentAssignments'));
 const StudentExams       = lazy(() => import('../pages/student/StudentExams'));
 const StudentResults     = lazy(() => import('../pages/student/StudentResults'));
-const StudentProfile     = lazy(() => import('../pages/student/StudentProfile'));
+const Studentprofile     = lazy(() => import('../pages/student/Studentprofile'));
 const LessonPage         = lazy(() => import('../pages/student/LessonPage'));
 const ExamPage           = lazy(() => import('../pages/student/ExamPage'));
 const AdminDashboard     = lazy(() => import('../pages/admin/AdminDashboard'));
@@ -27,6 +27,7 @@ const AdminLevels        = lazy(() => import('../pages/admin/AdminLevels'));
 const AdminMaterials     = lazy(() => import('../pages/admin/AdminMaterials'));
 const AdminAssignments   = lazy(() => import('../pages/admin/AdminAssignments'));
 const AdminExams         = lazy(() => import('../pages/admin/AdminExams'));
+const AdminExamReview    = lazy(() => import('../pages/admin/AdminExamReviewPage'));
 const AdminResults       = lazy(() => import('../pages/admin/AdminResults'));
 const AdminWebsite       = lazy(() => import('../pages/admin/AdminWebsite'));
 const AdminNotifications = lazy(() => import('../pages/admin/AdminNotifications'));
@@ -67,7 +68,7 @@ export default function AppRoutes() {
             <Route path="exams"            element={<StudentExams />} />
             <Route path="exams/:id"        element={<ExamPage />} />
             <Route path="results"          element={<StudentResults />} />
-            <Route path="profile"          element={<StudentProfile />} />
+            <Route path="profile"          element={<Studentprofile />} />
           </Route>
         </Route>
 
@@ -80,9 +81,10 @@ export default function AppRoutes() {
             <Route path="materials"        element={<AdminMaterials />} />
             <Route path="assignments"      element={<AdminAssignments />} />
             <Route path="exams"            element={<AdminExams />} />
+            <Route path="exams/:examId/review/:studentId" element={<AdminExamReview />} />
             <Route path="results"          element={<AdminResults />} />
             <Route path="website"          element={<AdminWebsite />} />
-            <Route path="notifications"   element={<AdminNotifications />} />
+            <Route path="Notifications"   element={<AdminNotifications />} />
           </Route>
         </Route>
 

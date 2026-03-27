@@ -16,11 +16,11 @@ function timeAgo(iso: string) {
 }
 
 export default function PortalNotifications() {
-  const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
+  const { Notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
   const [open, setOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const latest = useMemo(() => notifications.slice(0, 10), [notifications]);
-  const selected = useMemo(() => notifications.find(n => n.id === selectedId) ?? null, [notifications, selectedId]);
+  const latest = useMemo(() => Notifications.slice(0, 10), [Notifications]);
+  const selected = useMemo(() => Notifications.find(n => n.id === selectedId) ?? null, [Notifications, selectedId]);
 
   useEffect(() => {
     const onDoc = (e: MouseEvent) => {
@@ -34,7 +34,7 @@ export default function PortalNotifications() {
   }, []);
 
   return (
-    <div className="fixed top-16 lg:top-6 right-4 lg:right-6 z-120" data-portal-notif="1">
+    <div className="fixed top-16 lg:top-6 right-4 lg:right-6 z-[120]" data-portal-notif="1">
       <button
         onClick={() => setOpen(o => !o)}
         className="relative w-12 h-12 rounded-2xl bg-white/90 backdrop-blur-xl border border-[#1A1A1A]/10 shadow-xl flex items-center justify-center hover:-translate-y-0.5 transition-all"
@@ -75,7 +75,7 @@ export default function PortalNotifications() {
 
             {!latest.length ? (
               <div className="p-10 text-center">
-                <p className="font-black text-[#1A1A1A]/30 uppercase tracking-widest text-xs">No notifications yet.</p>
+                <p className="font-black text-[#1A1A1A]/30 uppercase tracking-widest text-xs">No Notifications yet.</p>
               </div>
             ) : (
               <div className="max-h-[420px] overflow-y-auto">
@@ -111,7 +111,7 @@ export default function PortalNotifications() {
       </AnimatePresence>
 
       {selected && (
-        <div className="fixed inset-0 z-120 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
           <button className="absolute inset-0 bg-black/60" onClick={() => setSelectedId(null)} />
           <div className="relative w-full max-w-xl bg-white rounded-3xl border border-[#1A1A1A]/10 shadow-2xl overflow-hidden">
             <div className="p-6 sm:p-8 border-b border-[#1A1A1A]/10">

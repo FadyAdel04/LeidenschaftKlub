@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
-import { FiHelpCircle, FiClock, FiAlertCircle, FiArrowRight, FiPlay } from 'react-icons/fi';
+import { HelpCircle, Clock, AlertCircle, ArrowRight, Play } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import StudentSidebar from '../../components/shared/StudentSidebar';
 import {
@@ -17,7 +17,7 @@ export default function StudentExams() {
   const { user }  = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const [profile,   setProfile]   = useState<Profile | null>(null);
+  const [profile,   setprofile]   = useState<Profile | null>(null);
   const [exams,     setExams]     = useState<Exam[]>([]);
   const [results,   setResults]   = useState<Result[]>([]);
   const [loading,   setLoading]   = useState(true);
@@ -35,7 +35,7 @@ export default function StudentExams() {
       try {
         const prof = await fetchProfile(user!.id);
         if (cancelled) return;
-        setProfile(prof);
+        setprofile(prof);
         const level = await fetchLevelByName(prof.current_level);
         if (cancelled) return;
         const [exs, ress] = await Promise.all([
@@ -77,7 +77,7 @@ export default function StudentExams() {
           </div>
           <div className="flex items-center gap-4 bg-white p-4 pr-8 rounded-2xl border border-[#1A1A1A]/5 shadow-xl">
             <div className="w-12 h-12 rounded-xl bg-[#C62828]/10 flex items-center justify-center text-[#C62828] shrink-0">
-              <FiHelpCircle className="w-6 h-6" />
+              <HelpCircle className="w-6 h-6" />
             </div>
             <div>
               <p className="text-xl font-black text-[#1A1A1A] tracking-tighter leading-none">
@@ -90,7 +90,7 @@ export default function StudentExams() {
 
         {error && (
           <motion.div variants={ci} className="mb-8 flex items-center gap-3 bg-red-50 border border-red-200 rounded-2xl p-4">
-            <FiAlertCircle className="w-5 h-5 text-[#C62828] shrink-0" />
+            <AlertCircle className="w-5 h-5 text-[#C62828] shrink-0" />
             <p className="text-sm font-bold text-[#C62828]">{error}</p>
           </motion.div>
         )}
@@ -104,7 +104,7 @@ export default function StudentExams() {
           ) : exams.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-32 text-center">
               <div className="w-20 h-20 rounded-3xl bg-[#F5F5F0] flex items-center justify-center mb-6">
-                <FiHelpCircle className="w-10 h-10 text-[#1A1A1A]/20" />
+                <HelpCircle className="w-10 h-10 text-[#1A1A1A]/20" />
               </div>
               <p className="text-xl font-black text-[#1A1A1A]/30 uppercase tracking-tight">No exams yet.</p>
               <p className="text-sm text-[#1A1A1A]/20 font-medium mt-2 italic">Check back when your instructor adds exams.</p>
@@ -114,6 +114,7 @@ export default function StudentExams() {
               {exams.map(exam => {
                 const result = resultMap[exam.id];
                 const taken  = !!result;
+                const pendingReview = taken && result.review_status === 'pending_review';
 
                 return (
                   <motion.div
@@ -129,15 +130,23 @@ export default function StudentExams() {
                       <div className="flex items-center justify-between">
                         <span className={`text-[9px] font-black uppercase tracking-[0.3em] px-3 py-1.5 rounded-full ${
                           taken
-                            ? result.passed
-                              ? 'bg-green-500/20 text-green-400'
-                              : 'bg-[#C62828]/20 text-[#C62828]'
+                            ? pendingReview
+                              ? 'bg-amber-500/20 text-amber-200'
+                              : result.passed
+                                ? 'bg-green-500/20 text-green-400'
+                                : 'bg-[#C62828]/20 text-[#C62828]'
                             : 'bg-[#C62828]/5 text-[#C62828]'
                         }`}>
-                          {taken ? (result.passed ? '✓ Passed' : '✗ Failed') : 'Not Taken'}
+                          {taken
+                            ? pendingReview
+                              ? 'Pending review'
+                              : result.passed
+                                ? '✓ Passed'
+                                : '✗ Failed'
+                            : 'Not Taken'}
                         </span>
                         <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${taken ? 'bg-white/10' : 'bg-[#C62828]/10'}`}>
-                          <FiHelpCircle className={`w-5 h-5 ${taken ? 'text-[#D4A373]' : 'text-[#C62828]'}`} />
+                          <HelpCircle className={`w-5 h-5 ${taken ? 'text-[#D4A373]' : 'text-[#C62828]'}`} />
                         </div>
                       </div>
 
@@ -149,10 +158,10 @@ export default function StudentExams() {
                       {/* Meta */}
                       <div className="flex items-center gap-4">
                         <div className={`flex items-center gap-2 ${taken ? 'text-white/30' : 'text-[#1A1A1A]/30'}`}>
-                          <FiClock className="w-4 h-4 shrink-0" />
+                          <Clock className="w-4 h-4 shrink-0" />
                           <span className="text-[10px] font-black uppercase tracking-widest">{exam.duration} min</span>
                         </div>
-                        {taken && (
+                        {taken && !pendingReview && result.score != null && (
                           <div className="flex items-center gap-2 text-[#D4A373]">
                             <span className="text-[10px] font-black uppercase tracking-widest">{result.score.toFixed(0)}%</span>
                           </div>
@@ -160,7 +169,7 @@ export default function StudentExams() {
                       </div>
 
                       {/* Score bar if taken */}
-                      {taken && (
+                      {taken && !pendingReview && result.score != null && (
                         <div className="space-y-1">
                           <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
                             <div
@@ -178,14 +187,14 @@ export default function StudentExams() {
                           className="flex items-center gap-2 text-[#D4A373] text-[10px] font-black uppercase tracking-widest hover:text-white transition-colors group/btn"
                         >
                           View Result
-                          <FiArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+                          <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
                         </button>
                       ) : (
                         <button
                           onClick={() => navigate(`/student/exams/${exam.id}`)}
                           className="flex items-center gap-2 bg-[#C62828] text-white px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest hover:shadow-xl hover:-translate-y-0.5 transition-all active:scale-95 group/btn"
                         >
-                          <FiPlay className="w-4 h-4 group-hover/btn:scale-125 transition-transform" />
+                          <Play className="w-4 h-4 group-hover/btn:scale-125 transition-transform" />
                           Start Exam
                         </button>
                       )}

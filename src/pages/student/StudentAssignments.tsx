@@ -1,17 +1,19 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect, useRef } from 'react';
 import {
-  FiFileText, FiUploadCloud, FiEdit, FiClock,
-  FiCheckCircle, FiAlertCircle, FiX, FiLoader,
-} from 'react-icons/fi';
-import { RiDoubleQuotesR, RiFileEditLine } from 'react-icons/ri';
+  LetterText, UploadCloud, Edit, Clock, Mic, StopCircle,
+  CheckCircle, AlertCircle, X, Loader,
+  FileText,
+} from 'lucide-react';
+import { Quote, LucideEdit } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import StudentSidebar from '../../components/shared/StudentSidebar';
 import {
   fetchProfile, fetchLevelByName, fetchAssignmentsByLevel,
-  fetchSubmissionForAssignment, submitAssignment, uploadSubmissionFile,
+  fetchSubmissionForAssignment, submitAssignment, uploadSubmissionFile, uploadSubmissionAudio,
   type Profile, type Assignment, type Submission,
 } from '../../services/studentService';
+import { formatBytes, MAX_UPLOAD_BYTES, type UploadMetrics } from '../../utils/storageUpload';
 
 const cv = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.07 } } };
 const ci = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } };
@@ -30,19 +32,27 @@ export default function StudentAssignments() {
   const { user } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const [profile,          setProfile]          = useState<Profile | null>(null);
+  const [profile,          setprofile]          = useState<Profile | null>(null);
   const [assignments,      setAssignments]      = useState<Assignment[]>([]);
   const [selected,         setSelected]         = useState<Assignment | null>(null);
   const [submission,       setSubmission]       = useState<Submission | null>(null);
   const [answer,           setAnswer]           = useState('');
   const [file,             setFile]             = useState<File | null>(null);
   const [submitting,       setSubmitting]       = useState(false);
+  const [uploadMetrics,    setUploadMetrics]    = useState<UploadMetrics | null>(null);
   const [submitError,      setSubmitError]      = useState('');
   const [submitSuccess,    setSubmitSuccess]    = useState(false);
   const [loading,          setLoading]          = useState(true);
   const [loadingSubmission,setLoadingSubmission] = useState(false);
   const [error,            setError]            = useState('');
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const leInputRef = useRef<HTMLInputElement>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const timerRef = useRef<number | null>(null);
+  const [recording, setRecording] = useState(false);
+  const [recordingSeconds, setRecordingSeconds] = useState(0);
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
+  const [audioPreviewUrl, setAudioPreviewUrl] = useState('');
 
   useEffect(() => {
     document.body.style.overflow = sidebarOpen ? 'hidden' : '';
@@ -56,7 +66,7 @@ export default function StudentAssignments() {
       try {
         const prof = await fetchProfile(user!.id);
         if (cancelled) return;
-        setProfile(prof);
+        setprofile(prof);
         const level = await fetchLevelByName(prof.current_level);
         if (cancelled) return;
         const asgns = await fetchAssignmentsByLevel(level.id);
@@ -85,16 +95,64 @@ export default function StudentAssignments() {
       .finally(() => setLoadingSubmission(false));
   }, [selected, user]);
 
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) window.clearInterval(timerRef.current);
+      if (audioPreviewUrl) URL.revokeObjectURL(audioPreviewUrl);
+    };
+  }, [audioPreviewUrl]);
+
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = recorder;
+      audioChunksRef.current = [];
+      setRecording(true);
+      setRecordingSeconds(0);
+      recorder.ondataavailable = (event) => {
+        if (event.data.size > 0) audioChunksRef.current.push(event.data);
+      };
+      recorder.onstop = () => {
+        stream.getTracks().forEach((track) => track.stop());
+        const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        setAudioBlob(blob);
+        if (audioPreviewUrl) URL.revokeObjectURL(audioPreviewUrl);
+        setAudioPreviewUrl(URL.createObjectURL(blob));
+      };
+      recorder.start();
+      timerRef.current = window.setInterval(() => setRecordingSeconds((prev) => prev + 1), 1000);
+    } catch (e: unknown) {
+      setSubmitError(e instanceof Error ? e.message : 'Microphone access is required for recording.');
+    }
+  };
+
+  const stopRecording = () => {
+    mediaRecorderRef.current?.stop();
+    setRecording(false);
+    if (timerRef.current) {
+      window.clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+  };
+
   const handleSubmit = async () => {
     if (!selected || !user) return;
     setSubmitting(true);
     setSubmitError('');
     try {
-      let fileUrl: string | undefined;
+      let leUrl: string | undefined;
+      let audioAnswerUrl: string | undefined;
       if (file) {
-        fileUrl = await uploadSubmissionFile(user.id, file);
+        if (file.size > MAX_UPLOAD_BYTES) throw new Error('Attached file exceeds 200MB.');
+        leUrl = await uploadSubmissionFile(user.id, file, setUploadMetrics);
       }
-      await submitAssignment({ assignmentId: selected.id, studentId: user.id, answer, fileUrl });
+      if (audioBlob) {
+        const ext = audioBlob.type.includes('wav') ? 'wav' : 'webm';
+        const audioFile = new File([audioBlob], `answer_${Date.now()}.${ext}`, { type: audioBlob.type || 'audio/webm' });
+        audioAnswerUrl = await uploadSubmissionAudio(user.id, audioFile, setUploadMetrics);
+      }
+      await submitAssignment({ assignmentId: selected.id, studentId: user.id, answer, fileUrl: leUrl, audioAnswerUrl });
       setSubmitSuccess(true);
       const updated = await fetchSubmissionForAssignment(selected.id, user.id);
       setSubmission(updated);
@@ -102,6 +160,7 @@ export default function StudentAssignments() {
       setSubmitError(e instanceof Error ? e.message : 'Submission failed');
     } finally {
       setSubmitting(false);
+      setUploadMetrics(null);
     }
   };
 
@@ -124,7 +183,7 @@ export default function StudentAssignments() {
           </div>
           <div className="flex items-center gap-4 bg-white p-3 pr-8 rounded-2xl border border-[#1A1A1A]/5 shadow-xl group">
             <div className="bg-[#C62828] w-12 h-12 rounded-xl flex items-center justify-center text-white shadow-xl shadow-[#C62828]/20 group-hover:rotate-12 transition-transform shrink-0">
-              <RiFileEditLine className="w-6 h-6" />
+              <LucideEdit className="w-6 h-6" />
             </div>
             <div>
               <p className="text-xl font-black text-[#1A1A1A] tracking-tighter leading-none">
@@ -137,7 +196,7 @@ export default function StudentAssignments() {
 
         {error && (
           <motion.div variants={ci} className="mb-8 flex items-center gap-3 bg-red-50 border border-red-200 rounded-2xl p-4">
-            <FiAlertCircle className="w-5 h-5 text-[#C62828] shrink-0" />
+            <AlertCircle className="w-5 h-5 text-[#C62828] shrink-0" />
             <p className="text-sm font-bold text-[#C62828]">{error}</p>
           </motion.div>
         )}
@@ -150,7 +209,7 @@ export default function StudentAssignments() {
               : assignments.length === 0
                 ? (
                   <div className="flex flex-col items-center justify-center py-20 text-center bg-white rounded-[2rem] border border-[#1A1A1A]/5 p-8">
-                    <FiFileText className="w-12 h-12 text-[#1A1A1A]/10 mb-4" />
+                    <LetterText className="w-12 h-12 text-[#1A1A1A]/10 mb-4" />
                     <p className="font-black text-[#1A1A1A]/30 uppercase">No assignments yet.</p>
                   </div>
                 )
@@ -176,7 +235,7 @@ export default function StudentAssignments() {
                           <p className={`text-xs line-clamp-2 italic leading-relaxed ${isActive ? 'text-white/40' : 'text-[#1A1A1A]/40'}`}>{a.description}</p>
                         )}
                         <div className={`flex items-center gap-2 mt-4 ${isActive ? 'text-[#D4A373]' : 'text-[#1A1A1A]/20'}`}>
-                          <FiClock className="w-4 h-4 shrink-0" />
+                          <Clock className="w-4 h-4 shrink-0" />
                           <span className="text-[9px] font-black uppercase tracking-wider italic">Level {profile?.current_level}</span>
                         </div>
                       </div>
@@ -189,7 +248,7 @@ export default function StudentAssignments() {
           <motion.div variants={ci} className="col-span-1 lg:col-span-8">
             {!selected && !loading ? (
               <div className="bg-white rounded-[2.5rem] p-16 border border-[#1A1A1A]/5 shadow-sm flex flex-col items-center justify-center text-center h-full min-h-[400px]">
-                <FiEdit className="w-16 h-16 text-[#1A1A1A]/10 mb-6" />
+                <Edit className="w-16 h-16 text-[#1A1A1A]/10 mb-6" />
                 <p className="font-black text-[#1A1A1A]/30 uppercase tracking-tight text-xl">Select an assignment to get started.</p>
               </div>
             ) : (
@@ -205,7 +264,7 @@ export default function StudentAssignments() {
                     {/* Assignment details */}
                     <div className="flex items-start gap-6">
                       <div className="w-14 h-14 rounded-2xl bg-[#C62828]/10 flex items-center justify-center text-[#C62828] shrink-0">
-                        <FiEdit className="w-7 h-7" />
+                        <Edit className="w-7 h-7" />
                       </div>
                       <div className="min-w-0">
                         <p className="text-[9px] text-[#D4A373] font-black uppercase tracking-[0.5em] mb-1 italic">Workspace</p>
@@ -215,12 +274,22 @@ export default function StudentAssignments() {
                       </div>
                     </div>
 
+                    {/* Assignment audio (listening task) */}
+                    {selected?.audio_url && (
+                      <div className="mt-2 rounded-2xl border border-[#1A1A1A]/10 bg-white p-4">
+                        <p className="text-[9px] font-black uppercase tracking-[0.35em] text-[#D4A373] mb-2">
+                          Assignment Audio
+                        </p>
+                        <audio src={selected.audio_url} controls className="w-full" />
+                      </div>
+                    )}
+
                     {/* Description */}
                     {selected?.description && (
                       <section>
                         <h4 className="text-[9px] font-black uppercase tracking-[0.4em] text-[#1A1A1A]/30 mb-4 border-b border-[#1A1A1A]/5 pb-3">Task Instructions</h4>
                         <div className="bg-[#F5F5F0] p-8 rounded-[2rem] border-l-8 border-[#D4A373] relative">
-                          <RiDoubleQuotesR className="text-[#D4A373]/20 text-5xl absolute -top-8 -left-4" />
+                          <Quote className="text-[#D4A373]/20 text-5xl absolute -top-8 -left-4" />
                           <p className="text-base font-medium text-[#1A1A1A]/70 italic leading-relaxed font-body">{selected.description}</p>
                         </div>
                       </section>
@@ -231,7 +300,7 @@ export default function StudentAssignments() {
                       <AnimatePresence>
                         <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
                           className="flex items-center gap-4 bg-green-50 border border-green-200 rounded-2xl p-5">
-                          <FiCheckCircle className="w-6 h-6 text-green-600 shrink-0" />
+                          <CheckCircle className="w-6 h-6 text-green-600 shrink-0" />
                           <div>
                             <p className="font-black text-green-700 text-sm uppercase tracking-wider">
                               {submission?.status === 'graded' ? `Graded: ${submission.grade ?? 0}/100` : 'Submitted Successfully'}
@@ -263,36 +332,36 @@ export default function StudentAssignments() {
                           />
                         </div>
 
-                        {/* File Upload */}
+                        {/* file Upload */}
                         <div>
                           <label className="block text-[9px] font-black uppercase tracking-[0.4em] text-[#1A1A1A]/30 ml-4 mb-3 italic">
-                            Attach File (optional)
+                            Attach file (optional)
                           </label>
                           <input
                             type="file"
-                            ref={fileInputRef}
+                            ref={leInputRef}
                             className="hidden"
                             accept=".pdf,.doc,.docx,.txt"
                             onChange={e => setFile(e.target.files?.[0] ?? null)}
                           />
                           <div
-                            onClick={() => fileInputRef.current?.click()}
+                            onClick={() => leInputRef.current?.click()}
                             className={`border-4 border-dashed rounded-[2rem] p-10 flex flex-col items-center justify-center cursor-pointer transition-all group/upload ${file ? 'border-[#C62828]/40 bg-[#C62828]/5' : 'border-[#1A1A1A]/10 bg-[#F5F5F0]/30 hover:bg-white hover:border-[#C62828]/40'}`}
                           >
                             {file ? (
                               <div className="flex items-center gap-3">
-                                <FiFileText className="w-6 h-6 text-[#C62828]" />
+                                <FileText className="w-6 h-6 text-[#C62828]" />
                                 <p className="font-black text-[#C62828] text-sm">{file.name}</p>
                                 <button
                                   onClick={e => { e.stopPropagation(); setFile(null); }}
                                   className="w-6 h-6 rounded-full bg-[#C62828]/10 flex items-center justify-center hover:bg-[#C62828] hover:text-white transition-all"
                                 >
-                                  <FiX className="w-3 h-3" />
+                                  <X className="w-3 h-3" />
                                 </button>
                               </div>
                             ) : (
                               <>
-                                <FiUploadCloud className="w-12 h-12 text-[#1A1A1A]/10 group-hover/upload:text-[#C62828] transition-all mb-4 group-hover/upload:-translate-y-2" />
+                                <UploadCloud className="w-12 h-12 text-[#1A1A1A]/10 group-hover/upload:text-[#C62828] transition-all mb-4 group-hover/upload:-translate-y-2" />
                                 <p className="text-base font-black text-[#1A1A1A] uppercase tracking-tighter">
                                   Drop file or <span className="text-[#C62828]">browse</span>
                                 </p>
@@ -302,10 +371,50 @@ export default function StudentAssignments() {
                           </div>
                         </div>
 
+                        <div className="rounded-[2rem] border border-[#1A1A1A]/10 p-6 bg-[#F5F5F0]/30">
+                          <p className="text-[9px] font-black uppercase tracking-[0.35em] text-[#1A1A1A]/30 ml-1 mb-3 italic">Audio Answer (optional)</p>
+                          <div className="flex flex-wrap items-center gap-3">
+                            {!recording ? (
+                              <button type="button" onClick={startRecording} disabled={submitting}
+                                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#1A1A1A] text-white text-[10px] font-black uppercase tracking-widest disabled:opacity-60">
+                                <Mic className="w-4 h-4" /> Record
+                              </button>
+                            ) : (
+                              <button type="button" onClick={stopRecording}
+                                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#C62828] text-white text-[10px] font-black uppercase tracking-widest">
+                                <StopCircle className="w-4 h-4" /> Stop ({recordingSeconds}s)
+                              </button>
+                            )}
+                            {audioBlob && (
+                              <button type="button" onClick={() => { setAudioBlob(null); if (audioPreviewUrl) URL.revokeObjectURL(audioPreviewUrl); setAudioPreviewUrl(''); }}
+                                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white text-[#1A1A1A] text-[10px] font-black uppercase tracking-widest border border-[#1A1A1A]/10">
+                                <X className="w-4 h-4" /> Remove
+                              </button>
+                            )}
+                          </div>
+                          {audioPreviewUrl && (
+                            <div className="mt-3">
+                              <audio src={audioPreviewUrl} controls className="w-full" />
+                            </div>
+                          )}
+                        </div>
+
+                        {uploadMetrics?.status === 'uploading' && (
+                          <div className="rounded-2xl border border-[#1A1A1A]/10 bg-[#F5F5F0] p-4">
+                            <div className="h-2 rounded-full bg-white overflow-hidden">
+                              <div className="h-full bg-[#C62828]" style={{ width: `${uploadMetrics.progress}%` }} />
+                            </div>
+                            <p className="mt-2 text-[10px] font-black uppercase tracking-wider text-[#1A1A1A]/50">
+                              {uploadMetrics.progress}% - {formatBytes(uploadMetrics.uploadedBytes)} / {formatBytes(uploadMetrics.totalBytes)}
+                              {uploadMetrics.etaSeconds !== null ? ` - ETA ${uploadMetrics.etaSeconds}s` : ''}
+                            </p>
+                          </div>
+                        )}
+
                         {/* Error */}
                         {submitError && (
                           <div className="flex items-center gap-3 bg-red-50 border border-red-200 rounded-2xl p-4">
-                            <FiAlertCircle className="w-5 h-5 text-[#C62828] shrink-0" />
+                            <AlertCircle className="w-5 h-5 text-[#C62828] shrink-0" />
                             <p className="text-sm font-bold text-[#C62828]">{submitError}</p>
                           </div>
                         )}
@@ -313,7 +422,7 @@ export default function StudentAssignments() {
                         {/* Success */}
                         {submitSuccess && (
                           <div className="flex items-center gap-3 bg-green-50 border border-green-200 rounded-2xl p-4">
-                            <FiCheckCircle className="w-5 h-5 text-green-600 shrink-0" />
+                            <CheckCircle className="w-5 h-5 text-green-600 shrink-0" />
                             <p className="text-sm font-bold text-green-700">Assignment submitted successfully!</p>
                           </div>
                         )}
@@ -326,10 +435,10 @@ export default function StudentAssignments() {
                           </div>
                           <button
                             onClick={handleSubmit}
-                            disabled={submitting || (!answer.trim() && !file)}
+                            disabled={submitting || (!answer.trim() && !file && !audioBlob)}
                             className="flex items-center gap-3 px-10 py-5 bg-[#C62828] text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-2xl shadow-[#C62828]/20 hover:-translate-y-1 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
                           >
-                            {submitting ? <FiLoader className="w-4 h-4 animate-spin" /> : <FiCheckCircle className="w-4 h-4" />}
+                            {submitting ? <Loader className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
                             {submitting ? 'Submitting…' : 'Submit'}
                           </button>
                         </div>

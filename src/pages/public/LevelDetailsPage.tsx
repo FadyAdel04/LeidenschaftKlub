@@ -18,12 +18,12 @@ function normalizeLevelSlug(nameOrSlug: string) {
 
 // Default hero images for each level
 const defaultHeroImages = {
-  A1: 'https://images.unsplash.com/photo-1546410531-bb4caa6b424d?w=1200&h=400&fit=crop',
-  A2: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1200&h=400&fit=crop',
-  B1: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=1200&h=400&fit=crop',
-  B2: 'https://images.unsplash.com/photo-1501504905252-473c47e087f8?w=1200&h=400&fit=crop',
-  C1: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=1200&h=400&fit=crop',
-  C2: 'https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?w=1200&h=400&fit=crop',
+  A1: 'https://images.unsplash.com/photo-1546410531-bb4caa6b424d?w=1200&h=400&t=crop',
+  A2: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1200&h=400&t=crop',
+  B1: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=1200&h=400&t=crop',
+  B2: 'https://images.unsplash.com/photo-1501504905252-473c47e087f8?w=1200&h=400&t=crop',
+  C1: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=1200&h=400&t=crop',
+  C2: 'https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?w=1200&h=400&t=crop',
 };
 
 // (lesson showcase defaults removed; using gallery/hero fallbacks)

@@ -1,15 +1,15 @@
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
-import { FiLayers, FiUsers, FiCheckCircle, FiPlus, FiEdit2, FiTrash2, FiX, FiSave, FiLoader, FiAlertCircle } from 'react-icons/fi';
+import { Layers, Users, CheckCircle, Plus, Edit2, Trash2, X, Save, Loader, AlertCircle } from 'lucide-react';
 import AdminSidebar from '../../components/shared/AdminSidebar';
-import { fetchAllLevels, fetchAllStudents, createLevel, updateLevel, deleteLevel, type Level, type Profile } from '../../services/adminService';
+import { fetchAllLevels, fetchAllStudents, createLevel, updateLevel, deleteLevel, type Level, type profile } from '../../services/adminService';
 
 const cv = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.1 } } };
 const ci = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } };
 
 export default function AdminLevels() {
   const [levels, setLevels] = useState<Level[]>([]);
-  const [students, setStudents] = useState<Profile[]>([]);
+  const [students, setStudents] = useState<profile[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
   const [name, setName] = useState('');
@@ -102,14 +102,14 @@ export default function AdminLevels() {
             </div>
             <button onClick={() => setShowCreate(p => !p)}
               className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-[#1A1A1A] text-white text-xs font-black uppercase tracking-widest hover:bg-[#C62828] transition-all">
-              <FiPlus className={`w-4 h-4 ${showCreate ? 'rotate-45' : ''}`} /> New Level
+              <Plus className={`w-4 h-4 ${showCreate ? 'rotate-45' : ''}`} /> New Level
             </button>
           </div>
         </motion.header>
 
         {error && (
           <div className="mb-6 flex items-center gap-2 bg-red-50 border border-red-200 rounded-2xl p-4">
-            <FiAlertCircle className="w-4 h-4 text-[#C62828]" />
+            <AlertCircle className="w-4 h-4 text-[#C62828]" />
             <p className="text-xs font-black text-[#C62828]">{error}</p>
           </div>
         )}
@@ -127,7 +127,7 @@ export default function AdminLevels() {
               <button onClick={() => setShowCreate(false)} className="px-6 py-3 bg-[#F5F5F0] rounded-2xl font-black text-xs uppercase tracking-widest">Cancel</button>
               <button onClick={handleCreate} disabled={saving}
                 className="inline-flex items-center gap-2 px-6 py-3 bg-[#C62828] text-white rounded-2xl font-black text-xs uppercase tracking-widest disabled:opacity-60">
-                {saving ? <FiLoader className="w-4 h-4 animate-spin" /> : <FiSave className="w-4 h-4" />} Create
+                {saving ? <Loader className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Create
               </button>
             </div>
           </div>
@@ -150,26 +150,26 @@ export default function AdminLevels() {
                     </div>
                     <div className="flex items-center gap-2">
                       <button onClick={() => openEdit(level)} className="w-10 h-10 bg-[#F5F5F0] rounded-xl flex items-center justify-center text-[#1A1A1A]/30 hover:bg-[#1A1A1A] hover:text-white transition-all">
-                        <FiEdit2 className="w-4 h-4" />
+                        <Edit2 className="w-4 h-4" />
                       </button>
                       <button onClick={() => handleDelete(level.id)} disabled={deleting === level.id}
                         className="w-10 h-10 bg-[#F5F5F0] rounded-xl flex items-center justify-center text-[#1A1A1A]/30 hover:bg-red-50 hover:text-[#C62828] transition-all disabled:opacity-60">
-                        {deleting === level.id ? <FiLoader className="w-4 h-4 animate-spin" /> : <FiTrash2 className="w-4 h-4" />}
+                        {deleting === level.id ? <Loader className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
                       </button>
                       <div className="w-12 h-12 bg-[#F5F5F0] rounded-2xl flex items-center justify-center text-[#1A1A1A]/20">
-                        <FiLayers className="w-6 h-6" />
+                        <Layers className="w-6 h-6" />
                       </div>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-6 relative z-10 border-t border-[#1A1A1A]/5 pt-6">
                     <div className="flex items-center gap-2">
-                      <FiUsers className="w-4 h-4 text-[#C62828]" />
+                      <Users className="w-4 h-4 text-[#C62828]" />
                       <span className="text-sm font-black text-[#1A1A1A]">{sts}</span>
                       <span className="text-[9px] font-black uppercase tracking-widest text-[#1A1A1A]/40">Active</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <FiCheckCircle className="w-4 h-4 text-green-600" />
+                      <CheckCircle className="w-4 h-4 text-green-600" />
                       <span className="text-[9px] font-black uppercase tracking-widest text-[#1A1A1A]/40">Validated</span>
                     </div>
                   </div>
@@ -180,12 +180,12 @@ export default function AdminLevels() {
         )}
 
         {editing && (
-          <div className="fixed inset-0 z-[110]">
+          <div className="xed inset-0 z-[110]">
             <button className="absolute inset-0 bg-black/60" onClick={() => setEditing(null)} />
             <div className="absolute inset-4 md:inset-10 bg-white rounded-3xl border border-[#1A1A1A]/10 shadow-2xl p-6 md:p-8">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="font-black text-xl uppercase tracking-tight text-[#1A1A1A]">Edit Level</h3>
-                <button onClick={() => setEditing(null)} className="w-9 h-9 rounded-xl bg-[#F5F5F0] text-[#1A1A1A]/50"><FiX className="w-5 h-5 mx-auto" /></button>
+                <button onClick={() => setEditing(null)} className="w-9 h-9 rounded-xl bg-[#F5F5F0] text-[#1A1A1A]/50"><X className="w-5 h-5 mx-auto" /></button>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <input value={editName} onChange={e => setEditName(e.target.value)} placeholder="Level name"
@@ -197,7 +197,7 @@ export default function AdminLevels() {
                 <button onClick={() => setEditing(null)} className="px-6 py-3 bg-[#F5F5F0] rounded-2xl font-black text-xs uppercase tracking-widest">Cancel</button>
                 <button onClick={handleUpdate} disabled={saving}
                   className="inline-flex items-center gap-2 px-6 py-3 bg-[#C62828] text-white rounded-2xl font-black text-xs uppercase tracking-widest disabled:opacity-60">
-                  {saving ? <FiLoader className="w-4 h-4 animate-spin" /> : <FiSave className="w-4 h-4" />} Save Changes
+                  {saving ? <Loader className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Save Changes
                 </button>
               </div>
             </div>

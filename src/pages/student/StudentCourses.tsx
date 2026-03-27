@@ -1,11 +1,11 @@
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
-import { FiBookOpen, FiSearch, FiAlertCircle, FiPlayCircle } from 'react-icons/fi';
+import { BookOpen, Search, AlertCircle, PlayCircle } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import StudentSidebar from '../../components/shared/StudentSidebar';
 import MaterialPreviewModal from '../../components/shared/MaterialPreviewModal';
 import {
-  fetchProfile, fetchLevelByName, fetchMaterialsByLevel,
+  fetchProfile, fetchMyAssignedMaterials,
   type Profile, type Material,
 } from '../../services/studentService';
 
@@ -15,9 +15,9 @@ const ci = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } };
 export default function StudentCourses() {
   const { user } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [profile,   setProfile]   = useState<Profile | null>(null);
+  const [profile,   setprofile]   = useState<Profile | null>(null);
   const [materials, setMaterials] = useState<Material[]>([]);
-  const [filtered,  setFiltered]  = useState<Material[]>([]);
+  const [ltered,  setltered]  = useState<Material[]>([]);
   const [search,    setSearch]    = useState('');
   const [loading,   setLoading]   = useState(true);
   const [error,     setError]     = useState('');
@@ -36,13 +36,11 @@ export default function StudentCourses() {
       try {
         const prof = await fetchProfile(user!.id);
         if (cancelled) return;
-        setProfile(prof);
-        const level = await fetchLevelByName(prof.current_level);
-        if (cancelled) return;
-        const mats = await fetchMaterialsByLevel(level.id);
+        setprofile(prof);
+        const mats = await fetchMyAssignedMaterials(user!.id);
         if (cancelled) return;
         setMaterials(mats);
-        setFiltered(mats);
+        setltered(mats);
       } catch (e: unknown) {
         if (!cancelled) setError(e instanceof Error ? e.message : 'Failed to load materials');
       } finally {
@@ -55,14 +53,15 @@ export default function StudentCourses() {
 
   useEffect(() => {
     const q = search.toLowerCase();
-    setFiltered(materials.filter(m => m.title.toLowerCase().includes(q)));
+    setltered(materials.filter(m => m.title.toLowerCase().includes(q)));
   }, [search, materials]);
 
   const getType = (url: string) => {
     const clean = url.split('?')[0].toLowerCase();
     if (clean.endsWith('.pdf')) return 'PDF';
     if (clean.endsWith('.mp4') || clean.endsWith('.webm') || clean.endsWith('.ogg') || clean.endsWith('.mov')) return 'Video';
-    return 'File';
+    if (clean.endsWith('.mp3') || clean.endsWith('.wav') || clean.endsWith('.m4a')) return 'Audio';
+    return 'file';
   };
 
   return (
@@ -85,7 +84,7 @@ export default function StudentCourses() {
 
           {/* Search */}
           <div className="relative w-full sm:w-80">
-            <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-[#1A1A1A]/20 w-4 h-4" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#1A1A1A]/20 w-4 h-4" />
             <input
               type="text"
               value={search}
@@ -99,7 +98,7 @@ export default function StudentCourses() {
         {/* Error */}
         {error && (
           <motion.div variants={ci} className="mb-8 flex items-center gap-3 bg-red-50 border border-red-200 rounded-2xl p-4">
-            <FiAlertCircle className="w-5 h-5 text-[#C62828] shrink-0" />
+            <AlertCircle className="w-5 h-5 text-[#C62828] shrink-0" />
             <p className="text-sm font-bold text-[#C62828]">{error}</p>
           </motion.div>
         )}
@@ -109,7 +108,7 @@ export default function StudentCourses() {
           {[
             { label: 'Total Materials', val: loading ? '—' : materials.length },
             { label: 'Level',           val: profile?.current_level ?? '—' },
-            { label: 'Shown',           val: loading ? '—' : filtered.length },
+            { label: 'Shown',           val: loading ? '—' : ltered.length },
           ].map((s, i) => (
             <div key={i} className="bg-white rounded-2xl p-5 border border-[#1A1A1A]/5 shadow-sm text-center">
               <p className="text-2xl font-black text-[#1A1A1A] tracking-tighter">{s.val}</p>
@@ -126,10 +125,10 @@ export default function StudentCourses() {
                 <div key={i} className="h-52 bg-white rounded-[2rem] border border-[#1A1A1A]/5 animate-pulse" />
               ))}
             </div>
-          ) : filtered.length === 0 ? (
+          ) : ltered.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-32 text-center">
               <div className="w-20 h-20 rounded-3xl bg-[#F5F5F0] flex items-center justify-center mb-6">
-                <FiBookOpen className="w-10 h-10 text-[#1A1A1A]/20" />
+                <BookOpen className="w-10 h-10 text-[#1A1A1A]/20" />
               </div>
               <p className="text-xl font-black text-[#1A1A1A]/30 uppercase tracking-tight">
                 {search ? 'No materials match your search.' : 'No materials uploaded yet.'}
@@ -140,7 +139,7 @@ export default function StudentCourses() {
             </div>
           ) : (
             <motion.div variants={cv} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filtered.map((m, i) => (
+              {ltered.map((m, i) => (
                 <motion.div
                   key={m.id}
                   variants={ci}
@@ -151,7 +150,7 @@ export default function StudentCourses() {
                   <div className="relative z-10">
                     {/* Icon */}
                     <div className="w-14 h-14 rounded-2xl bg-[#C62828]/10 flex items-center justify-center mb-6 group-hover:bg-[#C62828] transition-all">
-                      <FiBookOpen className="w-7 h-7 text-[#C62828] group-hover:text-white transition-colors" />
+                      <BookOpen className="w-7 h-7 text-[#C62828] group-hover:text-white transition-colors" />
                     </div>
 
                     {/* Material number */}
@@ -177,7 +176,7 @@ export default function StudentCourses() {
                       onClick={() => { setSelectedMaterial(m); setPreviewOpen(true); }}
                       className="inline-flex items-center gap-2 bg-[#1A1A1A] text-white px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-[#C62828] transition-all shadow-md active:scale-95"
                     >
-                      <FiPlayCircle className="w-4 h-4" />
+                      <PlayCircle className="w-4 h-4" />
                       Preview Material
                     </button>
                   </div>
@@ -190,7 +189,10 @@ export default function StudentCourses() {
 
       <MaterialPreviewModal
         open={previewOpen}
-        material={selectedMaterial}
+        material={selectedMaterial ? {
+          ...selectedMaterial,
+          watermarkText: `${profile?.name ?? 'Student'} ${profile?.email ?? ''}`.trim(),
+        } : null}
         onClose={() => { setPreviewOpen(false); setSelectedMaterial(null); }}
       />
     </motion.div>

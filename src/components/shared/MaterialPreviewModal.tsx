@@ -1,8 +1,10 @@
-import { FiDownload, FiExternalLink, FiFileText, FiVideo, FiX } from 'react-icons/fi';
+import { useEffect, useMemo, useState } from 'react';
+import { AlertTriangle, FileText, Music, Video, X } from 'lucide-react';
 
 type MaterialLike = {
   title: string;
   file_url: string;
+  watermarkText?: string;
 };
 
 interface MaterialPreviewModalProps {
@@ -11,17 +13,36 @@ interface MaterialPreviewModalProps {
   onClose: () => void;
 }
 
-function getFileType(url: string): 'pdf' | 'video' | 'other' {
+function getFileType(url: string): 'pdf' | 'video' | 'audio' | 'other' {
   const cleanUrl = url.split('?')[0].toLowerCase();
   if (cleanUrl.endsWith('.pdf')) return 'pdf';
   if (cleanUrl.endsWith('.mp4') || cleanUrl.endsWith('.webm') || cleanUrl.endsWith('.ogg') || cleanUrl.endsWith('.mov')) return 'video';
+  if (cleanUrl.endsWith('.mp3') || cleanUrl.endsWith('.wav') || cleanUrl.endsWith('.m4a') || cleanUrl.endsWith('.aac')) return 'audio';
   return 'other';
 }
 
 export default function MaterialPreviewModal({ open, material, onClose }: MaterialPreviewModalProps) {
+  const [screenHidden, setScreenHidden] = useState(false);
+
+  useEffect(() => {
+    if (!open) return undefined;
+    const onVisibility = () => setScreenHidden(document.hidden);
+    const preventDefault = (event: Event) => event.preventDefault();
+    document.addEventListener('visibilitychange', onVisibility);
+    document.addEventListener('contextmenu', preventDefault);
+    document.addEventListener('dragstart', preventDefault);
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibility);
+      document.removeEventListener('contextmenu', preventDefault);
+      document.removeEventListener('dragstart', preventDefault);
+      setScreenHidden(false);
+    };
+  }, [open]);
+
   if (!open || !material) return null;
 
   const fileType = getFileType(material.file_url);
+  const watermark = useMemo(() => material.watermarkText || 'Protected Content', [material.watermarkText]);
 
   return (
     <div className="fixed inset-0 z-[120]">
@@ -39,71 +60,79 @@ export default function MaterialPreviewModal({ open, material, onClose }: Materi
             <h3 className="text-base md:text-lg font-black text-[#1A1A1A] tracking-tight truncate">{material.title}</h3>
           </div>
           <div className="flex items-center gap-2 shrink-0">
-            <a
-              href={material.file_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#F5F5F0] text-[#1A1A1A] text-[10px] font-black uppercase tracking-widest hover:bg-[#1A1A1A] hover:text-white transition-all"
-            >
-              <FiExternalLink className="w-3.5 h-3.5" />
-              Open
-            </a>
-            <a
-              href={material.file_url}
-              download
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#C62828] text-white text-[10px] font-black uppercase tracking-widest hover:brightness-95 transition-all"
-            >
-              <FiDownload className="w-3.5 h-3.5" />
-              Download
-            </a>
+            <span className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-amber-50 text-amber-700 text-[10px] font-black uppercase tracking-widest">
+              <AlertTriangle className="w-3.5 h-3.5" />
+              Preview only
+            </span>
             <button
               type="button"
               onClick={onClose}
               className="w-9 h-9 rounded-xl bg-[#F5F5F0] text-[#1A1A1A]/60 hover:text-[#C62828] transition-colors flex items-center justify-center"
             >
-              <FiX className="w-5 h-5" />
+              <X className="w-5 h-5" />
             </button>
           </div>
         </div>
 
-        <div className="flex-1 bg-[#F5F5F0]">
+        <div className="relative flex-1 bg-[#F5F5F0] select-none">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 z-20 opacity-20"
+            style={{
+              backgroundImage: `repeating-linear-gradient(-25deg, transparent, transparent 30px, rgba(198,40,40,0.35) 30px, rgba(198,40,40,0.35) 33px)`,
+            }}
+          />
+          <div className="pointer-events-none absolute inset-0 z-30 flex items-center justify-center text-[#1A1A1A]/20 text-lg font-black uppercase tracking-[0.35em]">
+            {watermark}
+          </div>
           {fileType === 'pdf' && (
             <iframe
               src={material.file_url}
               title={material.title}
-              className="w-full h-full"
+              className="w-full h-full pointer-events-auto"
             />
           )}
 
           {fileType === 'video' && (
             <div className="w-full h-full flex items-center justify-center p-4 md:p-8">
-              <video src={material.file_url} controls className="w-full h-full max-h-full rounded-2xl bg-black" />
+              <video src={material.file_url} controls controlsList="nodownload noplaybackrate" className="w-full h-full max-h-full rounded-2xl bg-black" />
+            </div>
+          )}
+
+          {fileType === 'audio' && (
+            <div className="w-full h-full flex items-center justify-center p-6 md:p-10">
+              <div className="w-full max-w-2xl bg-white border border-[#1A1A1A]/10 rounded-2xl p-6">
+                <p className="text-[10px] font-black uppercase tracking-[0.35em] text-[#D4A373] mb-4">Audio Preview</p>
+                <audio src={material.file_url} controls controlsList="nodownload noplaybackrate" className="w-full" />
+              </div>
             </div>
           )}
 
           {fileType === 'other' && (
             <div className="w-full h-full flex flex-col items-center justify-center text-center p-8">
               <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center mb-4 text-[#C62828] shadow-sm">
-                <FiFileText className="w-7 h-7" />
+                <FileText className="w-7 h-7" />
               </div>
               <h4 className="text-lg font-black text-[#1A1A1A] mb-2">Preview not available</h4>
               <p className="text-sm text-[#1A1A1A]/50 mb-6">This file type cannot be previewed inline yet.</p>
-              <a
-                href={material.file_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[#1A1A1A] text-white text-xs font-black uppercase tracking-widest hover:bg-[#C62828] transition-all"
-              >
-                <FiExternalLink className="w-4 h-4" />
-                Open File
-              </a>
+              <p className="text-xs font-bold text-[#1A1A1A]/60">Only PDF, video, and audio files can be previewed inline.</p>
+            </div>
+          )}
+          {screenHidden && (
+            <div className="absolute inset-0 z-40 bg-[#1A1A1A] flex items-center justify-center">
+              <p className="text-white font-black uppercase tracking-[0.3em] text-xs">Preview paused while tab is inactive</p>
             </div>
           )}
         </div>
 
         <div className="px-5 md:px-8 py-3 border-t border-[#1A1A1A]/10 bg-white text-[9px] font-black uppercase tracking-widest text-[#1A1A1A]/30 flex items-center gap-2">
-          {fileType === 'pdf' ? <FiFileText className="w-3.5 h-3.5" /> : <FiVideo className="w-3.5 h-3.5" />}
-          <span>{fileType === 'pdf' ? 'PDF document' : fileType === 'video' ? 'Video file' : 'File'}</span>
+          {fileType === 'pdf' ? <FileText className="w-3.5 h-3.5" /> : fileType === 'audio' ? <Music className="w-3.5 h-3.5" /> : <Video className="w-3.5 h-3.5" />}
+          <span>
+            {fileType === 'pdf' ? 'PDF document' : fileType === 'video' ? 'Video file' : fileType === 'audio' ? 'Audio file' : 'file'}
+          </span>
+          <span className="ml-auto normal-case tracking-normal text-[10px]">
+            Browser restrictions reduce casual downloads, but full screenshot prevention is NOT 100% possible in browsers.
+          </span>
         </div>
       </div>
     </div>

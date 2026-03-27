@@ -151,6 +151,8 @@ export default function TopNavBar() {
               <img 
                 src={logo} 
                 alt="Leidenschaft Klub" 
+                width={40}
+                height={40}
                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
               />
             </div>
@@ -265,7 +267,7 @@ export default function TopNavBar() {
                   }}
                 />
                 <div className="w-12 h-12 rounded-full overflow-hidden bg-[#F5F5F0] shadow-md relative z-10">
-                  <img src={logo} alt="" className="w-full h-full object-cover" />
+                  <img src={logo} alt="" width={48} height={48} className="w-full h-full object-cover" />
                 </div>
                 <div className="relative z-10">
                   <span className="text-base font-black text-[#C62828] block">Leidenschaft</span>

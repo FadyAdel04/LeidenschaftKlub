@@ -5,7 +5,7 @@ export default function ToastStack() {
   const { toasts, dismissToast } = useNotifications();
 
   return (
-    <div className="fixed top-20 right-4 z-130 w-[320px] space-y-3">
+    <div className="xed top-20 right-4 z-130 w-[320px] space-y-3">
       <AnimatePresence>
         {toasts.map(t => (
           <motion.div
@@ -17,7 +17,7 @@ export default function ToastStack() {
           >
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <p className="text-[10px] font-black uppercase tracking-widest text-[#C62828]">Notification</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-[#C62828]">Notication</p>
                 <p className="text-sm font-black text-[#1A1A1A] truncate">{t.title}</p>
                 <p className="text-xs font-bold text-[#1A1A1A]/60 mt-1 line-clamp-2">{t.message}</p>
               </div>

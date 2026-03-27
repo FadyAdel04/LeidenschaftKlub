@@ -19,7 +19,7 @@ import {
 type Toast = { id: string; title: string; message: string; createdAt: number };
 
 type NotificationsContextType = {
-  notifications: AppNotification[];
+  Notifications: AppNotification[];
   unreadCount: number;
   loading: boolean;
   markAsRead: (id: string) => Promise<void>;
@@ -32,12 +32,12 @@ const NotificationsContext = createContext<NotificationsContextType | undefined>
 
 export function NotificationsProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
-  const [notifications, setNotifications] = useState<AppNotification[]>([]);
+  const [Notifications, setNotifications] = useState<AppNotification[]>([]);
   const [loading, setLoading] = useState(false);
   const [toasts, setToasts] = useState<Toast[]>([]);
   const pollRef = useRef<number | null>(null);
 
-  const unreadCount = useMemo(() => notifications.filter(n => !n.is_read).length, [notifications]);
+  const unreadCount = useMemo(() => Notifications.filter(n => !n.is_read).length, [Notifications]);
 
   const dismissToast = (id: string) => setToasts(prev => prev.filter(t => t.id !== id));
 
@@ -85,13 +85,13 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
     if (!user) return;
 
     const channel = supabase
-      .channel(`notifications:${user.id}`)
+      .channel(`Notifications:${user.id}`)
       .on(
         'postgres_changes',
         {
           event: 'INSERT',
           schema: 'public',
-          table: 'notifications',
+          table: 'Notifications',
           filter: `user_id=eq.${user.id}`,
         },
         (payload) => {
@@ -110,7 +110,7 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
         {
           event: 'UPDATE',
           schema: 'public',
-          table: 'notifications',
+          table: 'Notifications',
           filter: `user_id=eq.${user.id}`,
         },
         (payload) => {
@@ -129,7 +129,7 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
         {
           event: 'DELETE',
           schema: 'public',
-          table: 'notifications',
+          table: 'Notifications',
           filter: `user_id=eq.${user.id}`,
         },
         (payload) => {
@@ -168,7 +168,7 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
   return (
     <NotificationsContext.Provider
       value={{
-        notifications,
+        Notifications,
         unreadCount,
         loading,
         markAsRead,

@@ -8,6 +8,7 @@ import logo from '../../assets/logo.jpg';
 import { fetchAllLevels, type Level } from '../../services/adminService';
 import { bookWebsiteEvent, fetchWebsiteEvents, fetchWebsiteSpaces, publicAssetUrl, type WebsiteEvent, type WebsiteSpace } from '../../services/websiteService';
 import { useAuth } from '../../context/AuthContext';
+import background from '../../assets/background.jpg';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -90,7 +91,7 @@ export default function LandingPage() {
   const fallbackSpaces: WebsiteSpace[] = useMemo(() => ([
     {
       id: 'fallback-1',
-      image_path: "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=800&h=600&fit=crop",
+      image_path: "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=800&h=600&t=crop",
       title: "Main Classroom",
       description: "Spacious learning environment with modern equipment",
       category: "Classroom",
@@ -98,7 +99,7 @@ export default function LandingPage() {
     },
     {
       id: 'fallback-2',
-      image_path: "https://images.unsplash.com/photo-1577896851231-70ef18881754?w=800&h=600&fit=crop",
+      image_path: "https://images.unsplash.com/photo-1577896851231-70ef18881754?w=800&h=600&t=crop",
       title: "Study Lounge",
       description: "Cozy area for self-study and collaboration",
       category: "Lounge",
@@ -106,7 +107,7 @@ export default function LandingPage() {
     },
     {
       id: 'fallback-3',
-      image_path: "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800&h=600&fit=crop",
+      image_path: "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800&h=600&t=crop",
       title: "Library",
       description: "Extensive collection of German literature",
       category: "Library",
@@ -114,7 +115,7 @@ export default function LandingPage() {
     },
     {
       id: 'fallback-4',
-      image_path: "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=800&h=600&fit=crop",
+      image_path: "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=800&h=600&t=crop",
       title: "Conference Room",
       description: "Professional space for workshops and events",
       category: "Meeting",
@@ -122,7 +123,7 @@ export default function LandingPage() {
     },
     {
       id: 'fallback-5',
-      image_path: "https://images.unsplash.com/photo-1509062522246-3755977927d7?w=800&h=600&fit=crop",
+      image_path: "https://images.unsplash.com/photo-1509062522246-3755977927d7?w=800&h=600&t=crop",
       title: "Outdoor Terrace",
       description: "Relaxing space with city views",
       category: "Outdoor",
@@ -130,7 +131,7 @@ export default function LandingPage() {
     },
     {
       id: 'fallback-6',
-      image_path: "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=800&h=600&fit=crop",
+      image_path: "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=800&h=600&t=crop",
       title: "Digital Lab",
       description: "Tech-enabled learning experience",
       category: "Technology",
@@ -147,7 +148,7 @@ export default function LandingPage() {
       ends_at: null,
       location: "Main Hall, Berlin Campus",
       type: "Workshop",
-      image_path: "https://images.unsplash.com/photo-1556761175-b413da4baf72?w=800&h=500&fit=crop",
+      image_path: "https://images.unsplash.com/photo-1556761175-b413da4baf72?w=800&h=500&t=crop",
       capacity: 25,
       price: "Free",
       is_active: true,
@@ -160,7 +161,7 @@ export default function LandingPage() {
       ends_at: null,
       location: "Event Space, Munich Campus",
       type: "Social",
-      image_path: "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800&h=500&fit=crop",
+      image_path: "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800&h=500&t=crop",
       capacity: 50,
       price: "€15",
       is_active: true,
@@ -173,7 +174,7 @@ export default function LandingPage() {
       ends_at: null,
       location: "Online & In-Person",
       type: "Intensive",
-      image_path: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800&h=500&fit=crop",
+      image_path: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800&h=500&t=crop",
       capacity: 15,
       price: "€89",
       is_active: true,
@@ -186,7 +187,7 @@ export default function LandingPage() {
       ends_at: null,
       location: "Berlin Cultural Center",
       type: "Networking",
-      image_path: "https://images.unsplash.com/photo-1515187029135-8ee3e6d4d4a1?w=800&h=500&fit=crop",
+      image_path: "https://images.unsplash.com/photo-1515187029135-8ee3e6d4d4a1?w=800&h=500&t=crop",
       capacity: 40,
       price: "Free",
       is_active: true,
@@ -241,28 +242,28 @@ export default function LandingPage() {
               transition={{ duration: 1.5 }}
               className="absolute inset-0 bg-cover bg-center opacity-100"
               style={{
-                backgroundImage: "url('https://www.tripsavvy.com/thmb/2y4rC2mDASnHyTWwRDFIp9lyoYE=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/Brandenburg-Gate-at-sunset-58c5ca2c5f9b58af5c254f8a.jpg')",
+                backgroundImage: `url(${background})`,
               }}
             />
             {/* Gradient Overlay */}
             <div className="absolute inset-0 bg-linear-to-br from-white via-white/65 to-[#F5F5F0]/90" />
             
-            {/* Animated Particles - using percentage-based positioning */}
+            {/* Animated Particles - reduced count for performance */}
             <div className="absolute inset-0 overflow-hidden">
-              {[...Array(20)].map((_, i) => (
+              {[...Array(8)].map((_, i) => (
                 <motion.div
                   key={i}
                   initial={{
-                    x: `${Math.random() * 100}%`,
+                    x: `${(i / 8) * 100}%`,
                     y: `${Math.random() * 100}%`,
-                    scale: Math.random() * 0.5 + 0.2
+                    scale: 0.4
                   }}
                   animate={{
                     y: [null, -30, 30, -30],
                     x: [null, 20, -20, 20],
                   }}
                   transition={{
-                    duration: Math.random() * 10 + 15,
+                    duration: 20 + i * 2,
                     repeat: Infinity,
                     ease: "easeInOut"
                   }}
@@ -290,6 +291,9 @@ export default function LandingPage() {
                 alt="Logo" 
                 className="mx-auto mb-2 hover:rotate-12 transition-transform duration-500"
                 src={logo}
+                width={64}
+                height={64}
+                fetchPriority="high"
               />
             </motion.div>
             
@@ -337,8 +341,11 @@ export default function LandingPage() {
               <div className="aspect-4/5 bg-white rounded-3xl sm:rounded-4xl overflow-hidden shadow-2xl relative z-10">
                 <img 
                   alt="Community" 
-                  className="w-full h-full object-cover "
+                  className="w-full h-full object-cover"
                   src="https://lh3.googleusercontent.com/aida-public/AB6AXuBAxHLgRUfbhMq9lSE9Hj37KROGE2JRw-ofTOrW6J2SwQdtBxQplSODlzVK2QEjyym-q7hh3a2MpEH8U5NKREKj1nKQAhcLw7VMP35po1CwGwMcYrVYeq2cHS0J4E0CClb26BHjAftWsdeIId9K9j3S8EMVf5yAb_qLA2wpJiFoxySh8eyvgcT-_IwyBS7pTrNVx0r3PfFtPHgA7Jcrisov_vmNTqBdtcjxIJWdfCGUWHJhW_dCFfaMYLv_qB2RY-1QltfOOO3M1g"
+                  width={600}
+                  height={750}
+                  loading="lazy"
                 />
               </div>
               <motion.div 
@@ -476,6 +483,9 @@ export default function LandingPage() {
                     <img 
                       src={publicAssetUrl(image.image_path) ?? ''}
                       alt={image.title}
+                      width={800}
+                      height={600}
+                      loading="lazy"
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                     />
                     <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
@@ -540,6 +550,9 @@ export default function LandingPage() {
                     <img 
                       src={publicAssetUrl(event.image_path) ?? ''}
                       alt={event.title}
+                      width={800}
+                      height={500}
+                      loading="lazy"
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />
                     <div className="absolute top-3 left-3 sm:top-4 sm:left-4 bg-[#C62828] text-white px-2 sm:px-3 py-1 rounded-full text-xs font-black uppercase">
@@ -636,7 +649,7 @@ export default function LandingPage() {
             >
               <div className="flex items-center justify-between gap-4 mb-5">
                 <div>
-                  <p className="text-xs uppercase font-black tracking-[0.2em] text-[#D4A373]">Find us</p>
+                  <p className="text-xs uppercase font-black tracking-[0.2em] text-[#D4A373]">find us</p>
                   <p className="text-2xl md:text-3xl font-black tracking-tighter">Alexandria, Egypt</p>
                   <p className="text-white/60 text-sm md:text-base font-bold mt-1">
                     261 Portsaid street Cleopatra, Sidi Gaber
@@ -669,7 +682,7 @@ export default function LandingPage() {
       <Footer />
 
         {bookingOpen && bookingEvent && (
-        <div className="fixed inset-0 z-120 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
           <button className="absolute inset-0 bg-black/60" onClick={() => setBookingOpen(false)} />
           <div className="relative w-full max-w-lg bg-white rounded-3xl p-6 sm:p-8 border border-[#1A1A1A]/10 shadow-2xl">
             <div className="flex items-start justify-between gap-4 mb-4">

@@ -1,0 +1,101 @@
+﻿src/components/shared/MaterialPreviewModal.tsx(28,23): error TS2552: Cannot find name 'undened'. Did you mean 'undefined'?
+src/components/shared/PortalNotifications.tsx(23,48): error TS2339: Property 'nd' does not exist on type 'AppNotification[]'.
+src/components/shared/PortalNotifications.tsx(23,51): error TS7006: Parameter 'n' implicitly has an 'any' type.
+src/components/shared/StudentSidebar.tsx(6,15): error TS2724: '"../../services/studentService"' has no exported member named 'Profile'. Did you mean 'profile'?
+src/pages/admin/AdminAssignments.tsx(3,10): error TS2724: '"lucide-react"' has no exported member named 'FiLetterText'. Did you mean 'LetterText'?
+src/pages/admin/AdminAssignments.tsx(41,42): error TS2552: Cannot find name 'file'. Did you mean 'File'?
+src/pages/admin/AdminAssignments.tsx(42,50): error TS2552: Cannot find name 'file'. Did you mean 'File'?
+src/pages/admin/AdminAssignments.tsx(201,103): error TS2339: Property 'les' does not exist on type 'EventTarget & HTMLInputElement'.
+src/pages/admin/AdminAssignments.tsx(376,109): error TS2339: Property 'les' does not exist on type 'EventTarget & HTMLInputElement'.
+src/pages/admin/AdminDashboard.tsx(7,82): error TS2724: '"../../services/adminService"' has no exported member named 'Profile'. Did you mean 'profile'?
+src/pages/admin/AdminExamReviewPage.tsx(56,31): error TS2339: Property 'nd' does not exist on type 'ExamQuestion[]'.
+src/pages/admin/AdminExamReviewPage.tsx(56,35): error TS7006: Parameter 'x' implicitly has an 'any' type.
+src/pages/admin/AdminExams.tsx(57,58): error TS2304: Cannot find name 'file'.
+src/pages/admin/AdminExams.tsx(700,50): error TS2339: Property 'les' does not exist on type 'EventTarget & HTMLInputElement'.
+src/pages/admin/AdminMaterials.tsx(22,34): error TS2749: 'file' refers to a value, but is being used as a type here. Did you mean 'typeof file'?
+src/pages/admin/AdminMaterials.tsx(31,40): error TS2749: 'file' refers to a value, but is being used as a type here. Did you mean 'typeof file'?
+src/pages/admin/AdminMaterials.tsx(159,146): error TS2339: Property 'les' does not exist on type 'EventTarget & HTMLInputElement'.
+src/pages/admin/AdminMaterials.tsx(249,105): error TS2339: Property 'les' does not exist on type 'EventTarget & HTMLInputElement'.
+src/pages/admin/AdminMaterials.tsx(269,9): error TS2322: Type '{ watermarkText: string; id: string; title: string; file_url: string; level_id: string; created_at: string; levels?: { name: string; } | undefined; } | null' is not assignable to type 'MaterialLike | null'.
+  Property 'le_url' is missing in type '{ watermarkText: string; id: string; title: string; file_url: string; level_id: string; created_at: string; levels?: { name: string; }; }' but required in type 'MaterialLike'.
+src/pages/admin/AdminNotifications.tsx(4,15): error TS2724: '"../../services/Notificationservice"' has no exported member named 'NoticationPriority'. Did you mean 'NotificationPriority'?
+src/pages/admin/AdminNotifications.tsx(4,35): error TS2724: '"../../services/Notificationservice"' has no exported member named 'NoticationTargetLevel'. Did you mean 'NotificationTargetLevel'?
+src/pages/admin/AdminNotifications.tsx(4,58): error TS2724: '"../../services/Notificationservice"' has no exported member named 'NoticationType'. Did you mean 'NotificationType'?
+src/pages/admin/AdminNotifications.tsx(4,80): error TS1149: File name 'E:/computer and artificial intilgance/leidenschaft/Leidenschaft/src/services/Notificationservice.ts' differs from already included file name 'E:/computer and artificial intilgance/leidenschaft/Leidenschaft/src/services/notificationService.ts' only in casing.
+  The file is in the program because:
+    Imported via '../services/notificationService' from file 'E:/computer and artificial intilgance/leidenschaft/Leidenschaft/src/context/NotificationsContext.tsx'
+    Imported via './notificationService' from file 'E:/computer and artificial intilgance/leidenschaft/Leidenschaft/src/services/adminService.ts'
+    Imported via '../../services/Notificationservice' from file 'E:/computer and artificial intilgance/leidenschaft/Leidenschaft/src/pages/admin/AdminNotifications.tsx'
+    Imported via './notificationService' from file 'E:/computer and artificial intilgance/leidenschaft/Leidenschaft/src/services/adminNotificationservice.ts'
+    Imported via './notificationService' from file 'E:/computer and artificial intilgance/leidenschaft/Leidenschaft/src/services/adminNotificationservice.ts'
+    Matched by include pattern 'src' in 'tsconfig.app.json'
+src/pages/admin/AdminNotifications.tsx(5,15): error TS2724: '"../../services/adminNotificationservice"' has no exported member named 'NoticationGroup'. Did you mean 'NotificationGroup'?
+src/pages/admin/AdminNotifications.tsx(5,38): error TS1261: Already included file name 'E:/computer and artificial intilgance/leidenschaft/Leidenschaft/src/services/adminNotificationservice.ts' differs from file name 'E:/computer and artificial intilgance/leidenschaft/Leidenschaft/src/services/adminNotificationService.ts' only in casing.
+  The file is in the program because:
+    Imported via '../../services/adminNotificationservice' from file 'E:/computer and artificial intilgance/leidenschaft/Leidenschaft/src/pages/admin/AdminNotifications.tsx'
+    Imported via '../../services/adminNotificationservice' from file 'E:/computer and artificial intilgance/leidenschaft/Leidenschaft/src/pages/admin/AdminNotifications.tsx'
+    Matched by include pattern 'src' in 'tsconfig.app.json'
+src/pages/admin/AdminNotifications.tsx(6,10): error TS2724: '"../../services/adminNotificationservice"' has no exported member named 'adminCreateNoticationGroup'. Did you mean 'adminCreateNotificationGroup'?
+src/pages/admin/AdminNotifications.tsx(6,38): error TS2724: '"../../services/adminNotificationservice"' has no exported member named 'adminDeleteNoticationGroup'. Did you mean 'adminDeleteNotificationGroup'?
+src/pages/admin/AdminNotifications.tsx(6,66): error TS2724: '"../../services/adminNotificationservice"' has no exported member named 'adminFetchNoticationGroups'. Did you mean 'adminFetchNotificationGroups'?
+src/pages/admin/AdminNotifications.tsx(6,94): error TS2724: '"../../services/adminNotificationservice"' has no exported member named 'adminUpdateNoticationGroup'. Did you mean 'adminUpdateNotificationGroup'?
+src/pages/admin/AdminNotifications.tsx(331,43): error TS2551: Property 'conrm' does not exist on type 'Window & typeof globalThis'. Did you mean 'confirm'?
+src/pages/admin/AdminStudents.tsx(21,21): error TS6133: 'setLevellter' is declared but its value is never read.
+src/pages/admin/AdminStudents.tsx(109,46): error TS2552: Cannot find name 'setLevelfilter'. Did you mean 'setLevellter'?
+src/pages/admin/AdminWebsite.tsx(38,40): error TS2304: Cannot find name 'file'.
+src/pages/admin/AdminWebsite.tsx(49,40): error TS2304: Cannot find name 'file'.
+src/pages/admin/AdminWebsite.tsx(58,42): error TS2304: Cannot find name 'file'.
+src/pages/admin/AdminWebsite.tsx(70,42): error TS2304: Cannot find name 'file'.
+src/pages/admin/AdminWebsite.tsx(301,89): error TS2339: Property 'les' does not exist on type 'EventTarget & HTMLInputElement'.
+src/pages/admin/AdminWebsite.tsx(328,62): error TS2551: Property 'conrm' does not exist on type 'Window & typeof globalThis'. Did you mean 'confirm'?
+src/pages/admin/AdminWebsite.tsx(380,89): error TS2339: Property 'les' does not exist on type 'EventTarget & HTMLInputElement'.
+src/pages/admin/AdminWebsite.tsx(428,60): error TS2551: Property 'conrm' does not exist on type 'Window & typeof globalThis'. Did you mean 'confirm'?
+src/pages/admin/AdminWebsite.tsx(494,88): error TS2339: Property 'les' does not exist on type 'EventTarget & HTMLInputElement'.
+src/pages/admin/AdminWebsite.tsx(563,88): error TS2339: Property 'les' does not exist on type 'EventTarget & HTMLInputElement'.
+src/pages/auth/ForgotPasswordPage.tsx(40,25): error TS2552: Cannot find name 'Innity'. Did you mean 'Infinity'?
+src/pages/auth/LoginPage.tsx(71,59): error TS2552: Cannot find name 'Innity'. Did you mean 'Infinity'?
+src/pages/auth/RegisterPage.tsx(61,72): error TS2552: Cannot find name 'Innity'. Did you mean 'Infinity'?
+src/pages/public/LandingPage.tsx(266,29): error TS2552: Cannot find name 'Innity'. Did you mean 'Infinity'?
+src/pages/public/LevelDetailsPage.tsx(63,29): error TS2339: Property 'nd' does not exist on type '{ key: string; name: string; badge: string; headline: string; summary: string; duration: string; intensity: string; nextCohort: string; whoFor: { title: string; description: string; bullets: { title: string; description: string; }[]; }; ... 11 more ...; assessment: { ...; }; }[]'.
+src/pages/public/LevelDetailsPage.tsx(63,32): error TS7006: Parameter 'l' implicitly has an 'any' type.
+src/pages/public/LevelDetailsPage.tsx(64,31): error TS2339: Property 'nd' does not exist on type '{ key: string; name: string; badge: string; headline: string; summary: string; duration: string; intensity: string; nextCohort: string; whoFor: { title: string; description: string; bullets: { title: string; description: string; }[]; }; ... 11 more ...; assessment: { ...; }; }[]'.
+src/pages/public/LevelDetailsPage.tsx(64,34): error TS7006: Parameter 'l' implicitly has an 'any' type.
+src/pages/public/LevelDetailsPage.tsx(68,26): error TS2339: Property 'nd' does not exist on type 'Level[]'.
+src/pages/public/LevelDetailsPage.tsx(68,29): error TS7006: Parameter 'l' implicitly has an 'any' type.
+src/pages/public/LevelDetailsPage.tsx(70,19): error TS2339: Property 'nd' does not exist on type 'Level[]'.
+src/pages/public/LevelDetailsPage.tsx(70,22): error TS7006: Parameter 'l' implicitly has an 'any' type.
+src/pages/public/LevelDetailsPage.tsx(154,48): error TS2339: Property 'nd' does not exist on type '{ key: string; name: string; badge: string; headline: string; summary: string; duration: string; intensity: string; nextCohort: string; whoFor: { title: string; description: string; bullets: { title: string; description: string; }[]; }; ... 11 more ...; assessment: { ...; }; }[]'.
+src/pages/public/LevelDetailsPage.tsx(154,51): error TS7006: Parameter 'l' implicitly has an 'any' type.
+src/pages/public/LevelDetailsPage.tsx(235,35): error TS7006: Parameter 'b' implicitly has an 'any' type.
+src/pages/public/LevelDetailsPage.tsx(275,77): error TS7006: Parameter 'c' implicitly has an 'any' type.
+src/pages/public/LevelDetailsPage.tsx(275,80): error TS7006: Parameter 'idx' implicitly has an 'any' type.
+src/pages/public/LevelDetailsPage.tsx(290,46): error TS7006: Parameter 't' implicitly has an 'any' type.
+src/pages/public/LevelDetailsPage.tsx(364,107): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/pages/public/LevelDetailsPage.tsx(383,69): error TS7006: Parameter 'cap' implicitly has an 'any' type.
+src/pages/public/LevelDetailsPage.tsx(383,74): error TS7006: Parameter 'idx' implicitly has an 'any' type.
+src/pages/public/LevelDetailsPage.tsx(405,83): error TS7006: Parameter 'b' implicitly has an 'any' type.
+src/pages/student/LessonPage.tsx(12,3): error TS2724: '"lucide-react"' has no exported member named 'FiLetterText'. Did you mean 'LetterText'?
+src/pages/student/StudentAssignments.tsx(4,3): error TS2724: '"lucide-react"' has no exported member named 'FiLetterText'. Did you mean 'LetterText'?
+src/pages/student/StudentAssignments.tsx(7,17): error TS2724: '"lucide-react"' has no exported member named 'leEdit'. Did you mean 'Edit'?
+src/pages/student/StudentAssignments.tsx(7,17): error TS6133: 'leEdit' is declared but its value is never read.
+src/pages/student/StudentAssignments.tsx(11,3): error TS2724: '"../../services/studentService"' has no exported member named 'fetchprofile'. Did you mean 'fetchProfile'?
+src/pages/student/StudentAssignments.tsx(12,51): error TS2724: '"../../services/studentService"' has no exported member named 'uploadSubmissionle'. Did you mean 'uploadSubmissionFile'?
+src/pages/student/StudentAssignments.tsx(39,58): error TS2749: 'file' refers to a value, but is being used as a type here. Did you mean 'typeof file'?
+src/pages/student/StudentAssignments.tsx(154,87): error TS2561: Object literal may only specify known properties, but 'leUrl' does not exist in type '{ assignmentId: string; studentId: string; answer: string; fileUrl?: string | undefined; audioAnswerUrl?: string | undefined; }'. Did you mean to write 'fileUrl'?
+src/pages/student/StudentAssignments.tsx(185,15): error TS2339: Property 'leEdit' does not exist on type 'JSX.IntrinsicElements'.
+src/pages/student/StudentAssignments.tsx(344,59): error TS2339: Property 'les' does not exist on type 'EventTarget & HTMLInputElement'.
+src/pages/student/StudentCourses.tsx(8,3): error TS2724: '"../../services/studentService"' has no exported member named 'fetchprofile'. Did you mean 'fetchProfile'?
+src/pages/student/StudentCourses.tsx(194,9): error TS2322: Type '{ watermarkText: string; id: string; title: string; file_url: string; level_id: string; created_at: string; } | null' is not assignable to type 'MaterialLike | null'.
+  Property 'le_url' is missing in type '{ watermarkText: string; id: string; title: string; file_url: string; level_id: string; created_at: string; }' but required in type 'MaterialLike'.
+src/pages/student/StudentDashboard.tsx(12,8): error TS2724: '"../../services/studentService"' has no exported member named 'Profile'. Did you mean 'profile'?
+src/pages/student/StudentDashboard.tsx(351,9): error TS2322: Type 'Material | null' is not assignable to type 'MaterialLike | null'.
+  Property 'le_url' is missing in type 'Material' but required in type 'MaterialLike'.
+src/pages/student/StudentExams.tsx(8,3): error TS2724: '"../../services/studentService"' has no exported member named 'fetchprofile'. Did you mean 'fetchProfile'?
+src/pages/student/Studentprofile.tsx(20,8): error TS2724: '"../../services/studentService"' has no exported member named 'Profile'. Did you mean 'profile'?
+src/pages/student/Studentprofile.tsx(113,18): error TS7006: Parameter 'p' implicitly has an 'any' type.
+src/pages/student/Studentprofile.tsx(130,18): error TS7006: Parameter 'prev' implicitly has an 'any' type.
+src/pages/student/StudentResults.tsx(7,3): error TS2724: '"../../services/studentService"' has no exported member named 'fetchprofile'. Did you mean 'fetchProfile'?
+src/routes/index.tsx(21,46): error TS1261: Already included file name 'E:/computer and artificial intilgance/leidenschaft/Leidenschaft/src/pages/student/Studentprofile.tsx' differs from file name 'E:/computer and artificial intilgance/leidenschaft/Leidenschaft/src/pages/student/StudentProfile.tsx' only in casing.
+  The file is in the program because:
+    Imported via '../pages/student/Studentprofile' from file 'E:/computer and artificial intilgance/leidenschaft/Leidenschaft/src/routes/index.tsx'
+    Matched by include pattern 'src' in 'tsconfig.app.json'

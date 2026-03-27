@@ -1,11 +1,11 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useMemo, useState } from 'react';
 import AdminSidebar from '../../components/shared/AdminSidebar';
-import type { NotificationPriority, NotificationTargetLevel, NotificationType } from '../../services/notificationService';
+import { fetchAllLevels, type Level } from '../../services/adminService';
 import type { NotificationGroup } from '../../services/adminNotificationService';
 import { adminCreateNotificationGroup, adminDeleteNotificationGroup, adminFetchNotificationGroups, adminUpdateNotificationGroup } from '../../services/adminNotificationService';
-import { fetchAllLevels, type Level } from '../../services/adminService';
-
+import type { NotificationPriority, NotificationTargetLevel, NotificationType } from '../../services/notificationService';
+  
 const cv = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.07 } } };
 const ci = { hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } };
 
@@ -30,8 +30,8 @@ export default function AdminNotifications() {
   const [levels, setLevels] = useState<Level[]>([]);
   const [groups, setGroups] = useState<NotificationGroup[]>([]);
 
-  const [filterLevel, setFilterLevel] = useState<NotificationTargetLevel | 'all'>('all');
-  const [filterActive, setFilterActive] = useState<'all' | 'active' | 'inactive'>('all');
+  const [filterLevel, setfilterLevel] = useState<NotificationTargetLevel | 'all'>('all');
+  const [filterActive, setfilterActive] = useState<'all' | 'active' | 'inactive'>('all');
 
   // Form state
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -46,8 +46,8 @@ export default function AdminNotifications() {
 
   const preview = useMemo(() => {
     return {
-      title: title || 'Notification title',
-      message: message || 'Notification message',
+      title: title || 'notification title',
+      message: message || 'notification message',
       type,
       priority,
       targetLevel,
@@ -64,7 +64,7 @@ export default function AdminNotifications() {
       setLevels(lvls);
       setGroups(fetched);
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Failed to load notifications');
+      setError(e instanceof Error ? e.message : 'Failed to load Notifications');
     } finally {
       setLoading(false);
     }
@@ -129,7 +129,7 @@ export default function AdminNotifications() {
           expiresAt: expiresIso,
           isActive,
         });
-        setSuccess('Notification updated.');
+        setSuccess('notification updated.');
       } else {
         await adminCreateNotificationGroup({
           type,
@@ -140,7 +140,7 @@ export default function AdminNotifications() {
           expiresAt: expiresIso,
           isActive,
         });
-        setSuccess('Notification sent to students.');
+        setSuccess('notification sent to students.');
       }
       clearEdit();
       await load();
@@ -166,7 +166,7 @@ export default function AdminNotifications() {
           </div>
           <div className="flex flex-wrap gap-2">
             <button
-              onClick={() => { setFilterLevel('all'); setFilterActive('all'); }}
+              onClick={() => { setfilterLevel('all'); setfilterActive('all'); }}
               className="px-4 py-3 rounded-2xl bg-white text-[10px] font-black uppercase tracking-widest text-[#1A1A1A]/60 border border-[#1A1A1A]/10 hover:text-[#C62828]"
             >
               Reset filters
@@ -286,11 +286,11 @@ export default function AdminNotifications() {
                 </div>
 
                 <div className="flex flex-wrap gap-2">
-                  <select value={filterLevel} onChange={e => setFilterLevel(e.target.value as any)} className="px-4 py-3 rounded-2xl bg-[#F5F5F0] font-black text-xs outline-none">
+                  <select value={filterLevel} onChange={e => setfilterLevel(e.target.value as any)} className="px-4 py-3 rounded-2xl bg-[#F5F5F0] font-black text-xs outline-none">
                     <option value="all">All levels</option>
                     {levels.map(l => <option key={l.id} value={l.name}>{l.name}</option>)}
                   </select>
-                  <select value={filterActive} onChange={e => setFilterActive(e.target.value as any)} className="px-4 py-3 rounded-2xl bg-[#F5F5F0] font-black text-xs outline-none">
+                  <select value={filterActive} onChange={e => setfilterActive(e.target.value as any)} className="px-4 py-3 rounded-2xl bg-[#F5F5F0] font-black text-xs outline-none">
                     <option value="all">All status</option>
                     <option value="active">Active only</option>
                     <option value="inactive">Inactive only</option>
@@ -302,7 +302,7 @@ export default function AdminNotifications() {
                 <div className="space-y-4">{[1,2,3,4].map(i => <div key={i} className="h-24 bg-[#F5F5F0] rounded-3xl animate-pulse" />)}</div>
               ) : filtered.length === 0 ? (
                 <div className="py-20 text-center">
-                  <p className="font-black text-[#1A1A1A]/30 uppercase tracking-widest">No notifications yet.</p>
+                  <p className="font-black text-[#1A1A1A]/30 uppercase tracking-widest">No Notifications yet.</p>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -331,7 +331,7 @@ export default function AdminNotifications() {
                               if (!window.confirm('Delete this notification for all recipients?')) return;
                               await adminDeleteNotificationGroup(g.announcement_id);
                               await load();
-                              setSuccess('Notification deleted.');
+                              setSuccess('notification deleted.');
                             }}
                             className="px-4 py-2 rounded-2xl bg-white text-[#C62828] font-black text-[10px] uppercase tracking-widest border border-[#C62828]/20 hover:bg-[#C62828]/5"
                           >

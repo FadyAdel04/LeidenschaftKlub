@@ -59,16 +59,16 @@ export default function LoginPage() {
       <main className="flex-1 flex flex-col lg:flex-row relative overflow-hidden bg-white pt-20 lg:pt-16">
         {/* Background Animated Particles */}
         <div className="absolute inset-0 z-0 pointer-events-none">
-          {[...Array(15)].map((_, i) => (
+          {[...Array(6)].map((_, i) => (
             <motion.div
               key={i}
               initial={{
-                x: Math.random() * 100 + '%',
-                y: Math.random() * 100 + '%',
-                scale: Math.random() * 0.5 + 0.2,
+                x: `${(i / 6) * 100}%`,
+                y: `${(i % 3) * 33}%`,
+                scale: 0.4,
               }}
               animate={{ y: [null, -30, 30, -30], x: [null, 20, -20, 20] }}
-              transition={{ duration: Math.random() * 10 + 15, repeat: Infinity, ease: 'easeInOut' }}
+              transition={{ duration: 20 + i * 3, repeat: Infinity, ease: 'easeInOut' }}
               className="absolute w-1 h-1 bg-[#C62828]/20 rounded-full"
             />
           ))}
@@ -81,7 +81,7 @@ export default function LoginPage() {
             animate={{ scale: 1 }}
             transition={{ duration: 1.5 }}
             className="absolute inset-0 bg-cover bg-center opacity-30 grayscale group-hover:grayscale-0 transition-all duration-1000"
-            style={{ backgroundImage: "url('https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80')" }}
+            style={{ backgroundImage: "url('https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&t=crop&q=80')" }}
           />
           <div className="absolute inset-0 bg-gradient-to-br from-[#1A1A1A] via-[#1A1A1A]/80 to-transparent" />
 
@@ -91,9 +91,9 @@ export default function LoginPage() {
                 <Shield className="w-3 h-3 text-[#D4A373]" />
                 <span className="text-[8px] font-black uppercase tracking-[0.3em] text-white/60">Institutional Access</span>
               </div>
-              <h2 className="text-5xl font-black text-white leading-[0.9] tracking-tighter uppercase underline decoration-[#C62828] decoration-4 underline-offset-4">
+              <p role="heading" aria-level={2} className="text-5xl font-black text-white leading-[0.9] tracking-tighter uppercase underline decoration-[#C62828] decoration-4 underline-offset-4">
                 Die<br />Portal.
-              </h2>
+              </p>
             </motion.div>
             <p className="text-sm font-medium text-white/40 leading-relaxed italic font-body">
               "Enter the domain of precision and linguistic architecture."
@@ -112,7 +112,7 @@ export default function LoginPage() {
             <div className="space-y-8">
               <motion.div variants={containerVariants} className="space-y-2 md:space-y-3">
                 <h1 className="text-3xl md:text-4xl font-black text-[#1A1A1A] tracking-tighter leading-none uppercase">
-                  Identity<br /><span className="text-[#C62828]">Verification.</span>
+                  Identity<br /><span className="text-[#C62828]">Verication.</span>
                 </h1>
                 <p className="text-xs md:text-sm text-[#1A1A1A]/40 font-medium leading-relaxed font-body">
                   Synchronize your credentials to access the institutional learning modules.
@@ -151,6 +151,7 @@ export default function LoginPage() {
                       />
                     </div>
                   </div>
+
 
                   {/* Password */}
                   <div className="space-y-2">

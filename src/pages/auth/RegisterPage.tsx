@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Mail, Lock, User, ArrowRight, ShieldCheck, Check, AlertCircle, Loader2 } from 'lucide-react';
+import { Mail, Lock, User, ArrowRight, ShieldCheck, Check, AlertCircle, Loader2, Phone } from 'lucide-react';
 import TopNavBar from '../../components/layout/TopNavBar';
 import Footer from '../../components/layout/Footer';
 import { useAuth } from '../../context/AuthContext';
@@ -20,6 +20,7 @@ export default function RegisterPage() {
 
   const [name, setName]         = useState('');
   const [email, setEmail]       = useState('');
+  const [phone, setPhone]       = useState('');
   const [password, setPassword] = useState('');
   const [agreed, setAgreed]     = useState(false);
   const [error, setError]       = useState('');
@@ -32,9 +33,11 @@ export default function RegisterPage() {
     setSuccess('');
     if (!agreed) { setError('You must accept the institutional protocol.'); return; }
     if (password.length < 8) { setError('Password must be at least 8 characters.'); return; }
+    const digits = phone.replace(/\D/g, '');
+    if (digits.length < 8) { setError('Enter a valid phone number (at least 8 digits).'); return; }
     setLoading(true);
     try {
-      await register(name, email, password);
+      await register(name, email, password, phone);
       setSuccess('Account created! Check your email to confirm your address, then log in.');
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Registration failed. Please try again.');
@@ -68,7 +71,7 @@ export default function RegisterPage() {
             animate={{ scale: 1 }}
             transition={{ duration: 1.5 }}
             className="absolute inset-0 bg-cover bg-center opacity-30 grayscale group-hover:grayscale-0 transition-all duration-1000"
-            style={{ backgroundImage: "url('https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&q=80')" }}
+            style={{ backgroundImage: "url('https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&t=crop&q=80')" }}
           />
           <div className="absolute inset-0 bg-gradient-to-br from-[#1A1A1A] via-[#1A1A1A]/80 to-transparent" />
 
@@ -135,6 +138,25 @@ export default function RegisterPage() {
                         onChange={e => setName(e.target.value)}
                         className="w-full pl-11 pr-4 py-2.5 bg-[#F5F5F0] border-none rounded-xl focus:ring-4 focus:ring-[#C62828]/10 transition-all text-[#1A1A1A] placeholder:text-[#1A1A1A]/20 outline-none text-sm font-black tracking-tight"
                         placeholder="Wilhelm Schmidt"
+                        required
+                        disabled={loading || !!success}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Phone */}
+                  <div className="space-y-1.5">
+                    <label className="block text-[8px] font-black uppercase tracking-[0.3em] text-[#D4A373] ml-3">Phone number</label>
+                    <div className="relative group">
+                      <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-[#1A1A1A]/20 w-3.5 h-3.5 group-focus-within:text-[#C62828] transition-colors" />
+                      <input
+                        type="tel"
+                        inputMode="tel"
+                        autoComplete="tel"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        className="w-full pl-11 pr-4 py-2.5 bg-[#F5F5F0] border-none rounded-xl focus:ring-4 focus:ring-[#C62828]/10 transition-all text-[#1A1A1A] placeholder:text-[#1A1A1A]/20 outline-none text-sm font-black tracking-tight"
+                        placeholder="+20 15 12345678"
                         required
                         disabled={loading || !!success}
                       />

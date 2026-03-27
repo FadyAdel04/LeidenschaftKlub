@@ -93,7 +93,7 @@ export default function AboutPage() {
   useEffect(() => {
     if (!location.hash) return;
     const id = location.hash.replace('#', '');
-    // allow layout to paint first
+    // allow layout to paint rst
     const t = window.setTimeout(() => scrollToId(id), 0);
     return () => window.clearTimeout(t);
   }, [location.hash]);
@@ -185,7 +185,7 @@ export default function AboutPage() {
       <SectionCard
         id="locations"
         eyebrow="Locations"
-        title="Where to find us"
+        title="Where to nd us"
         tone="dark"
         copy={
           <>

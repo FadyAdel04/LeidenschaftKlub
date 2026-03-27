@@ -1,17 +1,29 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
-import { FiAward, FiPlus, FiX, FiTrash2, FiAlertCircle, FiCheckCircle, FiLoader, FiClock, FiList, FiUpload, FiEdit2, FiSave } from 'react-icons/fi';
+import { useNavigate } from 'react-router-dom';
+import { Award, Plus, X, Trash2, AlertCircle, CheckCircle, Loader, Clock, List, Upload, Edit2, Save, Clipboard } from 'lucide-react';
 import AdminSidebar from '../../components/shared/AdminSidebar';
 import {
   fetchAllExams, fetchAllLevels, createExam, deleteExam, fetchQuestionsByExamAdmin,
-  createExamQuestion, bulkCreateExamQuestions, deleteExamQuestion, updateExam, type Exam, type Level, type ExamQuestion,
+  createExamQuestion, bulkCreateExamQuestions, deleteExamQuestion, updateExam, uploadMaterialAsset,
+  fetchAllExamSubmissions,
+  type Exam, type Level, type ExamQuestion,
 } from '../../services/adminService';
+import type { Result } from '../../services/studentService';
+import { MAX_UPLOAD_BYTES } from '../../utils/storageUpload';
 
 const cv = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.07 } } };
 const ci = { hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } };
 type EW = Exam & { levels?: { name: string } };
 
 export default function AdminExams() {
+  const navigate = useNavigate();
+  const [adminTab, setAdminTab] = useState<'bank' | 'submissions'>('bank');
+  const [submissions, setSubmissions] = useState<
+    (Result & { profiles?: { name: string; email: string }; exams?: { title: string } })[]
+  >([]);
+  const [subLoading, setSubLoading] = useState(false);
+
   const [exams, setExams] = useState<EW[]>([]);
   const [levels, setLevels] = useState<Level[]>([]);
   const [loading, setLoading] = useState(true);
@@ -30,10 +42,21 @@ export default function AdminExams() {
   const [qText, setQText] = useState('');
   const [qOptions, setQOptions] = useState(['', '', '', '']);
   const [qCorrect, setQCorrect] = useState('A');
+  const [qType, setQType] = useState<'paragraph' | 'grammar' | 'writing' | 'listening'>('paragraph');
+  const [pSubtype, setPSubtype] = useState<'mcq' | 'true_false'>('mcq');
+  const [pParagraph, setPParagraph] = useState('');
+  const [gSentence, setGSentence] = useState('I ___ to school yesterday');
+  const [gWordsRaw, setGWordsRaw] = useState('go,went,gone');
+  const [gCorrectWord, setGCorrectWord] = useState('went');
+  const [wWordsRaw, setWWordsRaw] = useState('travel,Germany,experience');
+  const [tfCorrect, setTfCorrect] = useState<'True' | 'False'>('True');
   const [qSaving, setQSaving] = useState(false);
   const [bulkInput, setBulkInput] = useState('');
   const [bulkSaving, setBulkSaving] = useState(false);
   const [qError, setQError] = useState('');
+  const [questionAudiole, setQuestionAudiole] = useState<file | null>(null);
+  // For listening questions: upload once and reuse for multiple questions referencing the same audio.
+  const [listeningAudioUrl, setListeningAudioUrl] = useState<string | null>(null);
   const [editingExam, setEditingExam] = useState<EW | null>(null);
   const [editExamTitle, setEditExamTitle] = useState('');
   const [editExamLevel, setEditExamLevel] = useState('');
@@ -50,9 +73,28 @@ export default function AdminExams() {
   }
   useEffect(() => { load(); }, []);
 
+  useEffect(() => {
+    if (adminTab !== 'submissions') return;
+    let cancelled = false;
+    setSubLoading(true);
+    fetchAllExamSubmissions()
+      .then((rows) => {
+        if (!cancelled) setSubmissions(rows);
+      })
+      .catch(() => {
+        if (!cancelled) setSubmissions([]);
+      })
+      .finally(() => {
+        if (!cancelled) setSubLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [adminTab]);
+
   const handleCreate = async () => {
     if (!title.trim()) { setFormError('Title required.'); return; }
-    if (!levelId) { setFormError('Choose a level first.'); return; }
+    if (!levelId) { setFormError('Choose a level rst.'); return; }
     if (!duration || Number(duration) < 1) { setFormError('Duration must be at least 1 min.'); return; }
     setCreating(true); setFormError('');
     try {
@@ -115,24 +157,155 @@ export default function AdminExams() {
 
   const handleCreateQuestion = async () => {
     if (!activeExam) return;
-    if (!qText.trim()) { setQError('Question text is required.'); return; }
-    if (qOptions.some(o => !o.trim())) { setQError('All 4 options are required.'); return; }
+    if (!qText.trim()) {
+      setQError('Question prompt is required.');
+      return;
+    }
 
+    const orderIndex = questions.length + 1;
     setQSaving(true);
     setQError('');
     try {
-      await createExamQuestion({
-        examId: activeExam.id,
-        questionText: qText.trim(),
-        options: qOptions.map(o => o.trim()),
-        correctAnswer: qCorrect,
-        orderIndex: questions.length + 1,
-      });
+      const parseWords = (raw: string) =>
+        raw
+          .split(/[,\n]/g)
+          .map((s) => s.trim())
+          .filter(Boolean);
+
+      const correctIndex = qCorrect.charCodeAt(0) - 'A'.charCodeAt(0);
+      const pickCorrectByLetter = (opts: string[]) => {
+        if (correctIndex < 0 || correctIndex >= opts.length) return null;
+        return opts[correctIndex]?.trim() ?? null;
+      };
+
+      if (qType === 'paragraph') {
+        if (!pParagraph.trim()) throw new Error('Paragraph text is required.');
+
+        if (pSubtype === 'mcq') {
+          if (qOptions.some((o) => !o.trim())) throw new Error('All 4 options are required.');
+          const options = qOptions.map((o) => o.trim());
+          const correctOption = pickCorrectByLetter(options);
+          if (!correctOption) throw new Error('Please select the correct option (A/B/C/D).');
+
+          await createExamQuestion({
+            examId: activeExam.id,
+            questionText: qText.trim(),
+            qType: 'paragraph',
+            content: pParagraph.trim(),
+            options,
+            // Keep legacy column compatible with older DB constraints (A-D),
+            // while correct_answer_json carries the real answer value.
+            correctAnswer: qCorrect,
+            correctAnswerJson: correctOption,
+            extraData: { subtype: 'mcq' },
+            orderIndex,
+          });
+        } else {
+          const options = ['True', 'False'];
+          await createExamQuestion({
+            examId: activeExam.id,
+            questionText: qText.trim(),
+            qType: 'paragraph',
+            content: pParagraph.trim(),
+            options,
+            // Legacy fallback; JSON value is authoritative.
+            correctAnswer: tfCorrect === 'True' ? 'A' : 'B',
+            correctAnswerJson: tfCorrect === 'True',
+            extraData: { subtype: 'true_false' },
+            orderIndex,
+          });
+        }
+      }
+
+      if (qType === 'grammar') {
+        const sentence = gSentence.trim();
+        if (!sentence || !sentence.includes('___')) {
+          throw new Error('Grammar sentence must include the blank token `___`.');
+        }
+        const words = parseWords(gWordsRaw);
+        if (words.length < 2) throw new Error('Provide at least 2 candidate words.');
+        const correctWord = gCorrectWord.trim();
+        if (!correctWord) throw new Error('Correct word is required.');
+        if (!words.some((w) => w.toLowerCase() === correctWord.toLowerCase())) {
+          throw new Error('Correct word must be one of the candidate words.');
+        }
+
+        await createExamQuestion({
+          examId: activeExam.id,
+          questionText: qText.trim(),
+          qType: 'grammar',
+          content: sentence,
+          options: null,
+          extraData: { words },
+          // Legacy fallback to satisfy old constraints.
+          correctAnswer: 'A',
+          correctAnswerJson: correctWord,
+          orderIndex,
+        });
+      }
+
+      if (qType === 'writing') {
+        const words = parseWords(wWordsRaw);
+        if (words.length < 1) throw new Error('Word list is required.');
+
+        await createExamQuestion({
+          examId: activeExam.id,
+          questionText: qText.trim(),
+          qType: 'writing',
+          content: null,
+          options: null,
+          extraData: { words },
+          // Legacy fallback to satisfy old constraints.
+          correctAnswer: 'A',
+          correctAnswerJson: null,
+          orderIndex,
+        });
+      }
+
+      if (qType === 'listening') {
+        if (!questionAudiole) throw new Error('Audio file is required for listening questions.');
+        if (questionAudiole.size > MAX_UPLOAD_BYTES) throw new Error('Audio exceeds 200MB.');
+
+        if (qOptions.some((o) => !o.trim())) throw new Error('All 4 listening options are required.');
+        const options = qOptions.map((o) => o.trim());
+        const correctOption = pickCorrectByLetter(options);
+        if (!correctOption) throw new Error('Please select the correct option (A/B/C/D).');
+
+        const audioUrl = listeningAudioUrl ?? await uploadMaterialAsset(questionAudiole);
+        if (!listeningAudioUrl) setListeningAudioUrl(audioUrl);
+        await createExamQuestion({
+          examId: activeExam.id,
+          questionText: qText.trim(),
+          qType: 'listening',
+          audioUrl,
+          options,
+          // Keep legacy column A-D; JSON stores full value.
+          correctAnswer: qCorrect,
+          correctAnswerJson: correctOption,
+          extraData: null,
+          content: null,
+          orderIndex,
+        });
+      }
+
       const qs = await fetchQuestionsByExamAdmin(activeExam.id);
       setQuestions(qs);
+
+      // reset form elds for next question
       setQText('');
       setQOptions(['', '', '', '']);
       setQCorrect('A');
+      if (qType !== 'listening') {
+        setQuestionAudiole(null);
+        setListeningAudioUrl(null);
+      }
+      setPParagraph('');
+      setGSentence('I ___ to school yesterday');
+      setGWordsRaw('go,went,gone');
+      setGCorrectWord('went');
+      setWWordsRaw('travel,Germany,experience');
+      setPSubtype('mcq');
+      setTfCorrect('True');
     } catch (e: unknown) {
       setQError(e instanceof Error ? e.message : 'Failed to add question');
     } finally {
@@ -190,20 +363,42 @@ export default function AdminExams() {
     <motion.div initial="hidden" animate="visible" variants={cv} className="min-h-screen bg-[#F5F5F0] lg:flex">
       <AdminSidebar />
       <main className="pt-14 lg:pt-0 lg:ml-80 flex-1 p-4 sm:p-6 md:p-10 lg:p-16 xl:p-20 relative overflow-hidden">
-        <motion.header variants={ci} className="mb-10 flex flex-col sm:flex-row items-start sm:items-end justify-between gap-6 relative z-10">
-          <div>
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tighter text-[#1A1A1A] leading-none uppercase mb-3">Manage<br/><span className="text-[#C62828]">Exams.</span></h1>
-            <p className="text-[#D4A373] font-black uppercase text-[10px] tracking-[0.5em] italic">{loading ? '—' : `${exams.length} Created`}</p>
+        <motion.header variants={ci} className="mb-10 flex flex-col gap-6 relative z-10">
+          <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-6 w-full">
+            <div>
+              <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tighter text-[#1A1A1A] leading-none uppercase mb-3">Manage<br/><span className="text-[#C62828]">Exams.</span></h1>
+              <p className="text-[#D4A373] font-black uppercase text-[10px] tracking-[0.5em] italic">{loading ? '—' : `${exams.length} Created`}</p>
+            </div>
+            {adminTab === 'bank' && (
+              <button onClick={() => { setShowForm(p => !p); setFormError(''); }}
+                className="flex items-center gap-3 bg-[#1A1A1A] text-white px-7 py-4 rounded-2xl font-black text-sm uppercase tracking-wider hover:bg-[#C62828] transition-all active:scale-95 shadow-lg shrink-0">
+                <Plus className={`w-5 h-5 transition-transform ${showForm ? 'rotate-45' : ''}`} /> New Exam
+              </button>
+            )}
           </div>
-          <button onClick={() => { setShowForm(p => !p); setFormError(''); }}
-            className="flex items-center gap-3 bg-[#1A1A1A] text-white px-7 py-4 rounded-2xl font-black text-sm uppercase tracking-wider hover:bg-[#C62828] transition-all active:scale-95 shadow-lg shrink-0">
-            <FiPlus className={`w-5 h-5 transition-transform ${showForm ? 'rotate-45' : ''}`} /> New Exam
-          </button>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => setAdminTab('bank')}
+              className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-colors ${adminTab === 'bank' ? 'bg-[#1A1A1A] text-white' : 'bg-white border border-[#1A1A1A]/10 text-[#1A1A1A]/50'}`}
+            >
+              Exam bank
+            </button>
+            <button
+              type="button"
+              onClick={() => setAdminTab('submissions')}
+              className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-colors ${adminTab === 'submissions' ? 'bg-[#1A1A1A] text-white' : 'bg-white border border-[#1A1A1A]/10 text-[#1A1A1A]/50'}`}
+            >
+              Submissions
+            </button>
+          </div>
         </motion.header>
 
+        {adminTab === 'bank' && (
+        <>
         <AnimatePresence>
-          {success && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="mb-6 flex items-center gap-3 bg-green-50 border border-green-200 rounded-2xl p-4 relative z-10"><FiCheckCircle className="w-4 h-4 text-green-600 shrink-0" /><p className="text-xs font-bold text-green-700">{success}</p></motion.div>}
-          {error && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="mb-6 flex items-center gap-3 bg-red-50 border border-red-200 rounded-2xl p-4 relative z-10"><FiAlertCircle className="w-4 h-4 text-[#C62828] shrink-0" /><p className="text-xs font-bold text-[#C62828]">{error}</p></motion.div>}
+          {success && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="mb-6 flex items-center gap-3 bg-green-50 border border-green-200 rounded-2xl p-4 relative z-10"><CheckCircle className="w-4 h-4 text-green-600 shrink-0" /><p className="text-xs font-bold text-green-700">{success}</p></motion.div>}
+          {error && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="mb-6 flex items-center gap-3 bg-red-50 border border-red-200 rounded-2xl p-4 relative z-10"><AlertCircle className="w-4 h-4 text-[#C62828] shrink-0" /><p className="text-xs font-bold text-[#C62828]">{error}</p></motion.div>}
         </AnimatePresence>
 
         {/* Create Form */}
@@ -212,8 +407,8 @@ export default function AdminExams() {
             <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
               className="bg-white rounded-[2.5rem] p-8 lg:p-10 border border-[#1A1A1A]/5 shadow-sm mb-8 relative z-10">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="font-black text-[#1A1A1A] tracking-tighter uppercase text-lg flex items-center gap-3"><FiAward className="w-5 h-5 text-[#C62828]" /> New Exam</h3>
-                <button onClick={() => setShowForm(false)} className="p-2 rounded-xl bg-[#F5F5F0] text-[#1A1A1A]/40 hover:text-[#C62828]"><FiX className="w-4 h-4" /></button>
+                <h3 className="font-black text-[#1A1A1A] tracking-tighter uppercase text-lg flex items-center gap-3"><Award className="w-5 h-5 text-[#C62828]" /> New Exam</h3>
+                <button onClick={() => setShowForm(false)} className="p-2 rounded-xl bg-[#F5F5F0] text-[#1A1A1A]/40 hover:text-[#C62828]"><X className="w-4 h-4" /></button>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-6">
                 <div className="space-y-2">
@@ -234,12 +429,12 @@ export default function AdminExams() {
                     className="w-full px-5 py-3.5 bg-[#F5F5F0] rounded-2xl font-black text-sm text-[#1A1A1A] outline-none focus:ring-4 focus:ring-[#C62828]/10 transition-all" />
                 </div>
               </div>
-              {formError && <div className="flex items-center gap-3 bg-red-50 border border-red-200 rounded-2xl p-4 mb-6"><FiAlertCircle className="w-4 h-4 text-[#C62828] shrink-0" /><p className="text-xs font-bold text-[#C62828]">{formError}</p></div>}
+              {formError && <div className="flex items-center gap-3 bg-red-50 border border-red-200 rounded-2xl p-4 mb-6"><AlertCircle className="w-4 h-4 text-[#C62828] shrink-0" /><p className="text-xs font-bold text-[#C62828]">{formError}</p></div>}
               <div className="flex gap-3 justify-end">
                 <button onClick={() => setShowForm(false)} className="px-6 py-3 bg-[#F5F5F0] rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-[#1A1A1A] hover:text-white transition-all active:scale-95">Cancel</button>
                 <button onClick={handleCreate} disabled={creating}
                   className="flex items-center gap-2 px-8 py-3 bg-[#C62828] text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:shadow-xl transition-all active:scale-95 disabled:opacity-60">
-                  {creating ? <FiLoader className="w-4 h-4 animate-spin" /> : <FiPlus className="w-4 h-4" />} {creating ? 'Creating…' : 'Create'}
+                  {creating ? <Loader className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />} {creating ? 'Creating…' : 'Create'}
                 </button>
               </div>
             </motion.div>
@@ -250,7 +445,7 @@ export default function AdminExams() {
         {loading
           ? <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10">{[1,2,3].map(i => <div key={i} className="h-48 bg-white rounded-[2rem] animate-pulse" />)}</div>
           : exams.length === 0
-            ? <div className="flex flex-col items-center py-32 relative z-10"><FiAward className="w-16 h-16 text-[#1A1A1A]/10 mb-6" /><p className="font-black text-[#1A1A1A]/30 uppercase text-xl">No exams yet.</p></div>
+            ? <div className="flex flex-col items-center py-32 relative z-10"><Award className="w-16 h-16 text-[#1A1A1A]/10 mb-6" /><p className="font-black text-[#1A1A1A]/30 uppercase text-xl">No exams yet.</p></div>
             : <motion.div variants={cv} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10">
                 {exams.map(e => (
                   <motion.div key={e.id} variants={ci} whileHover={{ y: -4 }}
@@ -258,7 +453,7 @@ export default function AdminExams() {
                     <div className="absolute top-0 right-0 w-20 h-20 bg-[#C62828]/[0.03] rounded-full -translate-y-1/2 translate-x-1/2 group-hover:bg-[#C62828]/10 transition-all" />
                     <div className="flex items-start justify-between mb-5">
                       <div className="w-12 h-12 rounded-2xl bg-[#C62828]/10 flex items-center justify-center group-hover:bg-[#C62828] transition-all shrink-0">
-                        <FiAward className="w-6 h-6 text-[#C62828] group-hover:text-white transition-colors" />
+                        <Award className="w-6 h-6 text-[#C62828] group-hover:text-white transition-colors" />
                       </div>
                       <div className="flex items-center gap-2">
                         <button
@@ -266,42 +461,106 @@ export default function AdminExams() {
                           className="w-8 h-8 rounded-lg bg-[#F5F5F0] flex items-center justify-center text-[#1A1A1A]/30 hover:bg-[#1A1A1A] hover:text-white transition-all active:scale-95 shrink-0"
                           title="Manage questions"
                         >
-                          <FiList className="w-3.5 h-3.5" />
+                          <List className="w-3.5 h-3.5" />
                         </button>
                         <button onClick={() => handleDelete(e.id)} disabled={deleting === e.id}
                           className="w-8 h-8 rounded-lg bg-[#F5F5F0] flex items-center justify-center text-[#1A1A1A]/20 hover:bg-red-50 hover:text-[#C62828] transition-all active:scale-95 disabled:opacity-60 shrink-0">
-                          {deleting === e.id ? <FiLoader className="w-3.5 h-3.5 animate-spin" /> : <FiTrash2 className="w-3.5 h-3.5" />}
+                          {deleting === e.id ? <Loader className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
                         </button>
                         <button
                           onClick={() => openEditExam(e)}
                           className="w-8 h-8 rounded-lg bg-[#F5F5F0] flex items-center justify-center text-[#1A1A1A]/30 hover:bg-[#1A1A1A] hover:text-white transition-all active:scale-95 shrink-0"
                           title="Edit exam"
                         >
-                          <FiEdit2 className="w-3.5 h-3.5" />
+                          <Edit2 className="w-3.5 h-3.5" />
                         </button>
                       </div>
                     </div>
                     <span className="text-[8px] font-black uppercase tracking-[0.4em] text-[#D4A373] italic">Level {e.levels?.name ?? '—'}</span>
                     <h3 className="text-lg font-black text-[#1A1A1A] tracking-tighter uppercase leading-tight mt-1 mb-4 line-clamp-2 group-hover:text-[#C62828] transition-colors">{e.title}</h3>
                     <div className="flex items-center gap-2 text-[9px] font-black text-[#1A1A1A]/30 uppercase tracking-widest">
-                      <FiClock className="w-3.5 h-3.5" />
+                      <Clock className="w-3.5 h-3.5" />
                       <span>{e.duration} Minutes</span>
                     </div>
                     <button
                       onClick={() => openQuestions(e)}
                       className="mt-4 w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#1A1A1A] text-white font-black text-[10px] uppercase tracking-widest hover:bg-[#C62828] transition-all"
                     >
-                      <FiList className="w-3.5 h-3.5" />
+                      <List className="w-3.5 h-3.5" />
                       Manage Questions
                     </button>
                   </motion.div>
                 ))}
               </motion.div>
         }
+        </>
+        )}
+
+        {adminTab === 'submissions' && (
+          <section className="relative z-10 bg-white rounded-3xl border border-[#1A1A1A]/10 shadow-sm overflow-hidden mb-8">
+            <div className="px-6 py-4 border-b border-[#1A1A1A]/10 flex items-center gap-3">
+              <Clipboard className="w-5 h-5 text-[#C62828]" />
+              <div>
+                <h3 className="font-black uppercase text-[#1A1A1A] tracking-tight">Exam submissions</h3>
+                <p className="text-[9px] font-black uppercase tracking-widest text-[#1A1A1A]/35">Review writing tasks and release nal scores</p>
+              </div>
+            </div>
+            {subLoading ? (
+              <div className="p-12 flex justify-center">
+                <Loader className="w-8 h-8 animate-spin text-[#C62828]" />
+              </div>
+            ) : submissions.length === 0 ? (
+              <div className="p-12 text-center font-black text-[#1A1A1A]/30 uppercase text-sm">No submissions yet.</div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-sm">
+                  <thead>
+                    <tr className="border-b border-[#1A1A1A]/10 bg-[#F5F5F0]/80">
+                      <th className="px-6 py-3 text-[9px] font-black uppercase tracking-widest text-[#1A1A1A]/40">Student</th>
+                      <th className="px-6 py-3 text-[9px] font-black uppercase tracking-widest text-[#1A1A1A]/40">Exam</th>
+                      <th className="px-6 py-3 text-[9px] font-black uppercase tracking-widest text-[#1A1A1A]/40">Date</th>
+                      <th className="px-6 py-3 text-[9px] font-black uppercase tracking-widest text-[#1A1A1A]/40">Status</th>
+                      <th className="px-6 py-3 text-[9px] font-black uppercase tracking-widest text-[#1A1A1A]/40 text-right">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#1A1A1A]/10">
+                    {submissions.map((r) => (
+                      <tr key={r.id} className="hover:bg-[#F5F5F0]/50">
+                        <td className="px-6 py-4 font-bold text-[#1A1A1A]">{r.profiles?.name ?? '—'}</td>
+                        <td className="px-6 py-4 text-[#1A1A1A]/70">{r.exams?.title ?? 'Exam'}</td>
+                        <td className="px-6 py-4 text-[#1A1A1A]/50 text-xs">
+                          {new Date(r.taken_at).toLocaleString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                        </td>
+                        <td className="px-6 py-4">
+                          <span
+                            className={`text-[9px] font-black uppercase px-2 py-1 rounded-full ${
+                              r.review_status === 'completed' ? 'bg-green-50 text-green-700' : 'bg-amber-50 text-amber-900'
+                            }`}
+                          >
+                            {r.review_status === 'completed' ? 'Completed' : 'Pending review'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <button
+                            type="button"
+                            onClick={() => navigate(`/admin/exams/${r.exam_id}/review/${r.student_id}`)}
+                            className="text-[10px] font-black uppercase tracking-widest text-[#C62828] hover:underline"
+                          >
+                            Review
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </section>
+        )}
 
         <AnimatePresence>
           {activeExam && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[110]">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="xed inset-0 z-[110]">
               <button className="absolute inset-0 bg-black/55" onClick={() => setActiveExam(null)} />
               <motion.div
                 initial={{ y: 30, opacity: 0 }}
@@ -315,31 +574,163 @@ export default function AdminExams() {
                     <h3 className="text-lg md:text-xl font-black tracking-tight text-[#1A1A1A] uppercase mt-1">{activeExam.title}</h3>
                   </div>
                   <button onClick={() => setActiveExam(null)} className="w-9 h-9 rounded-xl bg-[#F5F5F0] text-[#1A1A1A]/50 hover:text-[#C62828]">
-                    <FiX className="w-5 h-5 mx-auto" />
+                    <X className="w-5 h-5 mx-auto" />
                   </button>
                 </div>
 
                 <div className="flex-1 overflow-y-auto p-6 md:p-8 grid grid-cols-1 xl:grid-cols-2 gap-8 bg-[#F5F5F0]">
                   <div className="bg-white rounded-2xl p-6 border border-[#1A1A1A]/10">
-                    <h4 className="font-black text-[#1A1A1A] uppercase tracking-tight mb-4">Add MCQ question</h4>
+                    <h4 className="font-black text-[#1A1A1A] uppercase tracking-tight mb-4">Add Question</h4>
                     <div className="space-y-3">
-                      <input value={qText} onChange={e => setQText(e.target.value)} placeholder="Question text"
-                        className="w-full px-4 py-3 rounded-xl bg-[#F5F5F0] border border-[#1A1A1A]/10 text-sm font-black outline-none" />
-                      {['A', 'B', 'C', 'D'].map((label, idx) => (
-                        <input
-                          key={label}
-                          value={qOptions[idx]}
-                          onChange={e => setQOptions(prev => prev.map((v, i) => (i === idx ? e.target.value : v)))}
-                          placeholder={`Option ${label}`}
-                          className="w-full px-4 py-3 rounded-xl bg-[#F5F5F0] border border-[#1A1A1A]/10 text-sm font-black outline-none"
-                        />
-                      ))}
-                      <select value={qCorrect} onChange={e => setQCorrect(e.target.value)}
-                        className="w-full px-4 py-3 rounded-xl bg-[#F5F5F0] border border-[#1A1A1A]/10 text-sm font-black outline-none">
-                        {['A', 'B', 'C', 'D'].map(c => <option key={c} value={c}>Correct: {c}</option>)}
+                      <select
+                        value={qType}
+                        onChange={(e) => setQType(e.target.value as typeof qType)}
+                        className="w-full px-4 py-3 rounded-xl bg-[#F5F5F0] border border-[#1A1A1A]/10 text-sm font-black outline-none"
+                      >
+                        <option value="paragraph">Paragraph (MCQ / True-False)</option>
+                        <option value="grammar">Grammar (Drag & Drop)</option>
+                        <option value="writing">Writing (Manual Review)</option>
+                        <option value="listening">Listening (Audio MCQ)</option>
                       </select>
-                      <button onClick={handleCreateQuestion} disabled={qSaving}
-                        className="w-full py-3 rounded-xl bg-[#C62828] text-white text-xs font-black uppercase tracking-widest hover:shadow-xl disabled:opacity-60">
+
+                      <input
+                        value={qText}
+                        onChange={(e) => setQText(e.target.value)}
+                        placeholder="Question prompt"
+                        className="w-full px-4 py-3 rounded-xl bg-[#F5F5F0] border border-[#1A1A1A]/10 text-sm font-black outline-none"
+                      />
+
+                      {qType === 'paragraph' && (
+                        <>
+                          <select
+                            value={pSubtype}
+                            onChange={(e) => setPSubtype(e.target.value as typeof pSubtype)}
+                            className="w-full px-4 py-3 rounded-xl bg-[#F5F5F0] border border-[#1A1A1A]/10 text-sm font-black outline-none"
+                          >
+                            <option value="mcq">Reading + MCQ</option>
+                            <option value="true_false">Reading + True/False</option>
+                          </select>
+
+                          <textarea
+                            value={pParagraph}
+                            onChange={(e) => setPParagraph(e.target.value)}
+                            rows={4}
+                            placeholder="Paragraph text (reading material)"
+                            className="w-full px-4 py-3 rounded-xl bg-[#F5F5F0] border border-[#1A1A1A]/10 text-sm font-black outline-none resize-none"
+                          />
+
+                          {pSubtype === 'mcq' ? (
+                            <>
+                              {['A', 'B', 'C', 'D'].map((label, idx) => (
+                                <input
+                                  key={label}
+                                  value={qOptions[idx]}
+                                  onChange={(e) => setQOptions((prev) => prev.map((v, i) => (i === idx ? e.target.value : v)))}
+                                  placeholder={`Option ${label}`}
+                                  className="w-full px-4 py-3 rounded-xl bg-[#F5F5F0] border border-[#1A1A1A]/10 text-sm font-black outline-none"
+                                />
+                              ))}
+                              <select
+                                value={qCorrect}
+                                onChange={(e) => setQCorrect(e.target.value)}
+                                className="w-full px-4 py-3 rounded-xl bg-[#F5F5F0] border border-[#1A1A1A]/10 text-sm font-black outline-none"
+                              >
+                                {['A', 'B', 'C', 'D'].map((c) => (
+                                  <option key={c} value={c}>
+                                    Correct: {c}
+                                  </option>
+                                ))}
+                              </select>
+                            </>
+                          ) : (
+                            <select
+                              value={tfCorrect}
+                              onChange={(e) => setTfCorrect(e.target.value as typeof tfCorrect)}
+                              className="w-full px-4 py-3 rounded-xl bg-[#F5F5F0] border border-[#1A1A1A]/10 text-sm font-black outline-none"
+                            >
+                              <option value="True">Correct: True</option>
+                              <option value="False">Correct: False</option>
+                            </select>
+                          )}
+                        </>
+                      )}
+
+                      {qType === 'grammar' && (
+                        <>
+                          <input
+                            value={gSentence}
+                            onChange={(e) => setGSentence(e.target.value)}
+                            placeholder="Sentence with ___ blank"
+                            className="w-full px-4 py-3 rounded-xl bg-[#F5F5F0] border border-[#1A1A1A]/10 text-sm font-black outline-none"
+                          />
+                          <textarea
+                            value={gWordsRaw}
+                            onChange={(e) => setGWordsRaw(e.target.value)}
+                            rows={3}
+                            placeholder="Candidate words (comma or newline separated)"
+                            className="w-full px-4 py-3 rounded-xl bg-[#F5F5F0] border border-[#1A1A1A]/10 text-sm font-black outline-none resize-none"
+                          />
+                          <input
+                            value={gCorrectWord}
+                            onChange={(e) => setGCorrectWord(e.target.value)}
+                            placeholder="Correct word"
+                            className="w-full px-4 py-3 rounded-xl bg-[#F5F5F0] border border-[#1A1A1A]/10 text-sm font-black outline-none"
+                          />
+                        </>
+                      )}
+
+                      {qType === 'writing' && (
+                        <>
+                          <textarea
+                            value={wWordsRaw}
+                            onChange={(e) => setWWordsRaw(e.target.value)}
+                            rows={3}
+                            placeholder="Allowed words/topic (comma or newline separated)"
+                            className="w-full px-4 py-3 rounded-xl bg-[#F5F5F0] border border-[#1A1A1A]/10 text-sm font-black outline-none resize-none"
+                          />
+                        </>
+                      )}
+
+                      {qType === 'listening' && (
+                        <>
+                          <input
+                            type="file"
+                            accept=".mp3,.wav,.m4a,audio/*"
+                            onChange={(e) => {
+                              const f = e.target.les?.[0] ?? null;
+                              setQuestionAudiole(f);
+                              setListeningAudioUrl(null);
+                            }}
+                            className="w-full px-4 py-3 rounded-xl bg-[#F5F5F0] border border-[#1A1A1A]/10 text-xs font-black outline-none"
+                          />
+                          {['A', 'B', 'C', 'D'].map((label, idx) => (
+                            <input
+                              key={label}
+                              value={qOptions[idx]}
+                              onChange={(e) => setQOptions((prev) => prev.map((v, i) => (i === idx ? e.target.value : v)))}
+                              placeholder={`Listening option ${label}`}
+                              className="w-full px-4 py-3 rounded-xl bg-[#F5F5F0] border border-[#1A1A1A]/10 text-sm font-black outline-none"
+                            />
+                          ))}
+                          <select
+                            value={qCorrect}
+                            onChange={(e) => setQCorrect(e.target.value)}
+                            className="w-full px-4 py-3 rounded-xl bg-[#F5F5F0] border border-[#1A1A1A]/10 text-sm font-black outline-none"
+                          >
+                            {['A', 'B', 'C', 'D'].map((c) => (
+                              <option key={c} value={c}>
+                                Correct: {c}
+                              </option>
+                            ))}
+                          </select>
+                        </>
+                      )}
+
+                      <button
+                        onClick={handleCreateQuestion}
+                        disabled={qSaving}
+                        className="w-full py-3 rounded-xl bg-[#C62828] text-white text-xs font-black uppercase tracking-widest hover:shadow-xl disabled:opacity-60"
+                      >
                         {qSaving ? 'Saving…' : 'Add Question'}
                       </button>
                     </div>
@@ -359,7 +750,7 @@ export default function AdminExams() {
                     />
                     <button onClick={handleBulkUpload} disabled={bulkSaving}
                       className="mt-3 w-full py-3 rounded-xl bg-[#1A1A1A] text-white text-xs font-black uppercase tracking-widest hover:bg-[#C62828] disabled:opacity-60 flex items-center justify-center gap-2">
-                      <FiUpload className="w-4 h-4" />
+                      <Upload className="w-4 h-4" />
                       {bulkSaving ? 'Uploading…' : 'Upload Questions'}
                     </button>
                   </div>
@@ -380,12 +771,15 @@ export default function AdminExams() {
                             <div className="flex justify-between gap-4">
                               <p className="text-sm font-black text-[#1A1A1A]">{idx + 1}. {q.question_text}</p>
                               <button onClick={() => handleDeleteQuestion(q.id)} className="text-[#C62828]">
-                                <FiTrash2 className="w-4 h-4" />
+                                <Trash2 className="w-4 h-4" />
                               </button>
                             </div>
                             <p className="mt-2 text-[10px] font-black text-[#1A1A1A]/50 uppercase tracking-wider">
                               Correct: {q.correct_answer}
                             </p>
+                            {q.audio_url && (
+                              <audio src={q.audio_url} controls className="w-full mt-2" />
+                            )}
                           </div>
                         ))}
                       </div>
@@ -399,12 +793,12 @@ export default function AdminExams() {
 
         <AnimatePresence>
           {editingExam && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[111]">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="xed inset-0 z-[111]">
               <button className="absolute inset-0 bg-black/60" onClick={() => setEditingExam(null)} />
               <div className="absolute inset-4 md:inset-10 bg-white rounded-3xl border border-[#1A1A1A]/10 shadow-2xl p-6 md:p-8 overflow-y-auto">
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="font-black text-xl uppercase tracking-tight text-[#1A1A1A]">Edit Exam</h3>
-                  <button onClick={() => setEditingExam(null)} className="w-9 h-9 rounded-xl bg-[#F5F5F0] text-[#1A1A1A]/50"><FiX className="w-5 h-5 mx-auto" /></button>
+                  <button onClick={() => setEditingExam(null)} className="w-9 h-9 rounded-xl bg-[#F5F5F0] text-[#1A1A1A]/50"><X className="w-5 h-5 mx-auto" /></button>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-5">
                   <input value={editExamTitle} onChange={e => setEditExamTitle(e.target.value)} placeholder="Exam title"
@@ -421,7 +815,7 @@ export default function AdminExams() {
                   <button onClick={() => setEditingExam(null)} className="px-6 py-3 bg-[#F5F5F0] rounded-2xl font-black text-xs uppercase tracking-widest">Cancel</button>
                   <button onClick={handleUpdateExam} disabled={updatingExam}
                     className="inline-flex items-center gap-2 px-6 py-3 bg-[#C62828] text-white rounded-2xl font-black text-xs uppercase tracking-widest disabled:opacity-60">
-                    {updatingExam ? <FiLoader className="w-4 h-4 animate-spin" /> : <FiSave className="w-4 h-4" />} Save Changes
+                    {updatingExam ? <Loader className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Save Changes
                   </button>
                 </div>
               </div>

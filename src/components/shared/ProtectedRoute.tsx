@@ -8,7 +8,7 @@ interface ProtectedRouteProps {
 }
 
 /**
- * Wraps routes that require authentication (and optionally a specific role).
+ * Wraps routes that require authentication (and optionally a specic role).
  * - Shows a spinner while the session is being loaded.
  * - Redirects to /login if the user is not authenticated.
  * - Redirects to / if the user's role is not allowed.

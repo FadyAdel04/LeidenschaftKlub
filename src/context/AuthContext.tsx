@@ -19,12 +19,13 @@ export interface AppUser {
   role: UserRole;
 }
 
+
 interface AuthContextType {
   user: AppUser | null;
   session: Session | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string) => Promise<void>;
+  register: (name: string, email: string, password: string, phone: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -141,12 +142,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // ── Register ───────────────────────────────────────────────────────────────
 
-  const register = async (name: string, email: string, password: string) => {
+  const register = async (name: string, email: string, password: string, phone: string) => {
+    const phoneTrim = phone.trim();
+    const phoneNorm = phoneTrim.replace(/[\s\-().]/g, '');
+    if (!phoneNorm || phoneNorm.length < 8) {
+      throw new Error('Enter a valid phone number (at least 8 digits).');
+    }
+
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        data: { name, role: 'student' },
+        data: { name, role: 'student', phone: phoneTrim },
       },
     });
     if (error) throw new Error(error.message);
