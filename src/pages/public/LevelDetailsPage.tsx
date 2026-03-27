@@ -37,14 +37,6 @@ export default function LevelDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [signedInLevel, setSignedInLevel] = useState<string | null>(null);
-  const [enrollForm, setEnrollForm] = useState({
-    fullName: '',
-    email: '',
-    phone: '',
-    currentLevel: 'Completed A2',
-    message: '',
-  });
-
   const currentName = useMemo(() => normalizeLevelSlug(level ?? ''), [level]);
 
   useEffect(() => {
