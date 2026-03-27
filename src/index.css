@@ -1,0 +1,22 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --primary: #dc2626; /* Adjust red as per design */
+    --primary-dark: #b91c1c;
+  }
+
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  html, body {
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  @apply bg-slate-50 text-slate-900;
+}

@@ -1,0 +1,3 @@
+import type { ButtonHTMLAttributes } from 'react';
+import clsx from 'clsx';
+export function Button({ className, variant = 'primary', ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'primary' | 'secondary' | 'outline' }) { return <button className={clsx('px-4 py-2 rounded-md font-medium transition-colors', variant === 'primary' && 'bg-red-600 text-white hover:bg-red-700', variant === 'secondary' && 'bg-gray-200 text-gray-900 hover:bg-gray-300', className)} {...props} />; }
