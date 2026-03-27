@@ -4,11 +4,11 @@ import { Award, BarChart2, CheckCircle, ChevronDown, ChevronUp, Clock, XCircle, 
 import StudentSidebar from '../../components/shared/StudentSidebar';
 import { useAuth } from '../../context/AuthContext';
 import {
-  fetchprofile,
+  fetchProfile,
   fetchResultsByStudent,
   fetchStudentExamResultDetail,
   isManualExamQuestion,
-  type profile,
+  type Profile,
   type Result,
   type ExamResultQuestionRow,
 } from '../../services/studentService';
@@ -27,7 +27,7 @@ function fmtAnswer(a: unknown): string {
 export default function StudentResults() {
   const { user } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [profile, setprofile] = useState<profile | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [results, setResults] = useState<Result[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -48,9 +48,9 @@ export default function StudentResults() {
     let cancelled = false;
     async function load() {
       try {
-        const [p, r] = await Promise.all([fetchprofile(userId), fetchResultsByStudent(userId)]);
+        const [p, r] = await Promise.all([fetchProfile(userId), fetchResultsByStudent(userId)]);
         if (cancelled) return;
-        setprofile(p);
+        setProfile(p);
         setResults(r);
       } catch (e: unknown) {
         if (!cancelled) setError(e instanceof Error ? e.message : 'Failed to load results');
@@ -204,8 +204,8 @@ export default function StudentResults() {
                         <div>
                           <p className="font-black text-amber-950 text-sm">Your exam is under review</p>
                           <p className="text-xs text-amber-900/80 mt-1">
-                            Writing sections are graded by your instructor. Your nal score will appear here when the review is
-                            nished. Auto-graded sections may be shown below.
+                            Writing sections are graded by your instructor. Your Final score will appear here when the review is
+                            finished. Auto-graded sections may be shown below.
                           </p>
                         </div>
                       </div>

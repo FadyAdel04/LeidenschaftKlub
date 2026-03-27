@@ -54,7 +54,7 @@ export default function AdminExams() {
   const [bulkInput, setBulkInput] = useState('');
   const [bulkSaving, setBulkSaving] = useState(false);
   const [qError, setQError] = useState('');
-  const [questionAudiole, setQuestionAudiole] = useState<file | null>(null);
+  const [questionAudioFile, setQuestionAudioFile] = useState<File | null>(null);
   // For listening questions: upload once and reuse for multiple questions referencing the same audio.
   const [listeningAudioUrl, setListeningAudioUrl] = useState<string | null>(null);
   const [editingExam, setEditingExam] = useState<EW | null>(null);
@@ -94,7 +94,7 @@ export default function AdminExams() {
 
   const handleCreate = async () => {
     if (!title.trim()) { setFormError('Title required.'); return; }
-    if (!levelId) { setFormError('Choose a level rst.'); return; }
+    if (!levelId) { setFormError('Choose a level first.'); return; }
     if (!duration || Number(duration) < 1) { setFormError('Duration must be at least 1 min.'); return; }
     setCreating(true); setFormError('');
     try {
@@ -263,15 +263,15 @@ export default function AdminExams() {
       }
 
       if (qType === 'listening') {
-        if (!questionAudiole) throw new Error('Audio file is required for listening questions.');
-        if (questionAudiole.size > MAX_UPLOAD_BYTES) throw new Error('Audio exceeds 200MB.');
+        if (!questionAudioFile) throw new Error('Audio file is required for listening questions.');
+        if (questionAudioFile.size > MAX_UPLOAD_BYTES) throw new Error('Audio exceeds 200MB.');
 
         if (qOptions.some((o) => !o.trim())) throw new Error('All 4 listening options are required.');
         const options = qOptions.map((o) => o.trim());
         const correctOption = pickCorrectByLetter(options);
         if (!correctOption) throw new Error('Please select the correct option (A/B/C/D).');
 
-        const audioUrl = listeningAudioUrl ?? await uploadMaterialAsset(questionAudiole);
+        const audioUrl = listeningAudioUrl ?? await uploadMaterialAsset(questionAudioFile);
         if (!listeningAudioUrl) setListeningAudioUrl(audioUrl);
         await createExamQuestion({
           examId: activeExam.id,
@@ -296,7 +296,7 @@ export default function AdminExams() {
       setQOptions(['', '', '', '']);
       setQCorrect('A');
       if (qType !== 'listening') {
-        setQuestionAudiole(null);
+        setQuestionAudioFile(null);
         setListeningAudioUrl(null);
       }
       setPParagraph('');
@@ -502,7 +502,7 @@ export default function AdminExams() {
               <Clipboard className="w-5 h-5 text-[#C62828]" />
               <div>
                 <h3 className="font-black uppercase text-[#1A1A1A] tracking-tight">Exam submissions</h3>
-                <p className="text-[9px] font-black uppercase tracking-widest text-[#1A1A1A]/35">Review writing tasks and release nal scores</p>
+                <p className="text-[9px] font-black uppercase tracking-widest text-[#1A1A1A]/35">Review writing tasks and release Final scores</p>
               </div>
             </div>
             {subLoading ? (
@@ -697,8 +697,8 @@ export default function AdminExams() {
                             type="file"
                             accept=".mp3,.wav,.m4a,audio/*"
                             onChange={(e) => {
-                              const f = e.target.les?.[0] ?? null;
-                              setQuestionAudiole(f);
+                              const f = e.target.files?.[0] ?? null;
+                              setQuestionAudioFile(f);
                               setListeningAudioUrl(null);
                             }}
                             className="w-full px-4 py-3 rounded-xl bg-[#F5F5F0] border border-[#1A1A1A]/10 text-xs font-black outline-none"

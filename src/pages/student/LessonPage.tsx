@@ -9,7 +9,7 @@ import {
   ChevronLeft, 
   ChevronRight, 
   Play, 
-  FiLetterText,
+  FileText,
   Volume2,
   Activity,
   Award
@@ -38,7 +38,7 @@ export default function LessonPage() {
       className="min-h-screen bg-[#F5F5F0] pb-40"
     >
       {/* Dynamic Header Interaction */}
-      <header className="xed top-0 left-0 w-full h-24 bg-white/80 backdrop-blur-2xl border-b border-[#1A1A1A]/5 px-12 z-[100] flex items-center justify-between group">
+      <header className="fixed top-0 left-0 w-full h-24 bg-white/80 backdrop-blur-2xl border-b border-[#1A1A1A]/5 px-12 z-[100] flex items-center justify-between group">
         <div className="flex items-center gap-12">
           <button 
             onClick={() => navigate('/courses')}
@@ -145,7 +145,7 @@ export default function LessonPage() {
                    { title: 'Foundational Theory', time: '12:00', icon: BookOpen, status: 'complete' },
                    { title: 'Hypothetical States', time: '08:45', icon: Play, status: 'active' },
                    { title: 'Nuance & Politesse', time: '14:20', icon: Award, status: 'locked' },
-                   { title: 'Case Study: The Passive', time: '22:00', icon: FiLetterText, status: 'locked' }
+                   { title: 'Case Study: The Passive', time: '22:00', icon: FileText, status: 'locked' }
                  ].map((item, i) => (
                    <div key={i} className={`p-6 rounded-[2.5rem] flex items-center justify-between transition-all group/item shadow-sm cursor-pointer ${item.status === 'active' ? 'bg-[#1A1A1A] text-white shadow-2xl -translate-x-2' : 'bg-[#F5F5F0] text-[#1A1A1A]/20 hover:bg-white border border-[#1A1A1A]/5'}`}>
                       <div className="flex items-center gap-6">
@@ -179,7 +179,7 @@ export default function LessonPage() {
       </main>
 
       {/* Persistence Bar: Contextual Controls */}
-      <footer className="xed bottom-0 left-0 w-full h-32 bg-white/95 backdrop-blur-3xl border-t border-[#1A1A1A]/5 px-12 lg:px-24 flex items-center justify-between z-[100] shadow-2xl">
+      <footer className="fixed bottom-0 left-0 w-full h-32 bg-white/95 backdrop-blur-3xl border-t border-[#1A1A1A]/5 px-12 lg:px-24 flex items-center justify-between z-[100] shadow-2xl">
          <div className="flex items-center gap-12">
             <div className="flex flex-col gap-2">
                <span className="text-[10px] font-black uppercase tracking-[0.5em] text-[#D4A373] italic">Global Progress 02/04</span>
@@ -204,7 +204,7 @@ export default function LessonPage() {
                </button>
             </div>
             <button className="px-16 py-6 bg-[#1A1A1A] text-white rounded-2xl font-black text-xs uppercase tracking-[0.4em] shadow-2xl hover:bg-[#C62828] transition-all active:scale-[0.98] shadow-lg">
-               nalize Phase
+               Finalize Phase
             </button>
          </div>
       </footer>

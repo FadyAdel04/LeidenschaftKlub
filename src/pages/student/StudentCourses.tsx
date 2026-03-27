@@ -15,9 +15,9 @@ const ci = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } };
 export default function StudentCourses() {
   const { user } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [profile,   setprofile]   = useState<Profile | null>(null);
+  const [profile,   setProfile]   = useState<Profile | null>(null);
   const [materials, setMaterials] = useState<Material[]>([]);
-  const [ltered,  setltered]  = useState<Material[]>([]);
+  const [filtered,  setFiltered]  = useState<Material[]>([]);
   const [search,    setSearch]    = useState('');
   const [loading,   setLoading]   = useState(true);
   const [error,     setError]     = useState('');
@@ -36,11 +36,11 @@ export default function StudentCourses() {
       try {
         const prof = await fetchProfile(user!.id);
         if (cancelled) return;
-        setprofile(prof);
+        setProfile(prof);
         const mats = await fetchMyAssignedMaterials(user!.id);
         if (cancelled) return;
         setMaterials(mats);
-        setltered(mats);
+        setFiltered(mats);
       } catch (e: unknown) {
         if (!cancelled) setError(e instanceof Error ? e.message : 'Failed to load materials');
       } finally {
@@ -53,7 +53,7 @@ export default function StudentCourses() {
 
   useEffect(() => {
     const q = search.toLowerCase();
-    setltered(materials.filter(m => m.title.toLowerCase().includes(q)));
+    setFiltered(materials.filter(m => m.title.toLowerCase().includes(q)));
   }, [search, materials]);
 
   const getType = (url: string) => {
@@ -108,7 +108,7 @@ export default function StudentCourses() {
           {[
             { label: 'Total Materials', val: loading ? '—' : materials.length },
             { label: 'Level',           val: profile?.current_level ?? '—' },
-            { label: 'Shown',           val: loading ? '—' : ltered.length },
+            { label: 'Shown',           val: loading ? '—' : filtered.length },
           ].map((s, i) => (
             <div key={i} className="bg-white rounded-2xl p-5 border border-[#1A1A1A]/5 shadow-sm text-center">
               <p className="text-2xl font-black text-[#1A1A1A] tracking-tighter">{s.val}</p>
@@ -121,11 +121,11 @@ export default function StudentCourses() {
         <div className="relative z-10">
           {loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[1,2,3,4,5,6].map(i => (
+              {[1,2,3,4,5,6].map((i: number) => (
                 <div key={i} className="h-52 bg-white rounded-[2rem] border border-[#1A1A1A]/5 animate-pulse" />
               ))}
             </div>
-          ) : ltered.length === 0 ? (
+          ) : filtered.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-32 text-center">
               <div className="w-20 h-20 rounded-3xl bg-[#F5F5F0] flex items-center justify-center mb-6">
                 <BookOpen className="w-10 h-10 text-[#1A1A1A]/20" />
@@ -139,7 +139,7 @@ export default function StudentCourses() {
             </div>
           ) : (
             <motion.div variants={cv} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {ltered.map((m, i) => (
+              {filtered.map((m: Material, i: number) => (
                 <motion.div
                   key={m.id}
                   variants={ci}

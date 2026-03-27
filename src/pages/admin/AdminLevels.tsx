@@ -2,14 +2,14 @@ import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { Layers, Users, CheckCircle, Plus, Edit2, Trash2, X, Save, Loader, AlertCircle } from 'lucide-react';
 import AdminSidebar from '../../components/shared/AdminSidebar';
-import { fetchAllLevels, fetchAllStudents, createLevel, updateLevel, deleteLevel, type Level, type profile } from '../../services/adminService';
+import { fetchAllLevels, fetchAllStudents, createLevel, updateLevel, deleteLevel, type Level, type Profile } from '../../services/adminService';
 
 const cv = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.1 } } };
 const ci = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } };
 
 export default function AdminLevels() {
   const [levels, setLevels] = useState<Level[]>([]);
-  const [students, setStudents] = useState<profile[]>([]);
+  const [students, setStudents] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
   const [name, setName] = useState('');

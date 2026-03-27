@@ -93,7 +93,7 @@ export default function AboutPage() {
   useEffect(() => {
     if (!location.hash) return;
     const id = location.hash.replace('#', '');
-    // allow layout to paint rst
+    // allow layout to paint first
     const t = window.setTimeout(() => scrollToId(id), 0);
     return () => window.clearTimeout(t);
   }, [location.hash]);

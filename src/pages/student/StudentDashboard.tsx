@@ -7,7 +7,7 @@ import { useAuth } from '../../context/AuthContext';
 import StudentSidebar from '../../components/shared/StudentSidebar';
 import MaterialPreviewModal from '../../components/shared/MaterialPreviewModal';
 import {
-  fetchProfile, fetchLevelByName, fetchMaterialsByLevel,
+  fetchProfile, fetchLevelByName, fetchMyAssignedMaterials,
   fetchAssignmentsByLevel, fetchExamsByLevel, fetchResultsByStudent, fetchSubmissionsByStudent,
   type Profile, type Material, type Assignment, type Exam, type Result, type Submission,
 } from '../../services/studentService';
@@ -47,7 +47,7 @@ export default function StudentDashboard() {
         const level = await fetchLevelByName(prof.current_level);
         if (cancelled) return;
         const [mats, asgns, exs, ress, subs] = await Promise.all([
-          fetchMaterialsByLevel(level.id),
+          fetchMyAssignedMaterials(user!.id),
           fetchAssignmentsByLevel(level.id),
           fetchExamsByLevel(level.id),
           fetchResultsByStudent(user!.id),

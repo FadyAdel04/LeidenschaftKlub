@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { Users, Search, Edit2, Save, X, AlertCircle, CheckCircle, Loader } from 'lucide-react';
 import AdminSidebar from '../../components/shared/AdminSidebar';
-import { fetchAllStudents, fetchAllLevels, updateStudentLevel, type profile, type Level } from '../../services/adminService';
+import { fetchAllStudents, fetchAllLevels, updateStudentLevel, type Profile, type Level } from '../../services/adminService';
 
 const cv = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.06 } } };
 const ci = { hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } };
@@ -14,9 +14,9 @@ function formatDate(iso: string) {
 }
 
 export default function AdminStudents() {
-  const [students,  setStudents]  = useState<profile[]>([]);
+  const [students,  setStudents]  = useState<Profile[]>([]);
   const [levels,    setLevels]    = useState<Level[]>([]);
-  const [ltered,  setltered]  = useState<profile[]>([]);
+  const [ltered,  setltered]  = useState<Profile[]>([]);
   const [search,    setSearch]    = useState('');
   const [levellter, setLevellter] = useState('');
   const [loading,   setLoading]   = useState(true);
@@ -106,7 +106,7 @@ export default function AdminStudents() {
             />
           </div>
           <select
-            value={levellter} onChange={e => setLevelfilter(e.target.value)}
+            value={levellter} onChange={e => setLevellter(e.target.value)}
             className="px-5 py-3.5 bg-white border border-[#1A1A1A]/5 rounded-2xl font-black text-sm text-[#1A1A1A] outline-none focus:ring-4 focus:ring-[#C62828]/10 shadow-sm appearance-none cursor-pointer"
           >
             <option value="">All Levels</option>

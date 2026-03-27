@@ -30,7 +30,7 @@ export default function AdminMaterials() {
   const [showForm, setShowForm] = useState(false);
   const [title, setTitle] = useState('');
   const [levelId, setLevelId] = useState('');
-  const [file, setle] = useState<File | null>(null);
+  const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [formError, setFormError] = useState('');
   const [deleting, setDeleting] = useState<string | null>(null);
@@ -39,7 +39,7 @@ export default function AdminMaterials() {
   const [editing, setEditing] = useState<MW | null>(null);
   const [editTitle, setEditTitle] = useState('');
   const [editLevelId, setEditLevelId] = useState('');
-  const [editle, setEditle] = useState<File | null>(null);
+  const [editFile, setEditFile] = useState<File | null>(null);
   const [updating, setUpdating] = useState(false);
   const [uploadMetrics, setUploadMetrics] = useState<UploadMetrics | null>(null);
   
@@ -67,9 +67,9 @@ export default function AdminMaterials() {
 
   const handleUpload = async () => {
     if (!title.trim()) { setFormError('Title required.'); return; }
-    if (!levelId) { setFormError('Choose a level rst.'); return; }
+    if (!levelId) { setFormError('Choose a level first.'); return; }
     if (!file) { setFormError('Attach a file.'); return; }
-    if (file.size > MAX_UPLOAD_BYTES) { setFormError('file exceeds 200MB limit.'); return; }
+    if (file.size > MAX_UPLOAD_BYTES) { setFormError('File exceeds 200MB limit.'); return; }
     setUploading(true); setFormError('');
     try {
       await uploadMaterial({
@@ -78,7 +78,7 @@ export default function AdminMaterials() {
         file,
         onProgress: setUploadMetrics,
       });
-      setSuccess('Material uploaded!'); setTitle(''); setle(null); setShowForm(false);
+      setSuccess('Material uploaded!'); setTitle(''); setFile(null); setShowForm(false);
       await load(); setTimeout(() => setSuccess(''), 4000);
     } catch (e: unknown) { setFormError(e instanceof Error ? e.message : 'Upload failed'); }
     finally { setUploading(false); setUploadMetrics(null); }
@@ -95,7 +95,7 @@ export default function AdminMaterials() {
     setEditing(material);
     setEditTitle(material.title);
     setEditLevelId(material.level_id);
-    setEditle(null);
+    setEditFile(null);
     setFormError('');
   };
 
@@ -103,7 +103,7 @@ export default function AdminMaterials() {
     if (!editing) return;
     if (!editTitle.trim()) { setFormError('Title required.'); return; }
     if (!editLevelId) { setFormError('Choose a level.'); return; }
-    if (editle && editle.size > MAX_UPLOAD_BYTES) { setFormError('Replacement file exceeds 200MB limit.'); return; }
+    if (editFile && editFile.size > MAX_UPLOAD_BYTES) { setFormError('Replacement file exceeds 200MB limit.'); return; }
     setUpdating(true);
     setFormError('');
     try {
@@ -111,7 +111,7 @@ export default function AdminMaterials() {
         id: editing.id,
         title: editTitle.trim(),
         levelId: editLevelId,
-        file: editle,
+        file: editFile,
         onProgress: setUploadMetrics,
       });
       setSuccess('Material updated!');
@@ -223,12 +223,12 @@ export default function AdminMaterials() {
                   </select>
                 </div>
               </div>
-              <input type="file" ref={leRef} className="hidden" accept=".pdf,.doc,.docx,.ppt,.pptx,.txt,.mp4,.mp3" onChange={e => setle(e.target.files?.[0] ?? null)} />
+              <input type="file" ref={leRef} className="hidden" accept=".pdf,.doc,.docx,.ppt,.pptx,.txt,.mp4,.mp3" onChange={e => setFile(e.target.files?.[0] ?? null)} />
               <div onClick={() => leRef.current?.click()}
                 className={`border-4 border-dashed rounded-[2rem] p-8 flex flex-col items-center cursor-pointer transition-all group mb-6 ${file ? 'border-[#C62828]/40 bg-[#C62828]/5' : 'border-[#1A1A1A]/10 hover:border-[#C62828]/30'}`}>
                 {file
                   ? <div className="flex items-center gap-3"><Book className="w-5 h-5 text-[#C62828]" /><p className="font-black text-[#C62828] text-sm">{file.name}</p>
-                      <button onClick={e => { e.stopPropagation(); setle(null); }} className="w-6 h-6 rounded-full bg-[#C62828]/10 flex items-center justify-center hover:bg-[#C62828] hover:text-white"><X className="w-3 h-3" /></button></div>
+                      <button onClick={e => { e.stopPropagation(); setFile(null); }} className="w-6 h-6 rounded-full bg-[#C62828]/10 flex items-center justify-center hover:bg-[#C62828] hover:text-white"><X className="w-3 h-3" /></button></div>
                   : <><UploadCloud className="w-10 h-10 text-[#1A1A1A]/10 group-hover:text-[#C62828] mb-3 group-hover:-translate-y-2 transition-all" />
                       <p className="font-black text-[#1A1A1A] uppercase tracking-tighter">Drop or <span className="text-[#C62828]">browse</span></p>
                       <p className="text-[9px] text-[#1A1A1A]/20 mt-2 uppercase tracking-[0.4em] font-black">PDF/Video/Audio up to 200MB</p></>
@@ -328,11 +328,11 @@ export default function AdminMaterials() {
                     </select>
                   </div>
                 </div>
-                <input ref={editleRef} type="file" className="hidden" onChange={e => setEditle(e.target.files?.[0] ?? null)} />
+                <input ref={editleRef} type="file" className="hidden" onChange={e => setEditFile(e.target.files?.[0] ?? null)} />
                 <div onClick={() => editleRef.current?.click()}
-                  className={`border-4 border-dashed rounded-[2rem] p-8 flex flex-col items-center cursor-pointer transition-all group mb-8 ${editle ? 'border-[#C62828]/40 bg-[#C62828]/5' : 'border-[#1A1A1A]/10 hover:border-[#C62828]/30'}`}>
-                  {editle 
-                    ? <div className="flex items-center gap-3"><Book className="w-5 h-5 text-[#C62828]" /><p className="font-black text-[#C62828] text-sm">{editle.name}</p></div>
+                  className={`border-4 border-dashed rounded-[2rem] p-8 flex flex-col items-center cursor-pointer transition-all group mb-8 ${editFile ? 'border-[#C62828]/40 bg-[#C62828]/5' : 'border-[#1A1A1A]/10 hover:border-[#C62828]/30'}`}>
+                  {editFile 
+                    ? <div className="flex items-center gap-3"><Book className="w-5 h-5 text-[#C62828]" /><p className="font-black text-[#C62828] text-sm">{editFile.name}</p></div>
                     : <><UploadCloud className="w-8 h-8 text-[#1A1A1A]/10 group-hover:text-[#C62828] mb-2 transition-all" /><p className="font-black text-[10px] text-[#1A1A1A]/30 uppercase tracking-widest">Replace file (optional)</p></>
                   }
                 </div>

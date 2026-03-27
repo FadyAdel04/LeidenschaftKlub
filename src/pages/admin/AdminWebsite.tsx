@@ -35,7 +35,7 @@ export default function AdminWebsite() {
   const [sDesc, setSDesc] = useState('');
   const [sCategory, setSCategory] = useState('');
   const [sOrder, setSOrder] = useState('0');
-  const [sImage, setSImage] = useState<file | null>(null);
+  const [sImage, setSImage] = useState<File | null>(null);
   const [savingSpace, setSavingSpace] = useState(false);
 
   // Create event form
@@ -46,7 +46,7 @@ export default function AdminWebsite() {
   const [eStartsAt, setEStartsAt] = useState('');
   const [eCapacity, setECapacity] = useState('25');
   const [ePrice, setEPrice] = useState('Free');
-  const [eImage, setEImage] = useState<file | null>(null);
+  const [eImage, setEImage] = useState<File | null>(null);
   const [savingEvent, setSavingEvent] = useState(false);
 
   // Editing modals
@@ -55,7 +55,7 @@ export default function AdminWebsite() {
   const [esDesc, setEsDesc] = useState('');
   const [esCategory, setEsCategory] = useState('');
   const [esOrder, setEsOrder] = useState('0');
-  const [esImage, setEsImage] = useState<file | null>(null);
+  const [esImage, setEsImage] = useState<File | null>(null);
   const [savingEditSpace, setSavingEditSpace] = useState(false);
 
   const [editEvent, setEditEvent] = useState<WebsiteEvent | null>(null);
@@ -67,7 +67,7 @@ export default function AdminWebsite() {
   const [eeCapacity, setEeCapacity] = useState('25');
   const [eePrice, setEePrice] = useState('Free');
   const [eeActive, setEeActive] = useState(true);
-  const [eeImage, setEeImage] = useState<file | null>(null);
+  const [eeImage, setEeImage] = useState<File | null>(null);
   const [savingEditEvent, setSavingEditEvent] = useState(false);
 
   const refresh = async () => {
@@ -298,7 +298,7 @@ export default function AdminWebsite() {
                 </div>
                 <div className="space-y-1">
                   <p className="text-[10px] font-black uppercase tracking-widest text-[#1A1A1A]/40">Image</p>
-                  <input type="file" accept="image/*" onChange={e => setSImage(e.target.les?.[0] ?? null)} className="w-full" />
+                  <input type="file" accept="image/*" onChange={e => setSImage(e.target.files?.[0] ?? null)} className="w-full" />
                 </div>
                 <button disabled={savingSpace} onClick={handleCreateSpace} className="w-full mt-2 bg-[#C62828] text-white py-3 rounded-2xl font-black uppercase tracking-widest text-xs disabled:opacity-60">
                   {savingSpace ? 'Saving…' : 'Add space'}
@@ -325,7 +325,7 @@ export default function AdminWebsite() {
                           Edit
                         </button>
                         <button
-                          onClick={async () => { if (!window.conrm('Delete this space?')) return; await adminDeleteSpace(s.id); await refresh(); }}
+                          onClick={async () => { if (!window.confirm('Delete this space?')) return; await adminDeleteSpace(s.id); await refresh(); }}
                           className="px-4 py-2 rounded-2xl bg-[#F5F5F0] text-[#C62828] font-black text-[10px] uppercase tracking-widest"
                         >
                           Delete
@@ -377,7 +377,7 @@ export default function AdminWebsite() {
                 </div>
                 <div className="space-y-1">
                   <p className="text-[10px] font-black uppercase tracking-widest text-[#1A1A1A]/40">Image</p>
-                  <input type="file" accept="image/*" onChange={e => setEImage(e.target.les?.[0] ?? null)} className="w-full" />
+                  <input type="file" accept="image/*" onChange={e => setEImage(e.target.files?.[0] ?? null)} className="w-full" />
                 </div>
                 <button disabled={savingEvent} onClick={handleCreateEvent} className="w-full mt-2 bg-[#C62828] text-white py-3 rounded-2xl font-black uppercase tracking-widest text-xs disabled:opacity-60">
                   {savingEvent ? 'Saving…' : 'Add event'}
@@ -425,7 +425,7 @@ export default function AdminWebsite() {
                         {selectedEventId === ev.id ? 'Hide bookings' : 'View bookings'}
                       </button>
                       <button
-                        onClick={async () => { if (!window.conrm('Delete this event?')) return; await adminDeleteEvent(ev.id); setSelectedEventId(null); await refresh(); }}
+                        onClick={async () => { if (!window.confirm('Delete this event?')) return; await adminDeleteEvent(ev.id); setSelectedEventId(null); await refresh(); }}
                         className="px-4 py-2 rounded-2xl bg-[#F5F5F0] text-[#C62828] font-black text-[10px] uppercase tracking-widest"
                       >
                         Delete
@@ -465,7 +465,7 @@ export default function AdminWebsite() {
       </main>
 
       {editSpace && (
-        <div className="xed inset-0 z-120 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
           <button className="absolute inset-0 bg-black/60" onClick={() => setEditSpace(null)} />
           <div className="relative w-full max-w-2xl bg-white rounded-3xl p-6 sm:p-8 border border-[#1A1A1A]/10 shadow-2xl">
             <div className="flex items-start justify-between gap-4 mb-4">
@@ -491,7 +491,7 @@ export default function AdminWebsite() {
               </div>
               <div className="space-y-1">
                 <p className="text-[10px] font-black uppercase tracking-widest text-[#1A1A1A]/40">Replace image (optional)</p>
-                <input type="file" accept="image/*" onChange={e => setEsImage(e.target.les?.[0] ?? null)} className="w-full" />
+                <input type="file" accept="image/*" onChange={e => setEsImage(e.target.files?.[0] ?? null)} className="w-full" />
               </div>
             </div>
             <div className="mt-3 space-y-1">
@@ -510,7 +510,7 @@ export default function AdminWebsite() {
       )}
 
       {editEvent && (
-        <div className="xed inset-0 z-120 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
           <button className="absolute inset-0 bg-black/60" onClick={() => setEditEvent(null)} />
           <div className="relative w-full max-w-2xl bg-white rounded-3xl p-6 sm:p-8 border border-[#1A1A1A]/10 shadow-2xl">
             <div className="flex items-start justify-between gap-4 mb-4">
@@ -560,7 +560,7 @@ export default function AdminWebsite() {
               </div>
               <div className="space-y-1">
                 <p className="text-[10px] font-black uppercase tracking-widest text-[#1A1A1A]/40">Replace image (optional)</p>
-                <input type="file" accept="image/*" onChange={e => setEeImage(e.target.les?.[0] ?? null)} className="w-full" />
+                <input type="file" accept="image/*" onChange={e => setEeImage(e.target.files?.[0] ?? null)} className="w-full" />
               </div>
             </div>
 

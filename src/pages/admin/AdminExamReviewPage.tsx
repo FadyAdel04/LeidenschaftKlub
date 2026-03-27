@@ -53,7 +53,7 @@ export default function AdminExamReviewPage() {
       setBundle(b);
       const next: Record<string, { score: string; feedback: string }> = {};
       for (const a of b.answers) {
-        const q = b.questions.nd((x) => x.id === a.question_id);
+        const q = b.questions.find((x: ExamQuestion) => x.id === a.question_id);
         if (q && isManualExamQuestion(q)) {
           next[a.id] = {
             score: a.score != null ? String(a.score) : '',
@@ -174,7 +174,7 @@ export default function AdminExamReviewPage() {
                     {bundle.result.review_status === 'completed' ? 'Completed' : 'Pending review'}
                   </span>
                   {bundle.result.review_status === 'completed' && bundle.result.score != null && (
-                    <span className="text-sm font-black text-[#1A1A1A]">nal: {bundle.result.score}%</span>
+                    <span className="text-sm font-black text-[#1A1A1A]">Final: {bundle.result.score}%</span>
                   )}
                 </div>
               )}
@@ -343,7 +343,7 @@ export default function AdminExamReviewPage() {
             </p>
             {writingQuestions.length > 0 && !allWritingReviewed && (
               <p className="text-[10px] text-amber-800 font-bold mt-1">
-                nal score is released after every writing question is reviewed.
+                Final score is released after every writing question is reviewed.
               </p>
             )}
           </div>
