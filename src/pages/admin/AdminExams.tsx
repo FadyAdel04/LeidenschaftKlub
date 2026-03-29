@@ -1,6 +1,8 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useReducer } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { usePersistentState } from '../../hooks/usePersistentState';
+import { useOnceAnimation } from '../../hooks/useOnceAnimation';
 import { Award, Plus, X, Trash2, AlertCircle, CheckCircle, Loader, Clock, List, Upload, Edit2, Save, Clipboard } from 'lucide-react';
 import AdminSidebar from '../../components/shared/AdminSidebar';
 import {
@@ -16,9 +18,34 @@ const cv = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { stagge
 const ci = { hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } };
 type EW = Exam & { levels?: { name: string } };
 
+type QuestionAction =
+  | { type: 'SET_QUESTIONS'; payload: ExamQuestion[] }
+  | { type: 'ADD_QUESTION'; payload: ExamQuestion }
+  | { type: 'UPDATE_QUESTION'; payload: ExamQuestion }
+  | { type: 'DELETE_QUESTION'; payload: string }
+  | { type: 'RESET' };
+
+function questionsReducer(state: ExamQuestion[], action: QuestionAction): ExamQuestion[] {
+  switch (action.type) {
+    case 'SET_QUESTIONS':
+      return action.payload;
+    case 'ADD_QUESTION':
+      return [...state, action.payload];
+    case 'UPDATE_QUESTION':
+      return state.map((q) => (q.id === action.payload.id ? action.payload : q));
+    case 'DELETE_QUESTION':
+      return state.filter((q) => q.id !== action.payload);
+    case 'RESET':
+      return [];
+    default:
+      return state;
+  }
+}
+
 export default function AdminExams() {
   const navigate = useNavigate();
-  const [adminTab, setAdminTab] = useState<'bank' | 'submissions'>('bank');
+  const hasAnimated = useOnceAnimation('admin_exams');
+  const [adminTab, setAdminTab] = usePersistentState<'bank' | 'submissions'>('admin_exams_tab', 'bank');
   const [submissions, setSubmissions] = useState<
     (Result & { profiles?: { name: string; email: string }; exams?: { title: string } })[]
   >([]);
@@ -30,44 +57,72 @@ export default function AdminExams() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [showForm, setShowForm] = useState(false);
-  const [title, setTitle] = useState('');
-  const [levelId, setLevelId] = useState('');
-  const [duration, setDuration] = useState('30');
+
+  // Consolidated Exam Data
+  const [examData, setExamData] = useState({
+    title: '',
+    levelId: '',
+    duration: '30',
+  });
+
   const [creating, setCreating] = useState(false);
   const [formError, setFormError] = useState('');
   const [deleting, setDeleting] = useState<string | null>(null);
   const [activeExam, setActiveExam] = useState<EW | null>(null);
-  const [questions, setQuestions] = useState<ExamQuestion[]>([]);
+  
+  // useReducer for questions
+  const [questions, dispatchQuestions] = useReducer(questionsReducer, []);
   const [questionsLoading, setQuestionsLoading] = useState(false);
-  const [qText, setQText] = useState('');
-  const [qOptions, setQOptions] = useState(['', '', '', '']);
-  const [qCorrect, setQCorrect] = useState('A');
-  const [qType, setQType] = useState<'paragraph' | 'grammar' | 'writing' | 'listening'>('paragraph');
-  const [pSubtype, setPSubtype] = useState<'mcq' | 'true_false'>('mcq');
-  const [pParagraph, setPParagraph] = useState('');
-  const [gSentence, setGSentence] = useState('I ___ to school yesterday');
-  const [gWordsRaw, setGWordsRaw] = useState('go,went,gone');
-  const [gCorrectWord, setGCorrectWord] = useState('went');
-  const [wWordsRaw, setWWordsRaw] = useState('travel,Germany,experience');
-  const [tfCorrect, setTfCorrect] = useState<'True' | 'False'>('True');
+
+  // Consolidated Question Form Data
+  const [qFormData, setQFormData] = useState({
+    qText: '',
+    qOptions: ['', '', '', ''],
+    qCorrect: 'A',
+    qType: 'paragraph' as 'paragraph' | 'grammar' | 'writing' | 'listening',
+    pSubtype: 'mcq' as 'mcq' | 'true_false',
+    pParagraph: '',
+    gSentence: 'I ___ to school yesterday',
+    gWordsRaw: 'go,went,gone',
+    gCorrectWord: 'went',
+    wWordsRaw: 'travel,Germany,experience',
+    tfCorrect: 'True' as 'True' | 'False',
+  });
+
   const [qSaving, setQSaving] = useState(false);
   const [bulkInput, setBulkInput] = useState('');
   const [bulkSaving, setBulkSaving] = useState(false);
   const [qError, setQError] = useState('');
   const [questionAudioFile, setQuestionAudioFile] = useState<File | null>(null);
-  // For listening questions: upload once and reuse for multiple questions referencing the same audio.
   const [listeningAudioUrl, setListeningAudioUrl] = useState<string | null>(null);
+  
   const [editingExam, setEditingExam] = useState<EW | null>(null);
-  const [editExamTitle, setEditExamTitle] = useState('');
-  const [editExamLevel, setEditExamLevel] = useState('');
-  const [editExamDuration, setEditExamDuration] = useState('30');
+  const [editExamState, setEditExamState] = useState({
+    title: '',
+    levelId: '',
+    duration: '30'
+  });
   const [updatingExam, setUpdatingExam] = useState(false);
+
+  // Prevent full page reload on tab switch or visibility change
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        // Just log, don't trigger anything that could cause a reload
+        console.log('Tab visible');
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, []);
 
   async function load() {
     try {
       const [e, l] = await Promise.all([fetchAllExams(), fetchAllLevels()]);
       setExams(e); setLevels(l);
-      if (l.length && !levelId) setLevelId(l[0].id);
+      if (l.length && !examData.levelId) {
+        setExamData(prev => ({ ...prev, levelId: l[0].id }));
+      }
     } catch (e: unknown) { setError(e instanceof Error ? e.message : 'Failed'); }
     finally { setLoading(false); }
   }
@@ -93,13 +148,16 @@ export default function AdminExams() {
   }, [adminTab]);
 
   const handleCreate = async () => {
-    if (!title.trim()) { setFormError('Title required.'); return; }
-    if (!levelId) { setFormError('Choose a level first.'); return; }
-    if (!duration || Number(duration) < 1) { setFormError('Duration must be at least 1 min.'); return; }
+    if (!examData.title.trim()) { setFormError('Title required.'); return; }
+    if (!examData.levelId) { setFormError('Choose a level first.'); return; }
+    const durationNum = Number(examData.duration);
+    if (!durationNum || durationNum < 1) { setFormError('Duration must be at least 1 min.'); return; }
     setCreating(true); setFormError('');
     try {
-      await createExam({ title: title.trim(), levelId, duration: Number(duration) });
-      setSuccess('Exam created!'); setTitle(''); setDuration('30'); setShowForm(false);
+      await createExam({ title: examData.title.trim(), levelId: examData.levelId, duration: durationNum });
+      setSuccess('Exam created!'); 
+      setExamData({ title: '', levelId: levels[0]?.id || '', duration: '30' }); 
+      setShowForm(false);
       await load(); setTimeout(() => setSuccess(''), 4000);
     } catch (e: unknown) { setFormError(e instanceof Error ? e.message : 'Failed'); }
     finally { setCreating(false); }
@@ -107,29 +165,41 @@ export default function AdminExams() {
 
   const handleDelete = async (id: string) => {
     setDeleting(id);
-    try { await deleteExam(id); setExams(p => p.filter(e => e.id !== id)); }
-    catch (e: unknown) { setError(e instanceof Error ? e.message : 'Delete failed'); }
-    finally { setDeleting(null); }
+    try { 
+      await deleteExam(id); 
+      setExams(p => p.filter(e => e.id !== id)); 
+    } catch (e: unknown) { 
+      setError(e instanceof Error ? e.message : 'Delete failed'); 
+    } finally { 
+      setDeleting(null); 
+    }
   };
 
   const openEditExam = (exam: EW) => {
     setEditingExam(exam);
-    setEditExamTitle(exam.title);
-    setEditExamLevel(exam.level_id);
-    setEditExamDuration(String(exam.duration));
+    setEditExamState({
+      title: exam.title,
+      levelId: exam.level_id,
+      duration: String(exam.duration)
+    });
     setFormError('');
   };
 
   const handleUpdateExam = async () => {
     if (!editingExam) return;
-    if (!editExamTitle.trim()) { setFormError('Title required.'); return; }
-    if (!editExamLevel) { setFormError('Choose a level.'); return; }
-    const durationNum = Number(editExamDuration);
+    if (!editExamState.title.trim()) { setFormError('Title required.'); return; }
+    if (!editExamState.levelId) { setFormError('Choose a level.'); return; }
+    const durationNum = Number(editExamState.duration);
     if (!durationNum || durationNum < 1) { setFormError('Duration must be at least 1 min.'); return; }
     setUpdatingExam(true);
     setFormError('');
     try {
-      await updateExam({ id: editingExam.id, title: editExamTitle.trim(), levelId: editExamLevel, duration: durationNum });
+      await updateExam({ 
+        id: editingExam.id, 
+        title: editExamState.title.trim(), 
+        levelId: editExamState.levelId, 
+        duration: durationNum 
+      });
       setSuccess('Exam updated!');
       setEditingExam(null);
       await load();
@@ -147,7 +217,7 @@ export default function AdminExams() {
     setQError('');
     try {
       const qs = await fetchQuestionsByExamAdmin(exam.id);
-      setQuestions(qs);
+      dispatchQuestions({ type: 'SET_QUESTIONS', payload: qs });
     } catch (e: unknown) {
       setQError(e instanceof Error ? e.message : 'Failed to load questions');
     } finally {
@@ -157,7 +227,7 @@ export default function AdminExams() {
 
   const handleCreateQuestion = async () => {
     if (!activeExam) return;
-    if (!qText.trim()) {
+    if (!qFormData.qText.trim()) {
       setQError('Question prompt is required.');
       return;
     }
@@ -172,30 +242,28 @@ export default function AdminExams() {
           .map((s) => s.trim())
           .filter(Boolean);
 
-      const correctIndex = qCorrect.charCodeAt(0) - 'A'.charCodeAt(0);
+      const correctIndex = qFormData.qCorrect.charCodeAt(0) - 'A'.charCodeAt(0);
       const pickCorrectByLetter = (opts: string[]) => {
         if (correctIndex < 0 || correctIndex >= opts.length) return null;
         return opts[correctIndex]?.trim() ?? null;
       };
 
-      if (qType === 'paragraph') {
-        if (!pParagraph.trim()) throw new Error('Paragraph text is required.');
+      if (qFormData.qType === 'paragraph') {
+        if (!qFormData.pParagraph.trim()) throw new Error('Paragraph text is required.');
 
-        if (pSubtype === 'mcq') {
-          if (qOptions.some((o) => !o.trim())) throw new Error('All 4 options are required.');
-          const options = qOptions.map((o) => o.trim());
+        if (qFormData.pSubtype === 'mcq') {
+          if (qFormData.qOptions.some((o) => !o.trim())) throw new Error('All 4 options are required.');
+          const options = qFormData.qOptions.map((o) => o.trim());
           const correctOption = pickCorrectByLetter(options);
           if (!correctOption) throw new Error('Please select the correct option (A/B/C/D).');
 
           await createExamQuestion({
             examId: activeExam.id,
-            questionText: qText.trim(),
+            questionText: qFormData.qText.trim(),
             qType: 'paragraph',
-            content: pParagraph.trim(),
+            content: qFormData.pParagraph.trim(),
             options,
-            // Keep legacy column compatible with older DB constraints (A-D),
-            // while correct_answer_json carries the real answer value.
-            correctAnswer: qCorrect,
+            correctAnswer: qFormData.qCorrect,
             correctAnswerJson: correctOption,
             extraData: { subtype: 'mcq' },
             orderIndex,
@@ -204,27 +272,26 @@ export default function AdminExams() {
           const options = ['True', 'False'];
           await createExamQuestion({
             examId: activeExam.id,
-            questionText: qText.trim(),
+            questionText: qFormData.qText.trim(),
             qType: 'paragraph',
-            content: pParagraph.trim(),
+            content: qFormData.pParagraph.trim(),
             options,
-            // Legacy fallback; JSON value is authoritative.
-            correctAnswer: tfCorrect === 'True' ? 'A' : 'B',
-            correctAnswerJson: tfCorrect === 'True',
+            correctAnswer: qFormData.tfCorrect === 'True' ? 'A' : 'B',
+            correctAnswerJson: qFormData.tfCorrect === 'True',
             extraData: { subtype: 'true_false' },
             orderIndex,
           });
         }
       }
 
-      if (qType === 'grammar') {
-        const sentence = gSentence.trim();
+      if (qFormData.qType === 'grammar') {
+        const sentence = qFormData.gSentence.trim();
         if (!sentence || !sentence.includes('___')) {
           throw new Error('Grammar sentence must include the blank token `___`.');
         }
-        const words = parseWords(gWordsRaw);
+        const words = parseWords(qFormData.gWordsRaw);
         if (words.length < 2) throw new Error('Provide at least 2 candidate words.');
-        const correctWord = gCorrectWord.trim();
+        const correctWord = qFormData.gCorrectWord.trim();
         if (!correctWord) throw new Error('Correct word is required.');
         if (!words.some((w) => w.toLowerCase() === correctWord.toLowerCase())) {
           throw new Error('Correct word must be one of the candidate words.');
@@ -232,42 +299,40 @@ export default function AdminExams() {
 
         await createExamQuestion({
           examId: activeExam.id,
-          questionText: qText.trim(),
+          questionText: qFormData.qText.trim(),
           qType: 'grammar',
           content: sentence,
           options: null,
           extraData: { words },
-          // Legacy fallback to satisfy old constraints.
           correctAnswer: 'A',
           correctAnswerJson: correctWord,
           orderIndex,
         });
       }
 
-      if (qType === 'writing') {
-        const words = parseWords(wWordsRaw);
+      if (qFormData.qType === 'writing') {
+        const words = parseWords(qFormData.wWordsRaw);
         if (words.length < 1) throw new Error('Word list is required.');
 
         await createExamQuestion({
           examId: activeExam.id,
-          questionText: qText.trim(),
+          questionText: qFormData.qText.trim(),
           qType: 'writing',
           content: null,
           options: null,
           extraData: { words },
-          // Legacy fallback to satisfy old constraints.
           correctAnswer: 'A',
           correctAnswerJson: null,
           orderIndex,
         });
       }
 
-      if (qType === 'listening') {
+      if (qFormData.qType === 'listening') {
         if (!questionAudioFile) throw new Error('Audio file is required for listening questions.');
         if (questionAudioFile.size > MAX_UPLOAD_BYTES) throw new Error('Audio exceeds 200MB.');
 
-        if (qOptions.some((o) => !o.trim())) throw new Error('All 4 listening options are required.');
-        const options = qOptions.map((o) => o.trim());
+        if (qFormData.qOptions.some((o) => !o.trim())) throw new Error('All 4 listening options are required.');
+        const options = qFormData.qOptions.map((o) => o.trim());
         const correctOption = pickCorrectByLetter(options);
         if (!correctOption) throw new Error('Please select the correct option (A/B/C/D).');
 
@@ -275,12 +340,11 @@ export default function AdminExams() {
         if (!listeningAudioUrl) setListeningAudioUrl(audioUrl);
         await createExamQuestion({
           examId: activeExam.id,
-          questionText: qText.trim(),
+          questionText: qFormData.qText.trim(),
           qType: 'listening',
           audioUrl,
           options,
-          // Keep legacy column A-D; JSON stores full value.
-          correctAnswer: qCorrect,
+          correctAnswer: qFormData.qCorrect,
           correctAnswerJson: correctOption,
           extraData: null,
           content: null,
@@ -289,23 +353,27 @@ export default function AdminExams() {
       }
 
       const qs = await fetchQuestionsByExamAdmin(activeExam.id);
-      setQuestions(qs);
+      dispatchQuestions({ type: 'SET_QUESTIONS', payload: qs });
 
-      // reset form elds for next question
-      setQText('');
-      setQOptions(['', '', '', '']);
-      setQCorrect('A');
-      if (qType !== 'listening') {
+      // reset form fields for next question
+      setQFormData({
+        ...qFormData,
+        qText: '',
+        qOptions: ['', '', '', ''],
+        qCorrect: 'A',
+        pParagraph: '',
+        gSentence: 'I ___ to school yesterday',
+        gWordsRaw: 'go,went,gone',
+        gCorrectWord: 'went',
+        wWordsRaw: 'travel,Germany,experience',
+        pSubtype: 'mcq' as 'mcq' | 'true_false',
+        tfCorrect: 'True' as 'True' | 'False',
+      });
+      
+      if (qFormData.qType !== 'listening') {
         setQuestionAudioFile(null);
         setListeningAudioUrl(null);
       }
-      setPParagraph('');
-      setGSentence('I ___ to school yesterday');
-      setGWordsRaw('go,went,gone');
-      setGCorrectWord('went');
-      setWWordsRaw('travel,Germany,experience');
-      setPSubtype('mcq');
-      setTfCorrect('True');
     } catch (e: unknown) {
       setQError(e instanceof Error ? e.message : 'Failed to add question');
     } finally {
@@ -339,7 +407,7 @@ export default function AdminExams() {
     try {
       await bulkCreateExamQuestions({ examId: activeExam.id, questions: parsed });
       const qs = await fetchQuestionsByExamAdmin(activeExam.id);
-      setQuestions(qs);
+      dispatchQuestions({ type: 'SET_QUESTIONS', payload: qs });
       setBulkInput('');
     } catch (e: unknown) {
       setQError(e instanceof Error ? e.message : 'Bulk upload failed');
@@ -352,18 +420,17 @@ export default function AdminExams() {
     if (!activeExam) return;
     try {
       await deleteExamQuestion(id);
-      const qs = await fetchQuestionsByExamAdmin(activeExam.id);
-      setQuestions(qs);
+      dispatchQuestions({ type: 'DELETE_QUESTION', payload: id });
     } catch (e: unknown) {
       setQError(e instanceof Error ? e.message : 'Delete question failed');
     }
   };
 
   return (
-    <motion.div initial="hidden" animate="visible" variants={cv} className="min-h-screen bg-[#F5F5F0] lg:flex">
+    <motion.div initial={hasAnimated ? false : "hidden"} animate="visible" variants={cv} className="min-h-screen bg-[#F5F5F0] lg:flex">
       <AdminSidebar />
       <main className="pt-14 lg:pt-0 lg:ml-80 flex-1 p-4 sm:p-6 md:p-10 lg:p-16 xl:p-20 relative overflow-hidden">
-        <motion.header variants={ci} className="mb-10 flex flex-col gap-6 relative z-10">
+        <motion.header variants={ci} initial={hasAnimated ? false : "hidden"} animate="visible" className="mb-10 flex flex-col gap-6 relative z-10">
           <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-6 w-full">
             <div>
               <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tighter text-[#1A1A1A] leading-none uppercase mb-3">Manage<br/><span className="text-[#C62828]">Exams.</span></h1>
@@ -413,19 +480,19 @@ export default function AdminExams() {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-6">
                 <div className="space-y-2">
                   <label className="text-[9px] font-black uppercase tracking-[0.4em] text-[#D4A373] ml-1 block">Exam Title</label>
-                  <input type="text" value={title} onChange={e => setTitle(e.target.value)} placeholder="e.g. B1 Midterm"
+                  <input type="text" value={examData.title} onChange={e => setExamData(prev => ({ ...prev, title: e.target.value }))} placeholder="e.g. B1 Midterm"
                     className="w-full px-5 py-3.5 bg-[#F5F5F0] rounded-2xl font-black text-sm text-[#1A1A1A] placeholder:text-[#1A1A1A]/20 outline-none focus:ring-4 focus:ring-[#C62828]/10 transition-all" />
                 </div>
                 <div className="space-y-2">
                   <label className="text-[9px] font-black uppercase tracking-[0.4em] text-[#D4A373] ml-1 block">Level</label>
-                  <select value={levelId} onChange={e => setLevelId(e.target.value)}
+                  <select value={examData.levelId} onChange={e => setExamData(prev => ({ ...prev, levelId: e.target.value }))}
                     className="w-full px-5 py-3.5 bg-[#F5F5F0] rounded-2xl font-black text-sm text-[#1A1A1A] outline-none appearance-none cursor-pointer">
                     {levels.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
                   </select>
                 </div>
                 <div className="space-y-2">
                   <label className="text-[9px] font-black uppercase tracking-[0.4em] text-[#D4A373] ml-1 block">Duration (min)</label>
-                  <input type="number" value={duration} onChange={e => setDuration(e.target.value)} min="1" max="300"
+                  <input type="number" value={examData.duration} onChange={e => setExamData(prev => ({ ...prev, duration: e.target.value }))} min="1" max="300"
                     className="w-full px-5 py-3.5 bg-[#F5F5F0] rounded-2xl font-black text-sm text-[#1A1A1A] outline-none focus:ring-4 focus:ring-[#C62828]/10 transition-all" />
                 </div>
               </div>
@@ -446,7 +513,7 @@ export default function AdminExams() {
           ? <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10">{[1,2,3].map(i => <div key={i} className="h-48 bg-white rounded-[2rem] animate-pulse" />)}</div>
           : exams.length === 0
             ? <div className="flex flex-col items-center py-32 relative z-10"><Award className="w-16 h-16 text-[#1A1A1A]/10 mb-6" /><p className="font-black text-[#1A1A1A]/30 uppercase text-xl">No exams yet.</p></div>
-            : <motion.div variants={cv} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10">
+            : <motion.div variants={cv} initial={hasAnimated ? false : "hidden"} animate="visible" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10">
                 {exams.map(e => (
                   <motion.div key={e.id} variants={ci} whileHover={{ y: -4 }}
                     className="bg-white rounded-[2rem] p-7 border border-[#1A1A1A]/5 shadow-sm hover:shadow-2xl transition-all group relative overflow-hidden">
@@ -456,13 +523,6 @@ export default function AdminExams() {
                         <Award className="w-6 h-6 text-[#C62828] group-hover:text-white transition-colors" />
                       </div>
                       <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => openQuestions(e)}
-                          className="w-8 h-8 rounded-lg bg-[#F5F5F0] flex items-center justify-center text-[#1A1A1A]/30 hover:bg-[#1A1A1A] hover:text-white transition-all active:scale-95 shrink-0"
-                          title="Manage questions"
-                        >
-                          <List className="w-3.5 h-3.5" />
-                        </button>
                         <button onClick={() => handleDelete(e.id)} disabled={deleting === e.id}
                           className="w-8 h-8 rounded-lg bg-[#F5F5F0] flex items-center justify-center text-[#1A1A1A]/20 hover:bg-red-50 hover:text-[#C62828] transition-all active:scale-95 disabled:opacity-60 shrink-0">
                           {deleting === e.id ? <Loader className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
@@ -560,7 +620,7 @@ export default function AdminExams() {
 
         <AnimatePresence>
           {activeExam && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="xed inset-0 z-[110]">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[110]">
               <button className="absolute inset-0 bg-black/55" onClick={() => setActiveExam(null)} />
               <motion.div
                 initial={{ y: 30, opacity: 0 }}
@@ -583,8 +643,8 @@ export default function AdminExams() {
                     <h4 className="font-black text-[#1A1A1A] uppercase tracking-tight mb-4">Add Question</h4>
                     <div className="space-y-3">
                       <select
-                        value={qType}
-                        onChange={(e) => setQType(e.target.value as typeof qType)}
+                        value={qFormData.qType}
+                        onChange={(e) => setQFormData(prev => ({ ...prev, qType: e.target.value as typeof qFormData.qType }))}
                         className="w-full px-4 py-3 rounded-xl bg-[#F5F5F0] border border-[#1A1A1A]/10 text-sm font-black outline-none"
                       >
                         <option value="paragraph">Paragraph (MCQ / True-False)</option>
@@ -594,17 +654,17 @@ export default function AdminExams() {
                       </select>
 
                       <input
-                        value={qText}
-                        onChange={(e) => setQText(e.target.value)}
+                        value={qFormData.qText}
+                        onChange={(e) => setQFormData(prev => ({ ...prev, qText: e.target.value }))}
                         placeholder="Question prompt"
                         className="w-full px-4 py-3 rounded-xl bg-[#F5F5F0] border border-[#1A1A1A]/10 text-sm font-black outline-none"
                       />
 
-                      {qType === 'paragraph' && (
+                      {qFormData.qType === 'paragraph' && (
                         <>
                           <select
-                            value={pSubtype}
-                            onChange={(e) => setPSubtype(e.target.value as typeof pSubtype)}
+                            value={qFormData.pSubtype}
+                            onChange={(e) => setQFormData(prev => ({ ...prev, pSubtype: e.target.value as typeof qFormData.pSubtype }))}
                             className="w-full px-4 py-3 rounded-xl bg-[#F5F5F0] border border-[#1A1A1A]/10 text-sm font-black outline-none"
                           >
                             <option value="mcq">Reading + MCQ</option>
@@ -612,27 +672,30 @@ export default function AdminExams() {
                           </select>
 
                           <textarea
-                            value={pParagraph}
-                            onChange={(e) => setPParagraph(e.target.value)}
+                            value={qFormData.pParagraph}
+                            onChange={(e) => setQFormData(prev => ({ ...prev, pParagraph: e.target.value }))}
                             rows={4}
                             placeholder="Paragraph text (reading material)"
                             className="w-full px-4 py-3 rounded-xl bg-[#F5F5F0] border border-[#1A1A1A]/10 text-sm font-black outline-none resize-none"
                           />
 
-                          {pSubtype === 'mcq' ? (
+                          {qFormData.pSubtype === 'mcq' ? (
                             <>
                               {['A', 'B', 'C', 'D'].map((label, idx) => (
                                 <input
                                   key={label}
-                                  value={qOptions[idx]}
-                                  onChange={(e) => setQOptions((prev) => prev.map((v, i) => (i === idx ? e.target.value : v)))}
+                                  value={qFormData.qOptions[idx]}
+                                  onChange={(e) => setQFormData(prev => ({ 
+                                    ...prev, 
+                                    qOptions: prev.qOptions.map((v, i) => (i === idx ? e.target.value : v)) 
+                                  }))}
                                   placeholder={`Option ${label}`}
                                   className="w-full px-4 py-3 rounded-xl bg-[#F5F5F0] border border-[#1A1A1A]/10 text-sm font-black outline-none"
                                 />
                               ))}
                               <select
-                                value={qCorrect}
-                                onChange={(e) => setQCorrect(e.target.value)}
+                                value={qFormData.qCorrect}
+                                onChange={(e) => setQFormData(prev => ({ ...prev, qCorrect: e.target.value }))}
                                 className="w-full px-4 py-3 rounded-xl bg-[#F5F5F0] border border-[#1A1A1A]/10 text-sm font-black outline-none"
                               >
                                 {['A', 'B', 'C', 'D'].map((c) => (
@@ -644,8 +707,8 @@ export default function AdminExams() {
                             </>
                           ) : (
                             <select
-                              value={tfCorrect}
-                              onChange={(e) => setTfCorrect(e.target.value as typeof tfCorrect)}
+                              value={qFormData.tfCorrect}
+                              onChange={(e) => setQFormData(prev => ({ ...prev, tfCorrect: e.target.value as typeof qFormData.tfCorrect }))}
                               className="w-full px-4 py-3 rounded-xl bg-[#F5F5F0] border border-[#1A1A1A]/10 text-sm font-black outline-none"
                             >
                               <option value="True">Correct: True</option>
@@ -655,35 +718,35 @@ export default function AdminExams() {
                         </>
                       )}
 
-                      {qType === 'grammar' && (
+                      {qFormData.qType === 'grammar' && (
                         <>
                           <input
-                            value={gSentence}
-                            onChange={(e) => setGSentence(e.target.value)}
+                            value={qFormData.gSentence}
+                            onChange={(e) => setQFormData(prev => ({ ...prev, gSentence: e.target.value }))}
                             placeholder="Sentence with ___ blank"
                             className="w-full px-4 py-3 rounded-xl bg-[#F5F5F0] border border-[#1A1A1A]/10 text-sm font-black outline-none"
                           />
                           <textarea
-                            value={gWordsRaw}
-                            onChange={(e) => setGWordsRaw(e.target.value)}
+                            value={qFormData.gWordsRaw}
+                            onChange={(e) => setQFormData(prev => ({ ...prev, gWordsRaw: e.target.value }))}
                             rows={3}
                             placeholder="Candidate words (comma or newline separated)"
                             className="w-full px-4 py-3 rounded-xl bg-[#F5F5F0] border border-[#1A1A1A]/10 text-sm font-black outline-none resize-none"
                           />
                           <input
-                            value={gCorrectWord}
-                            onChange={(e) => setGCorrectWord(e.target.value)}
+                            value={qFormData.gCorrectWord}
+                            onChange={(e) => setQFormData(prev => ({ ...prev, gCorrectWord: e.target.value }))}
                             placeholder="Correct word"
                             className="w-full px-4 py-3 rounded-xl bg-[#F5F5F0] border border-[#1A1A1A]/10 text-sm font-black outline-none"
                           />
                         </>
                       )}
 
-                      {qType === 'writing' && (
+                      {qFormData.qType === 'writing' && (
                         <>
                           <textarea
-                            value={wWordsRaw}
-                            onChange={(e) => setWWordsRaw(e.target.value)}
+                            value={qFormData.wWordsRaw}
+                            onChange={(e) => setQFormData(prev => ({ ...prev, wWordsRaw: e.target.value }))}
                             rows={3}
                             placeholder="Allowed words/topic (comma or newline separated)"
                             className="w-full px-4 py-3 rounded-xl bg-[#F5F5F0] border border-[#1A1A1A]/10 text-sm font-black outline-none resize-none"
@@ -691,7 +754,7 @@ export default function AdminExams() {
                         </>
                       )}
 
-                      {qType === 'listening' && (
+                      {qFormData.qType === 'listening' && (
                         <>
                           <input
                             type="file"
@@ -706,15 +769,18 @@ export default function AdminExams() {
                           {['A', 'B', 'C', 'D'].map((label, idx) => (
                             <input
                               key={label}
-                              value={qOptions[idx]}
-                              onChange={(e) => setQOptions((prev) => prev.map((v, i) => (i === idx ? e.target.value : v)))}
+                              value={qFormData.qOptions[idx]}
+                              onChange={(e) => setQFormData(prev => ({ 
+                                ...prev, 
+                                qOptions: prev.qOptions.map((v, i) => (i === idx ? e.target.value : v)) 
+                              }))}
                               placeholder={`Listening option ${label}`}
                               className="w-full px-4 py-3 rounded-xl bg-[#F5F5F0] border border-[#1A1A1A]/10 text-sm font-black outline-none"
                             />
                           ))}
                           <select
-                            value={qCorrect}
-                            onChange={(e) => setQCorrect(e.target.value)}
+                            value={qFormData.qCorrect}
+                            onChange={(e) => setQFormData(prev => ({ ...prev, qCorrect: e.target.value }))}
                             className="w-full px-4 py-3 rounded-xl bg-[#F5F5F0] border border-[#1A1A1A]/10 text-sm font-black outline-none"
                           >
                             {['A', 'B', 'C', 'D'].map((c) => (
@@ -793,7 +859,7 @@ export default function AdminExams() {
 
         <AnimatePresence>
           {editingExam && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="xed inset-0 z-[111]">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[111]">
               <button className="absolute inset-0 bg-black/60" onClick={() => setEditingExam(null)} />
               <div className="absolute inset-4 md:inset-10 bg-white rounded-3xl border border-[#1A1A1A]/10 shadow-2xl p-6 md:p-8 overflow-y-auto">
                 <div className="flex items-center justify-between mb-6">
@@ -801,13 +867,13 @@ export default function AdminExams() {
                   <button onClick={() => setEditingExam(null)} className="w-9 h-9 rounded-xl bg-[#F5F5F0] text-[#1A1A1A]/50"><X className="w-5 h-5 mx-auto" /></button>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-5">
-                  <input value={editExamTitle} onChange={e => setEditExamTitle(e.target.value)} placeholder="Exam title"
+                  <input value={editExamState.title} onChange={e => setEditExamState(prev => ({ ...prev, title: e.target.value }))} placeholder="Exam title"
                     className="w-full px-5 py-3.5 bg-[#F5F5F0] rounded-2xl font-black text-sm outline-none" />
-                  <select value={editExamLevel} onChange={e => setEditExamLevel(e.target.value)}
+                  <select value={editExamState.levelId} onChange={e => setEditExamState(prev => ({ ...prev, levelId: e.target.value }))}
                     className="w-full px-5 py-3.5 bg-[#F5F5F0] rounded-2xl font-black text-sm outline-none">
                     {levels.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
                   </select>
-                  <input type="number" value={editExamDuration} onChange={e => setEditExamDuration(e.target.value)} min="1"
+                  <input type="number" value={editExamState.duration} onChange={e => setEditExamState(prev => ({ ...prev, duration: e.target.value }))} min="1"
                     className="w-full px-5 py-3.5 bg-[#F5F5F0] rounded-2xl font-black text-sm outline-none" />
                 </div>
                 {formError && <p className="mt-2 text-xs font-black text-[#C62828]">{formError}</p>}

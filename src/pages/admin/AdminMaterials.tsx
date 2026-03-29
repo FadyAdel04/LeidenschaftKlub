@@ -10,7 +10,8 @@ import {
   deleteMaterial, 
   updateMaterial, 
   fetchStudentsByLevel, 
-  assignMaterials, 
+  syncMaterialAssignments,
+  fetchMaterialAssignments,
   type Material, 
   type Level,
   type Profile,
@@ -131,12 +132,12 @@ export default function AdminMaterials() {
     setAssignmentModalOpen(true);
     setAssignmentLoading(true);
     try {
-      const studs = await fetchStudentsByLevel(material.level_id);
+      const [studs, assignedIds] = await Promise.all([
+        fetchStudentsByLevel(material.level_id),
+        fetchMaterialAssignments(material.id)
+      ]);
       setStudentsInLevel(studs);
-      
-      // Optionally fetch existing assignments to pre-select?
-      // Or just empty selection as per "assign once, then again later" flow.
-      setSelectedStudentIds([]); 
+      setSelectedStudentIds(assignedIds); 
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Failed to fetch students');
     } finally {
@@ -145,16 +146,16 @@ export default function AdminMaterials() {
   };
 
   const handleAssign = async () => {
-    if (!assigningMaterial || selectedStudentIds.length === 0) return;
+    if (!assigningMaterial) return;
     setAssignmentLoading(true);
     try {
-      await assignMaterials({
+      await syncMaterialAssignments({
         materialId: assigningMaterial.id,
         studentIds: selectedStudentIds,
         availableFrom: new Date(availableFrom).toISOString(),
         visible: visibility
       });
-      setSuccess(`Assigned to ${selectedStudentIds.length} students!`);
+      setSuccess(`Assignments updated for ${selectedStudentIds.length} students!`);
       setAssignmentModalOpen(false);
       setTimeout(() => setSuccess(''), 3000);
     } catch (e: unknown) {
@@ -259,7 +260,7 @@ export default function AdminMaterials() {
 
         {/* Grid */}
         {loading
-          ? <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10">{[1,2,3,4,5,6].map(i => <div key={i} className="h-48 bg-white rounded-[2rem] animate-pulse" />)}</div>
+          ? <div className="flex flex-col items-center justify-center py-20 relative z-10 w-full col-span-full border-2 border-dashed border-[#1A1A1A]/5 rounded-[2rem] bg-white/50"><Loader className="w-10 h-10 text-[#C62828] animate-spin" /><p className="mt-4 text-[10px] font-black uppercase tracking-widest text-[#1A1A1A]/20">Loading Materials...</p></div>
           : materials.length === 0
             ? <div className="flex flex-col items-center py-32 relative z-10"><Book className="w-16 h-16 text-[#1A1A1A]/10 mb-6" /><p className="font-black text-[#1A1A1A]/30 uppercase text-xl">No materials yet.</p></div>
             : <motion.div variants={cv} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10">

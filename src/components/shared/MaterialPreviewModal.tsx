@@ -39,10 +39,11 @@ export default function MaterialPreviewModal({ open, material, onClose }: Materi
     };
   }, [open]);
 
+  const watermark = useMemo(() => material?.watermarkText || 'Protected Content', [material?.watermarkText]);
+
   if (!open || !material) return null;
 
   const fileType = getFileType(material.file_url);
-  const watermark = useMemo(() => material.watermarkText || 'Protected Content', [material.watermarkText]);
 
   return (
     <div className="fixed inset-0 z-[120]">
@@ -86,11 +87,14 @@ export default function MaterialPreviewModal({ open, material, onClose }: Materi
             {watermark}
           </div>
           {fileType === 'pdf' && (
-            <iframe
-              src={material.file_url}
-              title={material.title}
-              className="w-full h-full pointer-events-auto"
-            />
+            <div className="w-full h-full relative group/pdf">
+              <iframe
+                src={`${material.file_url}#toolbar=0&navpanes=0&scrollbar=1`}
+                title={material.title}
+                className="w-full h-full pointer-events-auto"
+              />
+              <div className="absolute top-0 right-0 left-0 h-14 bg-transparent z-10 pointer-events-auto" onContextMenu={e => e.preventDefault()} />
+            </div>
           )}
 
           {fileType === 'video' && (

@@ -80,7 +80,7 @@ export default function AppRoutes() {
             <Route path="levels"           element={<AdminLevels />} />
             <Route path="materials"        element={<AdminMaterials />} />
             <Route path="assignments"      element={<AdminAssignments />} />
-            <Route path="exams"            element={<AdminExams />} />
+            <Route path="exams"            element={<Suspense fallback={null}><AdminExams /></Suspense>} />
             <Route path="exams/:examId/review/:studentId" element={<AdminExamReview />} />
             <Route path="results"          element={<AdminResults />} />
             <Route path="website"          element={<AdminWebsite />} />

@@ -238,12 +238,23 @@ export async function fetchStudentsByLevel(levelId: string): Promise<Profile[]> 
   return (data ?? []) as Profile[];
 }
 
-export async function assignMaterials(payload: {
+export async function syncMaterialAssignments(payload: {
   materialId: string;
   studentIds: string[];
   availableFrom: string;
   visible: boolean;
 }): Promise<void> {
+  // 1. Clear existing assignments for this material to allow unassigning
+  const { error: delError } = await supabase
+    .from('material_assignments')
+    .delete()
+    .eq('material_id', payload.materialId);
+  
+  if (delError) throw new Error(delError.message);
+
+  // 2. Insert new assignments if any students are selected
+  if (payload.studentIds.length === 0) return;
+
   const assignments = payload.studentIds.map(studentId => ({
     material_id: payload.materialId,
     student_id: studentId,
@@ -251,11 +262,11 @@ export async function assignMaterials(payload: {
     visible: payload.visible,
   }));
 
-  const { error } = await supabase
+  const { error: insError } = await supabase
     .from('material_assignments')
     .insert(assignments);
   
-  if (error) throw new Error(error.message);
+  if (insError) throw new Error(insError.message);
 }
 
 export async function fetchMaterialAssignments(materialId: string) {

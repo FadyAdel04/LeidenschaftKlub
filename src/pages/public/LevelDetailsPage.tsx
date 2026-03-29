@@ -28,6 +28,35 @@ const defaultHeroImages = {
 
 // (lesson showcase defaults removed; using gallery/hero fallbacks)
 
+interface LevelDetail {
+  key: string;
+  name: string;
+  badge: string;
+  headline: string;
+  summary: string;
+  duration: string;
+  intensity: string;
+  assessment?: { passingScore: number };
+  whoFor?: {
+    title: string;
+    description: string;
+    bullets: { title: string; description?: string }[];
+  };
+  prerequisite?: {
+    title: string;
+    description: string;
+    ctaLabel?: string;
+    ctaHref?: string;
+  };
+  curriculumHighlights?: { title: string; subtitle?: string; description: string; tags?: string[] }[];
+  gallery?: { image?: string; alt?: string; title?: string; eyebrow?: string };
+  testimonial?: { quote?: string; initials?: string; author?: string; role?: string };
+  capabilities?: { title: string; description: string }[];
+  readyToMaster?: { description: string; bullets: string[] };
+}
+
+const levelsMetadata = levelData as LevelDetail[];
+
 export default function LevelDetailsPage() {
   const { level } = useParams<{ level: string }>();
   const navigate = useNavigate();
@@ -59,9 +88,9 @@ export default function LevelDetailsPage() {
   }, []);
 
   // Get level data from JSON
-  const levelJsonData = useMemo(() => {
-    const found = levelData.find(l => l.key.toLowerCase() === currentName.toLowerCase());
-    return found || levelData.find(l => l.key === 'B1');
+  const details = useMemo(() => {
+    const found = levelsMetadata.find(l => l.key.toLowerCase() === currentName.toLowerCase());
+    return found || null;
   }, [currentName]);
 
   const selected = useMemo(() => {
@@ -69,8 +98,6 @@ export default function LevelDetailsPage() {
     if (exact) return exact;
     return levels.find(l => l.name.toLowerCase() === decodeURIComponent(currentName).toLowerCase());
   }, [levels, currentName]);
-
-  const details = levelJsonData;
 
   const otherLevels = useMemo(() => {
     const sorted = [...levels].sort((a, b) => a.name.localeCompare(b.name));
@@ -125,6 +152,7 @@ export default function LevelDetailsPage() {
                       {otherLevels.map((lv) => {
                         const isActive = selected?.id === lv.id;
                         const isMine = signedInLevel && signedInLevel.toLowerCase() === lv.name.toLowerCase();
+                        const levelMeta = (levelData as LevelDetail[]).find(l => l.key === lv.name);
                         return (
                           <button
                             key={lv.id}
@@ -151,7 +179,7 @@ export default function LevelDetailsPage() {
                                 </div>
                                 {!isActive && (
                                   <p className="text-[10px] font-black uppercase tracking-widest text-[#C62828] mt-1">
-                                    {levelData.find(l => l.key === lv.name)?.badge || 'Level'}
+                                    {levelMeta?.badge || 'Level'}
                                   </p>
                                 )}
                               </div>
@@ -187,7 +215,7 @@ export default function LevelDetailsPage() {
                       </p>
                       <h1 className="mt-5 text-5xl sm:text-6xl md:text-7xl font-black tracking-tighter text-[#1A1A1A] leading-[0.95] uppercase">
                         Level {details?.name ?? selected?.name ?? currentName}:{' '}
-                        <span className="text-[#C62828]">{details?.badge ?? 'Level'}</span>
+                        <span className="text-[#C62828]">{details?.headline ?? details?.badge ?? 'Level'}</span>
                       </h1>
                       <p className="mt-6 text-base sm:text-lg font-bold text-[#1A1A1A]/60 leading-relaxed max-w-3xl">
                         {details?.summary ?? selected?.description ?? 'CEFR-aligned progression with structured materials, assignments, and exams.'}
@@ -202,9 +230,8 @@ export default function LevelDetailsPage() {
                     <div className="col-span-12 lg:col-span-4 flex flex-col justify-end">
                       <div className="bg-white rounded-4xl border border-[#1A1A1A]/10 shadow-xl p-6 sm:p-7 space-y-4">
                         {[
-                          { k: 'Duration', v: details?.duration ?? `${details?.assessment?.passingScore ? '—' : '—'}` },
+                          { k: 'Duration', v: details?.duration ?? '—' },
                           { k: 'Intensity', v: details?.intensity ?? '—' },
-                          { k: 'Next Cohort', v: details?.nextCohort ?? '—' },
                         ].map((x) => (
                           <div key={x.k} className="flex items-center justify-between border-b border-[#1A1A1A]/10 last:border-b-0 pb-3 last:pb-0">
                             <span className="text-[10px] font-black uppercase tracking-widest text-[#1A1A1A]/45">{x.k}</span>
@@ -230,9 +257,9 @@ export default function LevelDetailsPage() {
 
                         <div className="mt-8 space-y-4">
                           {(details?.whoFor?.bullets?.length ? details.whoFor.bullets : [
-                            { title: 'Career Climbers', description: 'Professionals aiming for German-speaking environments.' },
-                            { title: 'Academic Pursuits', description: 'Students preparing for academic opportunities.' },
-                          ]).map((b) => (
+                            { title: 'Goal Orientation', description: 'Students aiming for clear, measurable progress.' },
+                            { title: 'Interactive Learning', description: 'Those who thrive in communicative environments.' },
+                          ]).map((b: { title: string; description?: string }) => (
                             <div key={b.title} className="flex items-start gap-3">
                               <CheckCircle2 className="w-5 h-5 text-[#C62828] mt-0.5 shrink-0" />
                               <div>
@@ -272,7 +299,11 @@ export default function LevelDetailsPage() {
                   </h2>
 
                   <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-5">
-                    {(details?.curriculumHighlights ?? []).slice(0, 4).map((c, idx) => {
+                    {(details?.curriculumHighlights?.length ? details.curriculumHighlights : [
+                      { title: 'Core Grammar', subtitle: 'Module 01', description: 'Deep dive into structural foundations and sentence patterns.', tags: ['Grammar', 'Structure'] },
+                      { title: 'Conversation', subtitle: 'Module 02', description: 'Real-world speaking practice with certified instructors.', tags: ['Speaking', 'Interactive'] },
+                      { title: 'Exam Prep', subtitle: 'Module 03', description: 'Mock tests and strategies to master official exams.', tags: ['Exam', 'Strategy'] }
+                    ]).slice(0, 4).map((c: { title: string; subtitle?: string; description: string; tags?: string[] }, idx: number) => {
                       const isBigDark = idx === 0;
                       const isRedBig = idx === 3;
                       if (isBigDark) {
@@ -287,7 +318,7 @@ export default function LevelDetailsPage() {
                             </div>
                             {c.tags?.length ? (
                               <div className="mt-8 flex flex-wrap gap-2">
-                                {c.tags.map((t) => (
+                                {c.tags.map((t: string) => (
                                   <span key={t} className="px-3 py-2 bg-white/10 rounded-full text-[10px] font-black uppercase tracking-widest">
                                     {t}
                                   </span>
@@ -338,8 +369,7 @@ export default function LevelDetailsPage() {
                         alt={details?.gallery?.alt ?? details?.gallery?.title ?? 'Class experience'}
                         src={
                           details?.gallery?.image
-                          || details?.heroImage
-                          || defaultHeroImages[details?.key as keyof typeof defaultHeroImages]
+                          || defaultHeroImages[details?.key.substring(0, 2) as keyof typeof defaultHeroImages]
                           || defaultHeroImages.B1
                         }
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
@@ -357,16 +387,16 @@ export default function LevelDetailsPage() {
 
                     <div className="md:col-span-5 bg-[#A06B2B] text-white p-9 sm:p-10 rounded-4xl border border-[#1A1A1A]/10 shadow-xl flex flex-col justify-center">
                       <p className="text-2xl sm:text-3xl font-black italic leading-tight">
-                        “{details?.testimonial?.quote ?? details?.lessonShowcase?.quote?.text ?? 'Learning becomes real when you stop translating.'}”
+                        “{details?.testimonial?.quote ?? 'Learning becomes real when you stop translating and start thinking.'}”
                       </p>
                       <div className="mt-8 flex items-center gap-4">
                         <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center font-black">
-                          {details?.testimonial?.initials ?? details?.testimonial?.author?.split(' ').map(s => s[0]).slice(0, 2).join('') ?? 'LK'}
+                          {details?.testimonial?.initials ?? 'LK'}
                         </div>
                         <div>
-                          <p className="font-black">{details?.testimonial?.author ?? details?.lessonShowcase?.quote?.author ?? 'Student'}</p>
+                          <p className="font-black">{details?.testimonial?.author ?? 'Alumni'}</p>
                           <p className="text-xs font-bold text-white/70">
-                            {details?.testimonial?.role ?? details?.lessonShowcase?.quote?.role ?? ''}
+                            {details?.testimonial?.role ?? 'Level Completer'}
                           </p>
                         </div>
                       </div>
@@ -380,7 +410,12 @@ export default function LevelDetailsPage() {
                     Post-{details?.name ?? currentName} Capabilities
                   </h2>
                   <div className="mt-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {(details?.capabilities ?? []).slice(0, 4).map((cap, idx) => (
+                    {(details?.capabilities?.length ? details.capabilities : [
+                      { title: 'Independent Interaction', description: 'Navigate common social and work scenarios without help.' },
+                      { title: 'Detailed Expression', description: 'Articulate complex thoughts and structured opinions.' },
+                      { title: 'Extended Reading', description: 'Understand longer articles and reports on familiar subjects.' },
+                      { title: 'Storytelling', description: 'Recount events and experiences with narrative coherence.' }
+                    ]).slice(0, 4).map((cap: { title: string; description: string }, idx: number) => (
                       <div key={cap.title} className="space-y-3">
                         <p className="text-[#C62828] font-black text-4xl opacity-20">{String(idx + 1).padStart(2, '0')}</p>
                         <p className="text-sm font-black text-[#1A1A1A]">{cap.title}</p>
@@ -402,7 +437,11 @@ export default function LevelDetailsPage() {
                       </p>
 
                       <div className="mt-7 space-y-4">
-                        {(details?.readyToMaster?.bullets ?? []).slice(0, 4).map((b) => (
+                        {(details?.readyToMaster?.bullets?.length ? details.readyToMaster.bullets : [
+                          'Structured CEFR progression',
+                          'Certified native instructors',
+                          'Interactive community access'
+                        ]).slice(0, 4).map((b: string) => (
                           <div key={b} className="flex items-center gap-3 text-[#1A1A1A]">
                             <span className="w-9 h-9 rounded-2xl bg-white border border-[#1A1A1A]/10 flex items-center justify-center">
                               <GraduationCap className="w-4 h-4 text-[#C62828]" />
