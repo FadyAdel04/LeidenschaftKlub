@@ -8,7 +8,7 @@ import AdminSidebar from '../../components/shared/AdminSidebar';
 import {
   fetchAllExams, fetchAllLevels, createExam, deleteExam, fetchQuestionsByExamAdmin,
   createExamQuestion, bulkCreateExamQuestions, deleteExamQuestion, updateExam, uploadMaterialAsset,
-  fetchAllExamSubmissions,
+  updateExamQuestion, fetchAllExamSubmissions,
   type Exam, type Level, type ExamQuestion,
 } from '../../services/adminService';
 import type { Result } from '../../services/studentService';
@@ -95,6 +95,7 @@ export default function AdminExams() {
   const [qError, setQError] = useState('');
   const [questionAudioFile, setQuestionAudioFile] = useState<File | null>(null);
   const [listeningAudioUrl, setListeningAudioUrl] = useState<string | null>(null);
+  const [editingQuestionId, setEditingQuestionId] = useState<string | null>(null);
   
   const [editingExam, setEditingExam] = useState<EW | null>(null);
   const [editExamState, setEditExamState] = useState({
@@ -225,14 +226,33 @@ export default function AdminExams() {
     }
   };
 
-  const handleCreateQuestion = async () => {
+  const openEditQuestion = (q: ExamQuestion) => {
+    setEditingQuestionId(q.id);
+    const opts = Array.isArray(q.options) ? q.options : ['', '', '', ''];
+    setQFormData({
+      qText: q.question_text,
+      qOptions: [opts[0] || '', opts[1] || '', opts[2] || '', opts[3] || ''],
+      qCorrect: q.correct_answer || 'A',
+      qType: (q.type as any) || 'paragraph',
+      pSubtype: (q.extra_data as any)?.subtype || 'mcq',
+      pParagraph: q.content || '',
+      gSentence: q.type === 'grammar' ? q.content || '' : 'I ___ to school yesterday',
+      gWordsRaw: (q.extra_data as any)?.words?.join(',') || 'go,went,gone',
+      gCorrectWord: q.correct_answer_json as string || 'went',
+      wWordsRaw: (q.extra_data as any)?.words?.join(',') || 'travel,Germany,experience',
+      tfCorrect: q.correct_answer_json === true ? 'True' : 'False',
+    });
+    setListeningAudioUrl(q.audio_url || null);
+    setQError('');
+  };
+
+  const handleSaveQuestion = async () => {
     if (!activeExam) return;
     if (!qFormData.qText.trim()) {
       setQError('Question prompt is required.');
       return;
     }
 
-    const orderIndex = questions.length + 1;
     setQSaving(true);
     setQError('');
     try {
@@ -248,114 +268,79 @@ export default function AdminExams() {
         return opts[correctIndex]?.trim() ?? null;
       };
 
+      let payload: any = {
+        examId: activeExam.id,
+        questionText: qFormData.qText.trim(),
+        qType: qFormData.qType,
+        orderIndex: editingQuestionId ? undefined : (questions.length + 1),
+      };
+      if (editingQuestionId) payload.id = editingQuestionId;
+
       if (qFormData.qType === 'paragraph') {
         if (!qFormData.pParagraph.trim()) throw new Error('Paragraph text is required.');
+        payload.content = qFormData.pParagraph.trim();
+        payload.extraData = { subtype: qFormData.pSubtype };
 
         if (qFormData.pSubtype === 'mcq') {
           if (qFormData.qOptions.some((o) => !o.trim())) throw new Error('All 4 options are required.');
           const options = qFormData.qOptions.map((o) => o.trim());
           const correctOption = pickCorrectByLetter(options);
-          if (!correctOption) throw new Error('Please select the correct option (A/B/C/D).');
-
-          await createExamQuestion({
-            examId: activeExam.id,
-            questionText: qFormData.qText.trim(),
-            qType: 'paragraph',
-            content: qFormData.pParagraph.trim(),
-            options,
-            correctAnswer: qFormData.qCorrect,
-            correctAnswerJson: correctOption,
-            extraData: { subtype: 'mcq' },
-            orderIndex,
-          });
+          if (!correctOption) throw new Error('Please select correct option (A/B/C/D).');
+          payload.options = options;
+          payload.correctAnswer = qFormData.qCorrect;
+          payload.correctAnswerJson = correctOption;
         } else {
-          const options = ['True', 'False'];
-          await createExamQuestion({
-            examId: activeExam.id,
-            questionText: qFormData.qText.trim(),
-            qType: 'paragraph',
-            content: qFormData.pParagraph.trim(),
-            options,
-            correctAnswer: qFormData.tfCorrect === 'True' ? 'A' : 'B',
-            correctAnswerJson: qFormData.tfCorrect === 'True',
-            extraData: { subtype: 'true_false' },
-            orderIndex,
-          });
+          payload.options = ['True', 'False'];
+          payload.correctAnswer = qFormData.tfCorrect === 'True' ? 'A' : 'B';
+          payload.correctAnswerJson = qFormData.tfCorrect === 'True';
         }
       }
 
       if (qFormData.qType === 'grammar') {
         const sentence = qFormData.gSentence.trim();
-        if (!sentence || !sentence.includes('___')) {
-          throw new Error('Grammar sentence must include the blank token `___`.');
-        }
+        if (!sentence || !sentence.includes('___')) throw new Error('Sentence must include `___`.');
         const words = parseWords(qFormData.gWordsRaw);
-        if (words.length < 2) throw new Error('Provide at least 2 candidate words.');
+        if (words.length < 2) throw new Error('Provide 2+ candidate words.');
         const correctWord = qFormData.gCorrectWord.trim();
-        if (!correctWord) throw new Error('Correct word is required.');
-        if (!words.some((w) => w.toLowerCase() === correctWord.toLowerCase())) {
-          throw new Error('Correct word must be one of the candidate words.');
+        if (!correctWord || !words.some(w => w.toLowerCase() === correctWord.toLowerCase())) {
+          throw new Error('Correct word must be in candidates.');
         }
-
-        await createExamQuestion({
-          examId: activeExam.id,
-          questionText: qFormData.qText.trim(),
-          qType: 'grammar',
-          content: sentence,
-          options: null,
-          extraData: { words },
-          correctAnswer: 'A',
-          correctAnswerJson: correctWord,
-          orderIndex,
-        });
+        payload.content = sentence;
+        payload.extraData = { words };
+        payload.correctAnswer = 'A';
+        payload.correctAnswerJson = correctWord;
       }
 
       if (qFormData.qType === 'writing') {
         const words = parseWords(qFormData.wWordsRaw);
-        if (words.length < 1) throw new Error('Word list is required.');
-
-        await createExamQuestion({
-          examId: activeExam.id,
-          questionText: qFormData.qText.trim(),
-          qType: 'writing',
-          content: null,
-          options: null,
-          extraData: { words },
-          correctAnswer: 'A',
-          correctAnswerJson: null,
-          orderIndex,
-        });
+        payload.extraData = { words };
+        payload.correctAnswer = 'A';
       }
 
       if (qFormData.qType === 'listening') {
-        if (!questionAudioFile) throw new Error('Audio file is required for listening questions.');
-        if (questionAudioFile.size > MAX_UPLOAD_BYTES) throw new Error('Audio exceeds 200MB.');
-
-        if (qFormData.qOptions.some((o) => !o.trim())) throw new Error('All 4 listening options are required.');
+        if (!listeningAudioUrl && !questionAudioFile) throw new Error('Audio required.');
+        if (questionAudioFile && questionAudioFile.size > MAX_UPLOAD_BYTES) throw new Error('Audio too large.');
         const options = qFormData.qOptions.map((o) => o.trim());
         const correctOption = pickCorrectByLetter(options);
-        if (!correctOption) throw new Error('Please select the correct option (A/B/C/D).');
+        if (!correctOption) throw new Error('Select correct option.');
+        
+        payload.audioUrl = listeningAudioUrl ?? await uploadMaterialAsset(questionAudioFile!);
+        payload.options = options;
+        payload.correctAnswer = qFormData.qCorrect;
+        payload.correctAnswerJson = correctOption;
+      }
 
-        const audioUrl = listeningAudioUrl ?? await uploadMaterialAsset(questionAudioFile);
-        if (!listeningAudioUrl) setListeningAudioUrl(audioUrl);
-        await createExamQuestion({
-          examId: activeExam.id,
-          questionText: qFormData.qText.trim(),
-          qType: 'listening',
-          audioUrl,
-          options,
-          correctAnswer: qFormData.qCorrect,
-          correctAnswerJson: correctOption,
-          extraData: null,
-          content: null,
-          orderIndex,
-        });
+      if (editingQuestionId) {
+        await updateExamQuestion(payload);
+      } else {
+        await createExamQuestion(payload);
       }
 
       const qs = await fetchQuestionsByExamAdmin(activeExam.id);
       dispatchQuestions({ type: 'SET_QUESTIONS', payload: qs });
 
-      // reset form fields for next question
+      // reset form
+      setEditingQuestionId(null);
       setQFormData({
         ...qFormData,
         qText: '',
@@ -366,16 +351,13 @@ export default function AdminExams() {
         gWordsRaw: 'go,went,gone',
         gCorrectWord: 'went',
         wWordsRaw: 'travel,Germany,experience',
-        pSubtype: 'mcq' as 'mcq' | 'true_false',
-        tfCorrect: 'True' as 'True' | 'False',
+        pSubtype: 'mcq',
+        tfCorrect: 'True',
       });
-      
-      if (qFormData.qType !== 'listening') {
-        setQuestionAudioFile(null);
-        setListeningAudioUrl(null);
-      }
+      setQuestionAudioFile(null);
+      setListeningAudioUrl(null);
     } catch (e: unknown) {
-      setQError(e instanceof Error ? e.message : 'Failed to add question');
+      setQError(e instanceof Error ? e.message : 'Save failed');
     } finally {
       setQSaving(false);
     }
@@ -793,12 +775,37 @@ export default function AdminExams() {
                       )}
 
                       <button
-                        onClick={handleCreateQuestion}
+                        onClick={handleSaveQuestion}
                         disabled={qSaving}
                         className="w-full py-3 rounded-xl bg-[#C62828] text-white text-xs font-black uppercase tracking-widest hover:shadow-xl disabled:opacity-60"
                       >
-                        {qSaving ? 'Saving…' : 'Add Question'}
+                        {qSaving ? 'Saving…' : editingQuestionId ? 'Update Question' : 'Add Question'}
                       </button>
+                      {editingQuestionId && (
+                        <button
+                          onClick={() => {
+                            setEditingQuestionId(null);
+                            setQFormData({
+                              qText: '',
+                              qOptions: ['', '', '', ''],
+                              qCorrect: 'A',
+                              pParagraph: '',
+                              gSentence: 'I ___ to school yesterday',
+                              gWordsRaw: 'go,went,gone',
+                              gCorrectWord: 'went',
+                              wWordsRaw: 'travel,Germany,experience',
+                              pSubtype: 'mcq',
+                              tfCorrect: 'True',
+                              qType: qFormData.qType
+                            });
+                            setQuestionAudioFile(null);
+                            setListeningAudioUrl(null);
+                          }}
+                          className="w-full mt-2 py-2 rounded-xl bg-[#F5F5F0] text-[#1A1A1A]/40 text-[10px] font-black uppercase tracking-widest hover:text-[#C62828]"
+                        >
+                          Cancel Edit
+                        </button>
+                      )}
                     </div>
                   </div>
 
@@ -836,9 +843,14 @@ export default function AdminExams() {
                           <div key={q.id} className="p-4 rounded-xl bg-[#F5F5F0] border border-[#1A1A1A]/10">
                             <div className="flex justify-between gap-4">
                               <p className="text-sm font-black text-[#1A1A1A]">{idx + 1}. {q.question_text}</p>
-                              <button onClick={() => handleDeleteQuestion(q.id)} className="text-[#C62828]">
-                                <Trash2 className="w-4 h-4" />
-                              </button>
+                              <div className="flex items-center gap-2">
+                                <button onClick={() => openEditQuestion(q)} className="text-[#1A1A1A]/30 hover:text-[#1A1A1A]">
+                                  <Edit2 className="w-3.5 h-3.5" />
+                                </button>
+                                <button onClick={() => handleDeleteQuestion(q.id)} className="text-[#C62828]/30 hover:text-[#C62828]">
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
                             </div>
                             <p className="mt-2 text-[10px] font-black text-[#1A1A1A]/50 uppercase tracking-wider">
                               Correct: {q.correct_answer}

@@ -542,6 +542,34 @@ export async function createExamQuestion(payload: {
   if (error) throw new Error(error.message);
 }
 
+export async function updateExamQuestion(payload: {
+  id: string;
+  examId: string;
+  questionText: string;
+  options?: string[] | null;
+  correctAnswer?: string | null;
+  orderIndex?: number;
+  qType?: 'mcq' | 'text' | 'paragraph' | 'grammar' | 'writing' | 'listening';
+  content?: string | null;
+  audioUrl?: string | null;
+  extraData?: unknown | null;
+  correctAnswerJson?: unknown | null;
+}): Promise<void> {
+  const { error } = await supabase.from('questions').update({
+    exam_id: payload.examId,
+    question_text: payload.questionText,
+    type: payload.qType ?? 'mcq',
+    options: payload.options ?? null,
+    content: payload.content ?? null,
+    audio_url: payload.audioUrl || null,
+    extra_data: payload.extraData ?? null,
+    correct_answer: (payload.correctAnswer ?? '') as string,
+    correct_answer_json: payload.correctAnswerJson ?? null,
+    order_index: payload.orderIndex,
+  }).eq('id', payload.id);
+  if (error) throw new Error(error.message);
+}
+
 export async function bulkCreateExamQuestions(payload: {
   examId: string;
   questions: Array<{ questionText: string; options: string[]; correctAnswer: string; audioUrl?: string | null }>;
