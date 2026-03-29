@@ -481,7 +481,7 @@ export default function LandingPage() {
                 >
                   <div className="relative aspect-4/3 overflow-hidden">
                     <img 
-                      src={publicAssetUrl(image.image_path) ?? ''}
+                      src={publicAssetUrl(image.image_path) || undefined}
                       alt={image.title}
                       width={800}
                       height={600}
@@ -548,7 +548,7 @@ export default function LandingPage() {
                 >
                   <div className="relative h-40 sm:h-48 overflow-hidden">
                     <img 
-                      src={publicAssetUrl(event.image_path) ?? ''}
+                      src={publicAssetUrl(event.image_path) || undefined}
                       alt={event.title}
                       width={800}
                       height={500}

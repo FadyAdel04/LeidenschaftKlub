@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect, useRef } from 'react';
+import { usePersistentState } from '../../hooks/usePersistentState';
 import {
   LetterText, UploadCloud, Edit, Clock, Mic, StopCircle,
   CheckCircle, AlertCircle, X, Loader,
@@ -36,7 +37,7 @@ export default function StudentAssignments() {
   const [assignments,      setAssignments]      = useState<Assignment[]>([]);
   const [selected,         setSelected]         = useState<Assignment | null>(null);
   const [submission,       setSubmission]       = useState<Submission | null>(null);
-  const [answer,           setAnswer]           = useState('');
+  const [answer,           setAnswer]           = usePersistentState(`assignment_answer_${selected?.id ?? 'temp'}`, '');
   const [file,             setFile]             = useState<File | null>(null);
   const [submitting,       setSubmitting]       = useState(false);
   const [uploadMetrics,    setUploadMetrics]    = useState<UploadMetrics | null>(null);

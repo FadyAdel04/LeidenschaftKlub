@@ -154,7 +154,13 @@ export default function ExamPage() {
         if (cancelled) return;
         setExam(examData);
         setQuestions(questionData);
-        setTimeLeft(examData.duration * 60);
+        
+        // Calculate the target end time
+        const durationSeconds = examData.duration * 60;
+        const endTime = Date.now() + (durationSeconds * 1000);
+        (window as any).__examEndTime = endTime;
+        setTimeLeft(durationSeconds);
+        
         setAnswers(savedAnswers ?? {});
 
         // localStorage fallback (for resilience)
@@ -187,6 +193,19 @@ export default function ExamPage() {
 
   useEffect(() => {
     if (!protectionEnabled || !backupKey) return;
+    // Immediate backup to localStorage on any change
+    try {
+      const payload = {
+        answers,
+        currentIndex,
+        savedAt: Date.now(),
+      };
+      localStorage.setItem(backupKey, JSON.stringify(payload));
+    } catch {
+      // ignore
+    }
+    
+    // Also keep a 10s interval for extra safety
     const interval = window.setInterval(() => {
       try {
         const payload = {
@@ -198,7 +217,7 @@ export default function ExamPage() {
       } catch {
         // ignore
       }
-    }, 25_000);
+    }, 10_000);
     return () => window.clearInterval(interval);
   }, [protectionEnabled, backupKey, answers, currentIndex]);
 
@@ -295,14 +314,26 @@ export default function ExamPage() {
 
   useEffect(() => {
     if (loading || !exam || submitting) return;
-    if (timeLeft <= 0) {
-      setSubmitConrmOpen(false);
-      void handleSubmit();
-      return;
-    }
-    const timer = window.setInterval(() => setTimeLeft((prev) => prev - 1), 1000);
-    return () => window.clearInterval(timer);
-  }, [timeLeft, loading, exam, submitting]);
+    
+    const interval = window.setInterval(() => {
+      const target = (window as any).__examEndTime;
+      if (!target) return;
+      
+      const now = Date.now();
+      const diff = Math.max(0, Math.floor((target - now) / 1000));
+      
+      if (diff <= 0) {
+        setTimeLeft(0);
+        setSubmitConrmOpen(false);
+        void handleSubmit();
+        window.clearInterval(interval);
+      } else {
+        setTimeLeft(diff);
+      }
+    }, 1000);
+
+    return () => window.clearInterval(interval);
+  }, [loading, exam, submitting]);
 
   const answeredCount = questions.reduce((acc, q) => acc + (isAnswered(q, answers[q.id]) ? 1 : 0), 0);
   const progress = questions.length > 0 ? Math.round((answeredCount / questions.length) * 100) : 0;

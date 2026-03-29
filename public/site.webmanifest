@@ -1,7 +1,7 @@
 {
   "name": "Leidenschaft Klub",
   "short_name": "Leidenschaft",
-  "description": "German learning — courses, exams, and materials. Add to Home Screen for quick access.",
+  "description": "Premium Language Learning Platform — Александрия, Египет.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
@@ -10,16 +10,22 @@
   "theme_color": "#C62828",
   "icons": [
     {
-      "src": "/favicon.png",
-      "sizes": "any",
-      "type": "image/png",
+      "src": "/logo.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
       "purpose": "any"
     },
     {
-      "src": "/favicon.png",
-      "sizes": "any",
-      "type": "image/png",
+      "src": "/logo.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
       "purpose": "maskable"
+    },
+    {
+      "src": "/logo.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any"
     }
   ]
 }

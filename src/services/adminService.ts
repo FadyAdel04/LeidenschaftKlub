@@ -26,6 +26,19 @@ export type ExamAnswer = ExamAnswerCore & {
   questions?: { question_text: string; type: string; extra_data: unknown | null };
 };
 
+// Caching Layer
+const ADMIN_CACHE: Record<string, { data: any; timestamp: number }> = {};
+const CACHE_TTL = 1000 * 60 * 5; // 5 minutes
+
+function getCache(key: string) {
+  const entry = ADMIN_CACHE[key];
+  if (!entry) return null;
+  if (Date.now() - entry.timestamp > CACHE_TTL) { delete ADMIN_CACHE[key]; return null; }
+  return entry.data;
+}
+function setCache(key: string, data: any) { ADMIN_CACHE[key] = { data, timestamp: Date.now() }; }
+export function invalidateAdminCache() { Object.keys(ADMIN_CACHE).forEach(k => delete ADMIN_CACHE[k]); }
+
 function resolveMaterialsPath(fileUrlOrPath: string): string {
   if (!fileUrlOrPath) return '';
   if (!fileUrlOrPath.startsWith('http')) return fileUrlOrPath;
@@ -69,16 +82,31 @@ function resolveSubmissionsPath(fileUrlOrPath: string): string {
 // ─── Students ─────────────────────────────────────────────────────────────────
 
 export async function fetchAllStudents(): Promise<Profile[]> {
+  const cached = getCache('students');
+  if (cached) return cached;
+
   const { data, error } = await supabase
     .from('profiles')
     .select('*')
     .eq('role', 'student')
     .order('created_at', { ascending: false });
   if (error) throw new Error(error.message);
-  return (data ?? []) as Profile[];
+  
+  const profiles = (data ?? []) as Profile[];
+  // Hydrate signed URLs for avatars
+  const hydrated = await Promise.all(profiles.map(async (p) => {
+    if (!p.avatar_url) return p;
+    const { getSignedAvatarUrl } = await import('./studentService');
+    const signed = await getSignedAvatarUrl(p.avatar_url);
+    return { ...p, avatar_url: signed };
+  }));
+
+  setCache('students', hydrated);
+  return hydrated;
 }
 
 export async function updateStudentLevel(studentId: string, newLevel: string): Promise<void> {
+  invalidateAdminCache();
   const { error } = await supabase
     .from('profiles')
     .update({ current_level: newLevel })
@@ -89,15 +117,21 @@ export async function updateStudentLevel(studentId: string, newLevel: string): P
 // ─── Levels ───────────────────────────────────────────────────────────────────
 
 export async function fetchAllLevels(): Promise<Level[]> {
+  const cached = getCache('levels');
+  if (cached) return cached;
+
   const { data, error } = await supabase
     .from('levels')
     .select('*')
     .order('name', { ascending: true });
   if (error) throw new Error(error.message);
-  return (data ?? []) as Level[];
+  const res = (data ?? []) as Level[];
+  setCache('levels', res);
+  return res;
 }
 
 export async function createLevel(payload: { name: string; description?: string | null }): Promise<void> {
+  invalidateAdminCache();
   const { error } = await supabase.from('levels').insert({
     name: payload.name,
     description: payload.description || null,
@@ -106,6 +140,7 @@ export async function createLevel(payload: { name: string; description?: string 
 }
 
 export async function updateLevel(id: string, payload: { name: string; description?: string | null }): Promise<void> {
+  invalidateAdminCache();
   const { error } = await supabase
     .from('levels')
     .update({ name: payload.name, description: payload.description || null })
@@ -114,6 +149,7 @@ export async function updateLevel(id: string, payload: { name: string; descripti
 }
 
 export async function deleteLevel(id: string): Promise<void> {
+  invalidateAdminCache();
   const { error } = await supabase.from('levels').delete().eq('id', id);
   if (error) throw new Error(error.message);
 }
@@ -121,6 +157,9 @@ export async function deleteLevel(id: string): Promise<void> {
 // ─── Materials ────────────────────────────────────────────────────────────────
 
 export async function fetchAllMaterials(): Promise<(Material & { levels?: { name: string } })[]> {
+  const cached = getCache('materials');
+  if (cached) return cached;
+
   const { data, error } = await supabase
     .from('materials')
     .select('*, levels(name)')
@@ -140,6 +179,7 @@ export async function fetchAllMaterials(): Promise<(Material & { levels?: { name
     return { ...material, file_url: signedData.signedUrl };
   }));
 
+  setCache('materials', hydrated);
   return hydrated;
 }
 
@@ -164,6 +204,7 @@ export async function uploadMaterial(payload: {
     upsert: true,
     onProgress: payload.onProgress,
   });
+  invalidateAdminCache();
 
   // 2. Insert row in DB (store storage path, not public URL)
   const { data: created, error: dbError } = await supabase
@@ -214,6 +255,7 @@ export async function uploadMaterial(payload: {
 }
 
 export async function deleteMaterial(id: string): Promise<void> {
+  invalidateAdminCache();
   const { error } = await supabase.from('materials').delete().eq('id', id);
   if (error) throw new Error(error.message);
 }
@@ -308,6 +350,7 @@ export async function updateMaterial(payload: {
   };
   if (nextPath) updates.file_url = nextPath;
 
+  invalidateAdminCache();
   const { error } = await supabase.from('materials').update(updates).eq('id', payload.id);
   if (error) throw new Error(error.message);
 }
@@ -315,6 +358,9 @@ export async function updateMaterial(payload: {
 // ─── Assignments ──────────────────────────────────────────────────────────────
 
 export async function fetchAllAssignments(): Promise<(Assignment & { levels?: { name: string } })[]> {
+  const cached = getCache('assignments');
+  if (cached) return cached;
+
   const { data, error } = await supabase
     .from('assignments')
     .select('*, levels(name)')
@@ -329,6 +375,7 @@ export async function fetchAllAssignments(): Promise<(Assignment & { levels?: { 
     if (!signedData?.signedUrl) return row;
     return { ...row, audio_url: signedData.signedUrl };
   }));
+  setCache('assignments', hydrated);
   return hydrated;
 }
 
@@ -343,6 +390,7 @@ export async function createAssignment(payload: {
     throw new Error('Please choose a level before creating assignment.');
   }
 
+  invalidateAdminCache();
   const { data: created, error } = await supabase
     .from('assignments')
     .insert({
@@ -387,6 +435,7 @@ export async function createAssignment(payload: {
 }
 
 export async function deleteAssignment(id: string): Promise<void> {
+  invalidateAdminCache();
   const { error } = await supabase.from('assignments').delete().eq('id', id);
   if (error) throw new Error(error.message);
 }
@@ -415,12 +464,17 @@ export async function updateAssignment(payload: {
 // ─── Exams ────────────────────────────────────────────────────────────────────
 
 export async function fetchAllExams(): Promise<(Exam & { levels?: { name: string } })[]> {
+  const cached = getCache('exams');
+  if (cached) return cached;
+
   const { data, error } = await supabase
     .from('exams')
     .select('*, levels(name)')
     .order('created_at', { ascending: false });
   if (error) throw new Error(error.message);
-  return (data ?? []) as (Exam & { levels?: { name: string } })[];
+  const res = (data ?? []) as (Exam & { levels?: { name: string } })[];
+  setCache('exams', res);
+  return res;
 }
 
 export async function createExam(payload: {
@@ -432,6 +486,7 @@ export async function createExam(payload: {
     throw new Error('Please choose a level before creating exam.');
   }
 
+  invalidateAdminCache();
   const { data: created, error } = await supabase
     .from('exams')
     .insert({
@@ -474,6 +529,7 @@ export async function createExam(payload: {
 }
 
 export async function deleteExam(id: string): Promise<void> {
+  invalidateAdminCache();
   const { error } = await supabase.from('exams').delete().eq('id', id);
   if (error) throw new Error(error.message);
 }
@@ -484,6 +540,7 @@ export async function updateExam(payload: {
   levelId: string;
   duration: number;
 }): Promise<void> {
+  invalidateAdminCache();
   const { error } = await supabase
     .from('exams')
     .update({ title: payload.title, level_id: payload.levelId, duration: payload.duration })

@@ -59,7 +59,7 @@ export default function AdminExams() {
   const [showForm, setShowForm] = useState(false);
 
   // Consolidated Exam Data
-  const [examData, setExamData] = useState({
+  const [examData, setExamData] = usePersistentState('admin_exam_form', {
     title: '',
     levelId: '',
     duration: '30',
@@ -75,7 +75,7 @@ export default function AdminExams() {
   const [questionsLoading, setQuestionsLoading] = useState(false);
 
   // Consolidated Question Form Data
-  const [qFormData, setQFormData] = useState({
+  const [qFormData, setQFormData] = usePersistentState('admin_question_form', {
     qText: '',
     qOptions: ['', '', '', ''],
     qCorrect: 'A',
@@ -90,7 +90,7 @@ export default function AdminExams() {
   });
 
   const [qSaving, setQSaving] = useState(false);
-  const [bulkInput, setBulkInput] = useState('');
+  const [bulkInput, setBulkInput] = usePersistentState('admin_exam_bulk_input', '');
   const [bulkSaving, setBulkSaving] = useState(false);
   const [qError, setQError] = useState('');
   const [questionAudioFile, setQuestionAudioFile] = useState<File | null>(null);
@@ -156,10 +156,11 @@ export default function AdminExams() {
     setCreating(true); setFormError('');
     try {
       await createExam({ title: examData.title.trim(), levelId: examData.levelId, duration: durationNum });
-      setSuccess('Exam created!'); 
-      setExamData({ title: '', levelId: levels[0]?.id || '', duration: '30' }); 
+      setSuccess('Exam created successfully!');
+      setExamData({ title: '', levelId: '', duration: '30' });
       setShowForm(false);
-      await load(); setTimeout(() => setSuccess(''), 4000);
+      await load();
+      setTimeout(() => setSuccess(''), 4000);
     } catch (e: unknown) { setFormError(e instanceof Error ? e.message : 'Failed'); }
     finally { setCreating(false); }
   };
@@ -341,17 +342,18 @@ export default function AdminExams() {
 
       // reset form
       setEditingQuestionId(null);
+      setSuccess('Question added!');
       setQFormData({
-        ...qFormData,
         qText: '',
         qOptions: ['', '', '', ''],
         qCorrect: 'A',
+        qType: 'paragraph',
+        pSubtype: 'mcq',
         pParagraph: '',
         gSentence: 'I ___ to school yesterday',
         gWordsRaw: 'go,went,gone',
         gCorrectWord: 'went',
         wWordsRaw: 'travel,Germany,experience',
-        pSubtype: 'mcq',
         tfCorrect: 'True',
       });
       setQuestionAudioFile(null);

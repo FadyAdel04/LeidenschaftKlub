@@ -7,6 +7,19 @@ import type { User as SupabaseAuthUser } from '@supabase/supabase-js';
 import { uploadFileWithProgress, type UploadMetrics } from '../utils/storageUpload';
 // notification inserts for student actions are done via RPC (see `notify_admins`)
 
+// Caching Layer
+const STUDENT_CACHE: Record<string, { data: any; timestamp: number }> = {};
+const CACHE_TTL = 1000 * 60 * 5; // 5 minutes
+
+function getCache(key: string) {
+  const entry = STUDENT_CACHE[key];
+  if (!entry) return null;
+  if (Date.now() - entry.timestamp > CACHE_TTL) { delete STUDENT_CACHE[key]; return null; }
+  return entry.data;
+}
+function setCache(key: string, data: any) { STUDENT_CACHE[key] = { data, timestamp: Date.now() }; }
+export function invalidateStudentCache() { Object.keys(STUDENT_CACHE).forEach(k => delete STUDENT_CACHE[k]); }
+
 // ─── Auth User (full metadata from Supabase Auth) ─────────────────────────────
 
 export interface AuthUserInfo {
@@ -378,6 +391,10 @@ export async function fetchLevelByName(levelName: string): Promise<Level> {
 // ─── Materials ────────────────────────────────────────────────────────────────
 
 export async function fetchMyAssignedMaterials(studentId: string): Promise<Material[]> {
+  const cacheKey = `materials_${studentId}`;
+  const cached = getCache(cacheKey);
+  if (cached) return cached;
+
   const { data, error } = await supabase
     .from('material_assignments')
     .select(`
@@ -406,12 +423,17 @@ export async function fetchMyAssignedMaterials(studentId: string): Promise<Mater
     return { ...material, file_url: signedData.signedUrl };
   }));
 
+  setCache(cacheKey, hydrated);
   return hydrated;
 }
 
 // ─── Assignments ──────────────────────────────────────────────────────────────
 
 export async function fetchAssignmentsByLevel(levelId: string): Promise<Assignment[]> {
+  const cacheKey = `assignments_${levelId}`;
+  const cached = getCache(cacheKey);
+  if (cached) return cached;
+
   const { data, error } = await supabase
     .from('assignments')
     .select('*')
@@ -427,6 +449,7 @@ export async function fetchAssignmentsByLevel(levelId: string): Promise<Assignme
     if (signedError || !signedData?.signedUrl) return assignment;
     return { ...assignment, audio_url: signedData.signedUrl };
   }));
+  setCache(cacheKey, hydrated);
   return hydrated;
 }
 
@@ -496,6 +519,7 @@ export async function submitAssignment(payload: {
   fileUrl?: string;
   audioAnswerUrl?: string;
 }): Promise<void> {
+  invalidateStudentCache();
   const { error } = await supabase
     .from('submissions')
     .upsert(
@@ -570,13 +594,19 @@ export async function uploadSubmissionAudio(
 // ─── Exams ────────────────────────────────────────────────────────────────────
 
 export async function fetchExamsByLevel(levelId: string): Promise<Exam[]> {
+  const cacheKey = `exams_${levelId}`;
+  const cached = getCache(cacheKey);
+  if (cached) return cached;
+
   const { data, error } = await supabase
     .from('exams')
     .select('*')
     .eq('level_id', levelId)
     .order('created_at', { ascending: false });
   if (error) throw new Error(error.message);
-  return (data ?? []) as Exam[];
+  const res = (data ?? []) as Exam[];
+  setCache(cacheKey, res);
+  return res;
 }
 
 export async function fetchExamById(examId: string): Promise<Exam> {
@@ -678,6 +708,7 @@ export function normalizeExamResultRow(data: unknown): Result {
 export async function submitExamAndGrade(
   payload: SubmitExamPayload
 ): Promise<{ score: number | null; passed: boolean; pendingReview: boolean }> {
+  invalidateStudentCache();
   const questions = await fetchQuestionsByExam(payload.examId);
   if (questions.length === 0) {
     throw new Error('This exam has no questions yet.');

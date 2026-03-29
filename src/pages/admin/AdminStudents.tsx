@@ -139,8 +139,12 @@ export default function AdminStudents() {
                           {/* Name */}
                           <td className="px-8 py-5">
                             <div className="flex items-center gap-4">
-                              <div className="w-10 h-10 rounded-xl bg-[#C62828] flex items-center justify-center text-white font-black text-sm shrink-0">
-                                {getInitials(s.name || s.email)}
+                              <div className="w-10 h-10 rounded-xl bg-[#C62828] flex items-center justify-center text-white font-black text-sm shrink-0 overflow-hidden shadow-sm">
+                                {s.avatar_url ? (
+                                  <img src={s.avatar_url} alt={s.name || s.email} className="w-full h-full object-cover" />
+                                ) : (
+                                  getInitials(s.name || s.email)
+                                )}
                               </div>
                               <p className="font-black text-sm text-[#1A1A1A] whitespace-nowrap">{s.name || '—'}</p>
                             </div>

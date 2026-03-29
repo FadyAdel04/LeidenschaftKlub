@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
+import { usePersistentState } from '../../hooks/usePersistentState';
 import { LetterText, Plus, X, Trash2, AlertCircle, CheckCircle, Loader, Clock, Edit2, Save, ExternalLink } from 'lucide-react';
 import AdminSidebar from '../../components/shared/AdminSidebar';
 import {
@@ -20,10 +21,10 @@ export default function AdminAssignments() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [showForm, setShowForm] = useState(false);
-  const [title, setTitle] = useState('');
-  const [desc, setDesc] = useState('');
-  const [levelId, setLevelId] = useState('');
-  const [deadline, setDeadline] = useState('');
+  const [title, setTitle] = usePersistentState('admin_assignment_title', '');
+  const [desc, setDesc] = usePersistentState('admin_assignment_desc', '');
+  const [levelId, setLevelId] = usePersistentState('admin_assignment_level_id', '');
+  const [deadline, setDeadline] = usePersistentState('admin_assignment_deadline', '');
   const [creating, setCreating] = useState(false);
   const [formError, setFormError] = useState('');
   const [deleting, setDeleting] = useState<string | null>(null);
@@ -64,7 +65,9 @@ export default function AdminAssignments() {
         audioUrl = await uploadMaterialAsset(audiole, setUploadMetrics);
       }
       await createAssignment({ title: title.trim(), description: desc.trim(), levelId, deadline: deadline || null, audioUrl });
-      setSuccess('Assignment created!'); setTitle(''); setDesc(''); setDeadline(''); setShowForm(false);
+      setSuccess('Assignment created!');
+      setTitle(''); setDesc(''); setDeadline(''); setLevelId('');
+      setShowForm(false);
       setAudiole(null);
       await load(); setTimeout(() => setSuccess(''), 4000);
     } catch (e: unknown) { setFormError(e instanceof Error ? e.message : 'Failed'); }

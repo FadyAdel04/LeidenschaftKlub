@@ -1,9 +1,10 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import { FiBookOpen, FiFileText, FiHelpCircle, FiUser, FiLogOut, FiX, FiMenu } from 'react-icons/fi';
+import { FiBookOpen, FiFileText, FiHelpCircle, FiUser, FiLogOut, FiX, FiMenu, FiDownload } from 'react-icons/fi';
 import { RiDashboardLine } from 'react-icons/ri';
 import { useAuth } from '../../context/AuthContext';
 import type { Profile } from '../../services/studentService';
+import { usePWAInstall } from '../../hooks/usePWAInstall';
 
 const navLinks = [
   { to: '/student',             label: 'Dashboard',   icon: RiDashboardLine },
@@ -32,6 +33,7 @@ export default function StudentSidebar({ profile, open, onClose, onToggle }: Pro
   const navigate = useNavigate();
   const location = useLocation();
   const { logout } = useAuth();
+  const { deferredPrompt, installApp } = usePWAInstall();
 
   const handleLogout = async () => {
     await logout();
@@ -111,6 +113,19 @@ export default function StudentSidebar({ profile, open, onClose, onToggle }: Pro
             </Link>
           ))}
         </nav>
+
+        {/* PWA Install */}
+        {deferredPrompt && (
+          <div className="px-6 lg:px-8 mb-4 relative z-10">
+            <button
+              onClick={installApp}
+              className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-[#C62828] text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:shadow-2xl hover:shadow-[#C62828]/20 transition-all border border-[#C62828]/20"
+            >
+              <FiDownload className="w-4 h-4" />
+              <span>Install App</span>
+            </button>
+          </div>
+        )}
 
         {/* Logout */}
         <div className="px-6 lg:px-8 pt-6 border-t border-[#1A1A1A]/5">

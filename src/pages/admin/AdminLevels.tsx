@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
+import { usePersistentState } from '../../hooks/usePersistentState';
 import { Layers, Users, CheckCircle, Plus, Edit2, Trash2, X, Save, Loader, AlertCircle } from 'lucide-react';
 import AdminSidebar from '../../components/shared/AdminSidebar';
 import { fetchAllLevels, fetchAllStudents, createLevel, updateLevel, deleteLevel, type Level, type Profile } from '../../services/adminService';
@@ -12,8 +13,8 @@ export default function AdminLevels() {
   const [students, setStudents] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
+  const [name, setName] = usePersistentState('admin_level_name', '');
+  const [description, setDescription] = usePersistentState('admin_level_desc', '');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [editing, setEditing] = useState<Level | null>(null);

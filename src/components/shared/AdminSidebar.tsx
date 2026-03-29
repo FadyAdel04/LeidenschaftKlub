@@ -1,10 +1,11 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
-import { FiUsers, FiBook, FiFileText, FiAward, FiLogOut, FiX, FiMenu, FiGrid, FiImage, FiBell } from 'react-icons/fi';
+import { FiUsers, FiBook, FiFileText, FiAward, FiLogOut, FiX, FiMenu, FiGrid, FiImage, FiBell, FiDownload } from 'react-icons/fi';
 import { RiDashboardLine } from 'react-icons/ri';
 import { useAuth } from '../../context/AuthContext';
 import { fetchAuthUser, type AuthUserInfo } from '../../services/studentService';
+import { usePWAInstall } from '../../hooks/usePWAInstall';
 
 const navLinks = [
   { to: '/admin',              label: 'Dashboard',   icon: RiDashboardLine, exact: true },
@@ -27,6 +28,7 @@ export default function AdminSidebar() {
   const { logout }   = useAuth();
   const [open,       setOpen]    = useState(false);
   const [adminInfo,  setAdminInfo] = useState<AuthUserInfo | null>(null);
+  const { deferredPrompt, installApp } = usePWAInstall();
 
   useEffect(() => {
     fetchAuthUser().then(setAdminInfo).catch(() => null);
@@ -112,6 +114,19 @@ export default function AdminSidebar() {
             </Link>
           ))}
         </nav>
+
+        {/* PWA Install */}
+        {deferredPrompt && (
+          <div className="px-6 lg:px-8 mb-4 relative z-10">
+            <button
+              onClick={installApp}
+              className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-[#C62828] text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:shadow-2xl hover:shadow-[#C62828]/20 transition-all border border-[#C62828]/20"
+            >
+              <FiDownload className="w-4 h-4" />
+              <span>Install App</span>
+            </button>
+          </div>
+        )}
 
         {/* Logout */}
         <div className="px-6 lg:px-8 pt-6 border-t border-white/5 relative z-10">

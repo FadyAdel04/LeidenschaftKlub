@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect, useRef } from 'react';
+import { usePersistentState } from '../../hooks/usePersistentState';
 import { Book, UploadCloud, Trash2, AlertCircle, CheckCircle, Loader, Plus, X, PlayCircle, Edit2, Save } from 'lucide-react';
 import AdminSidebar from '../../components/shared/AdminSidebar';
 import MaterialPreviewModal from '../../components/shared/MaterialPreviewModal';
@@ -29,8 +30,8 @@ export default function AdminMaterials() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [showForm, setShowForm] = useState(false);
-  const [title, setTitle] = useState('');
-  const [levelId, setLevelId] = useState('');
+  const [title, setTitle] = usePersistentState('admin_material_title', '');
+  const [levelId, setLevelId] = usePersistentState('admin_material_level_id', '');
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [formError, setFormError] = useState('');
@@ -79,8 +80,11 @@ export default function AdminMaterials() {
         file,
         onProgress: setUploadMetrics,
       });
-      setSuccess('Material uploaded!'); setTitle(''); setFile(null); setShowForm(false);
-      await load(); setTimeout(() => setSuccess(''), 4000);
+      setSuccess('Material uploaded!');
+      setTitle(''); setLevelId(''); setFile(null);
+      setShowForm(false);
+      await load();
+      setTimeout(() => setSuccess(''), 4000);
     } catch (e: unknown) { setFormError(e instanceof Error ? e.message : 'Upload failed'); }
     finally { setUploading(false); setUploadMetrics(null); }
   };

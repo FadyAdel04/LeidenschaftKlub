@@ -6,6 +6,7 @@ import logo from '../../assets/logo.jpg';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../lib/supabase';
 import ToastStack from '../shared/ToastStack';
+import { usePWAInstall } from '../../hooks/usePWAInstall';
 
 export default function TopNavBar() {
   const navigate = useNavigate();
@@ -14,6 +15,7 @@ export default function TopNavBar() {
   const [isOpen, setIsOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('hero');
   const [dbRole, setDbRole] = useState<'student' | 'admin' | null>(null);
+  const { deferredPrompt, installApp: handleInstallApp } = usePWAInstall();
 
   const navItems = [
     { name: 'Home', id: 'hero' },
@@ -184,6 +186,14 @@ export default function TopNavBar() {
         <div className="flex items-center gap-4">
           {/* Auth Actions - Desktop only */}
           <div className="hidden lg:flex items-center gap-6">
+            {deferredPrompt && (
+              <button
+                onClick={handleInstallApp}
+                className="hidden xl:flex items-center gap-2 text-[#C62828] font-black text-[10px] uppercase tracking-[0.2em] border border-[#C62828]/20 px-4 py-2 rounded-xl hover:bg-[#C62828] hover:text-white transition-all"
+              >
+                Install App
+              </button>
+            )}
             {isSignedIn ? (
               <button
                 onClick={() => navigate(portalPath)}
@@ -311,6 +321,17 @@ export default function TopNavBar() {
 
             {/* Auth Actions - Mobile */}
             <div className="w-full pt-6 mt-4 border-t border-[#1A1A1A]/10 space-y-3">
+              {deferredPrompt && (
+                <motion.button
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.25 }}
+                  onClick={handleInstallApp}
+                  className="w-full py-4 text-[#C62828] font-black uppercase tracking-wider text-sm border-2 border-[#C62828] rounded-2xl hover:bg-[#C62828] hover:text-white transition-all flex items-center justify-center gap-2"
+                >
+                  Download Mobile App
+                </motion.button>
+              )}
               {isSignedIn ? (
                 <motion.button
                   initial={{ y: 20, opacity: 0 }}
