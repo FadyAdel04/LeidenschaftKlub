@@ -12,13 +12,15 @@ import type {
   Submission,
   ExamQuestion,
   Result,
+  Group,
+  InstructorGroup,
   ExamAnswer as ExamAnswerCore,
 } from './studentService';
 import { normalizeExamResultRow } from './studentService';
 import { insertNotificationsBatch, insertNotification } from './notificationService';
 import { uploadFileWithProgress, type UploadMetrics } from '../utils/storageUpload';
 
-export type { Profile, Level, Material, Assignment, Exam, Submission, ExamQuestion, Result };
+export type { Profile, Level, Material, Assignment, Exam, Submission, ExamQuestion, Result, Group, InstructorGroup };
 
 export type ExamAnswer = ExamAnswerCore & {
   profiles?: { name: string; email: string };
@@ -81,15 +83,19 @@ function resolveSubmissionsPath(fileUrlOrPath: string): string {
 
 // ─── Students ─────────────────────────────────────────────────────────────────
 
-export async function fetchAllStudents(): Promise<Profile[]> {
-  const cached = getCache('students');
+export async function fetchAllStudents(includeInstructors = false): Promise<Profile[]> {
+  const cached = getCache('students' + (includeInstructors ? '_all' : ''));
   if (cached) return cached;
 
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('role', 'student')
-    .order('created_at', { ascending: false });
+  let query = supabase.from('profiles').select('*');
+  
+  if (includeInstructors) {
+    query = query.in('role', ['student', 'instructor']);
+  } else {
+    query = query.eq('role', 'student');
+  }
+
+  const { data, error } = await query.order('name', { ascending: true });
   if (error) throw new Error(error.message);
   
   const profiles = (data ?? []) as Profile[];
@@ -101,51 +107,178 @@ export async function fetchAllStudents(): Promise<Profile[]> {
     return { ...p, avatar_url: signed };
   }));
 
-  setCache('students', hydrated);
+  setCache('students' + (includeInstructors ? '_all' : ''), hydrated);
   return hydrated;
+}
+
+export async function fetchAllInstructors(): Promise<Profile[]> {
+  const cached = getCache('instructors');
+  if (cached) return cached;
+
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('role', 'instructor')
+    .order('name', { ascending: true });
+  if (error) throw new Error(error.message);
+  
+  const instructors = (data ?? []) as Profile[];
+  setCache('instructors', instructors);
+  return instructors;
+}
+
+export async function deleteStudent(studentId: string): Promise<void> {
+  const { error } = await supabase.from('profiles').delete().eq('id', studentId);
+  if (error) throw new Error(error.message);
+  invalidateAdminCache();
 }
 
 export async function updateStudentLevel(studentId: string, newLevel: string): Promise<void> {
   invalidateAdminCache();
+  // 1. Update basic string field
   const { error } = await supabase
     .from('profiles')
     .update({ current_level: newLevel })
     .eq('id', studentId);
   if (error) throw new Error(error.message);
+
+  // 2. Map name to level_id and update join table securely
+  const { data: level } = await supabase.from('levels').select('id').eq('name', newLevel).maybeSingle();
+  if (level) {
+    await assignStudentToLevelNew(studentId, level.id);
+  }
 }
 
 // ─── Levels ───────────────────────────────────────────────────────────────────
 
 export async function fetchAllLevels(): Promise<Level[]> {
-  const cached = getCache('levels');
-  if (cached) return cached;
+  invalidateAdminCache(); // always fresh for this page
 
-  const { data, error } = await supabase
+  const { data: levelsData, error: levelsError } = await supabase
     .from('levels')
-    .select('*')
+    .select('*, level_students(count), groups(id, name)')
     .order('name', { ascending: true });
-  if (error) throw new Error(error.message);
-  const res = (data ?? []) as Level[];
-  setCache('levels', res);
-  return res;
+
+  if (levelsError) throw new Error(levelsError.message);
+
+  const instructorIds = [...new Set((levelsData || []).map((l: any) => l.instructor_id).filter(Boolean))];
+  let instructorsMap: Record<string, { name: string; email: string }> = {};
+
+  if (instructorIds.length > 0) {
+    const { data: profileData } = await supabase
+      .from('profiles')
+      .select('id, name, email')
+      .in('id', instructorIds);
+    instructorsMap = (profileData || []).reduce((acc, p) => {
+      acc[p.id] = { name: p.name, email: p.email };
+      return acc;
+    }, {} as Record<string, { name: string; email: string }>);
+  }
+
+  return (levelsData ?? []).map((l: any) => ({
+    ...l,
+    instructor: l.instructor_id ? instructorsMap[l.instructor_id] ?? null : null,
+    group: l.groups ?? null,
+    student_count: l.level_students?.[0]?.count ?? 0,
+  })) as Level[];
 }
 
-export async function createLevel(payload: { name: string; description?: string | null }): Promise<void> {
+export async function fetchLevelsByGroup(groupId: string): Promise<Level[]> {
+  const { data, error } = await supabase
+    .from('levels')
+    .select('*, level_students(count)')
+    .eq('group_id', groupId)
+    .order('name', { ascending: true });
+  if (error) throw new Error(error.message);
+  return (data ?? []).map((l: any) => ({
+    ...l,
+    student_count: l.level_students?.[0]?.count ?? 0,
+  })) as Level[];
+}
+
+export async function fetchStudentsInLevel(levelId: string): Promise<Profile[]> {
+  const { data, error } = await supabase
+    .from('level_students')
+    .select('student_id, student:profiles!student_id(*)')
+    .eq('level_id', levelId);
+  if (error) throw new Error(error.message);
+  
+  const profiles = (data ?? []).map((r: any) => r.student).filter(Boolean) as Profile[];
+  
+  // Hydrate avatars
+  const hydrated = await Promise.all(profiles.map(async (p) => {
+    if (!p.avatar_url) return p;
+    // Assume avatars are in public 'avatars' bucket or similar
+    const { data: signed } = await supabase.storage.from('avatars').createSignedUrl(p.avatar_url, 60*60);
+    return { ...p, avatar_url: signed?.signedUrl ?? p.avatar_url };
+  }));
+  
+  return hydrated;
+}
+
+export async function assignStudentToLevelNew(studentId: string, levelId: string): Promise<void> {
+  invalidateAdminCache();
+  
+  // Ensure the student is only in one level by removing old assignments first
+  await supabase.from('level_students').delete().eq('student_id', studentId);
+  
+  // Insert the new assignment cleanly
+  const { error } = await supabase
+    .from('level_students')
+    .insert({ student_id: studentId, level_id: levelId });
+    
+  if (error) throw new Error(error.message);
+}
+
+export async function removeStudentFromLevel(studentId: string, levelId: string): Promise<void> {
+  invalidateAdminCache();
+  const { error } = await supabase
+    .from('level_students')
+    .delete()
+    .eq('student_id', studentId)
+    .eq('level_id', levelId);
+  if (error) throw new Error(error.message);
+}
+
+export async function createLevel(payload: {
+  name: string;
+  description?: string | null;
+  group_id?: string | null;
+  instructor_id?: string | null;
+}): Promise<void> {
   invalidateAdminCache();
   const { error } = await supabase.from('levels').insert({
     name: payload.name,
     description: payload.description || null,
+    group_id: payload.group_id || null,
+    instructor_id: payload.instructor_id || null,
   });
   if (error) throw new Error(error.message);
 }
 
-export async function updateLevel(id: string, payload: { name: string; description?: string | null }): Promise<void> {
+export async function updateLevel(id: string, payload: {
+  name?: string;
+  description?: string | null;
+  group_id?: string | null;
+  instructor_id?: string | null;
+}): Promise<void> {
   invalidateAdminCache();
-  const { error } = await supabase
-    .from('levels')
-    .update({ name: payload.name, description: payload.description || null })
-    .eq('id', id);
+  const update: Record<string, any> = {};
+  if (payload.name !== undefined)          update.name = payload.name;
+  if (payload.description !== undefined)   update.description = payload.description || null;
+  if (payload.group_id !== undefined)      update.group_id = payload.group_id || null;
+  if (payload.instructor_id !== undefined) update.instructor_id = payload.instructor_id || null;
+  const { error } = await supabase.from('levels').update(update).eq('id', id);
   if (error) throw new Error(error.message);
+
+  // Sync instructor_id to the joint table level_students to keep queries clean
+  if (payload.instructor_id !== undefined) {
+    const { error: syncError } = await supabase
+      .from('level_students')
+      .update({ instructor_id: payload.instructor_id || null })
+      .eq('level_id', id);
+    if (syncError) console.error("Failed to sync instructor_id to level_students:", syncError);
+  }
 }
 
 export async function deleteLevel(id: string): Promise<void> {
@@ -153,6 +286,11 @@ export async function deleteLevel(id: string): Promise<void> {
   const { error } = await supabase.from('levels').delete().eq('id', id);
   if (error) throw new Error(error.message);
 }
+
+export async function assignStudentToLevel(studentId: string, levelId: string, _instructorId?: string | null): Promise<void> {
+  return assignStudentToLevelNew(studentId, levelId);
+}
+
 
 // ─── Materials ────────────────────────────────────────────────────────────────
 
@@ -361,12 +499,19 @@ export async function fetchAllAssignments(): Promise<(Assignment & { levels?: { 
   const cached = getCache('assignments');
   if (cached) return cached;
 
-  const { data, error } = await supabase
+  // 1. Fetch assignments and join levels AND instructor
+  const { data: assignmentsData, error: assignmentsError } = await supabase
     .from('assignments')
-    .select('*, levels(name)')
+    .select('*, levels(name), instructor:profiles(name)')
     .order('created_at', { ascending: false });
-  if (error) throw new Error(error.message);
-  const rows = (data ?? []) as (Assignment & { levels?: { name: string } })[];
+
+  if (assignmentsError) throw new Error(assignmentsError.message);
+
+  const rows = (assignmentsData ?? []).map((a: any) => ({
+    ...a,
+    instructor: a.instructor || null
+  })) as (Assignment & { levels?: { name: string }; instructor?: { name: string } | null })[];
+
   const hydrated = await Promise.all(rows.map(async (row) => {
     if (!row.audio_url) return row;
     const path = resolveMaterialsPath(row.audio_url);
@@ -390,15 +535,20 @@ export async function createAssignment(payload: {
     throw new Error('Please choose a level before creating assignment.');
   }
 
+  // 1. Get current user
+  const { data: authData } = await supabase.auth.getUser();
+  const instId = authData.user?.id ?? null;
+
   invalidateAdminCache();
   const { data: created, error } = await supabase
     .from('assignments')
     .insert({
-    title:       payload.title,
-    description: payload.description || null,
-    audio_url: payload.audioUrl || null,
-    level_id:    payload.levelId,
-    deadline:    payload.deadline || null,
+      title:       payload.title,
+      description: payload.description || null,
+      audio_url:   payload.audioUrl || null,
+      level_id:    payload.levelId,
+      deadline:    payload.deadline || null,
+      instructor_id: instId,
     })
     .select('id, level_id')
     .single();
@@ -467,12 +617,18 @@ export async function fetchAllExams(): Promise<(Exam & { levels?: { name: string
   const cached = getCache('exams');
   if (cached) return cached;
 
-  const { data, error } = await supabase
+  const { data: examsData, error: examsError } = await supabase
     .from('exams')
-    .select('*, levels(name)')
+    .select('*, levels(name), instructor:profiles(name)')
     .order('created_at', { ascending: false });
-  if (error) throw new Error(error.message);
-  const res = (data ?? []) as (Exam & { levels?: { name: string } })[];
+
+  if (examsError) throw new Error(examsError.message);
+
+  const res = (examsData ?? []).map((e: any) => ({
+    ...e,
+    instructor: e.instructor || null
+  })) as (Exam & { levels?: { name: string }; instructor?: { name: string } | null })[];
+
   setCache('exams', res);
   return res;
 }
@@ -486,13 +642,18 @@ export async function createExam(payload: {
     throw new Error('Please choose a level before creating exam.');
   }
 
+  // 1. Get current user
+  const { data: authData } = await supabase.auth.getUser();
+  const instId = authData.user?.id ?? null;
+
   invalidateAdminCache();
   const { data: created, error } = await supabase
     .from('exams')
     .insert({
-    title:    payload.title,
-    level_id: payload.levelId,
-    duration: payload.duration,
+      title:    payload.title,
+      level_id: payload.levelId,
+      duration: payload.duration,
+      instructor_id: instId,
     })
     .select('id, level_id')
     .single();
@@ -889,8 +1050,9 @@ export async function gradeExamAnswer(payload: {
 // ─── Dashboard Stats ──────────────────────────────────────────────────────────
 
 export async function fetchDashboardStats() {
-  const [students, materials, assignments, exams, submissions] = await Promise.all([
+  const [students, instructors, materials, assignments, exams, submissions] = await Promise.all([
     supabase.from('profiles').select('id', { count: 'exact' }).eq('role', 'student'),
+    supabase.from('profiles').select('id', { count: 'exact' }).eq('role', 'instructor'),
     supabase.from('materials').select('id', { count: 'exact' }),
     supabase.from('assignments').select('id', { count: 'exact' }),
     supabase.from('exams').select('id', { count: 'exact' }),
@@ -902,9 +1064,206 @@ export async function fetchDashboardStats() {
 
   return {
     students:    students.count    ?? 0,
+    instructors: instructors.count ?? 0,
     materials:   materials.count   ?? 0,
     assignments: assignments.count ?? 0,
     exams:       exams.count       ?? 0,
     avgScore,
   };
+}
+
+// ─── Groups ───────────────────────────────────────────────────────────────────
+
+export async function fetchAllGroups(): Promise<Group[]> {
+  const cached = getCache('groups');
+  if (cached) return cached;
+
+  const { data, error } = await supabase
+    .from('groups')
+    .select('*, profiles(id)')
+    .order('created_at', { ascending: false });
+    
+  if (error) throw new Error(error.message);
+  
+  const res = (data ?? []).map((g: any) => ({
+    ...g,
+    student_count: g.profiles?.length ?? 0
+  })) as Group[];
+  
+  setCache('groups', res);
+  return res;
+}
+
+export async function createGroup(payload: { name: string; description?: string; level?: string }): Promise<Group> {
+  invalidateAdminCache();
+  const { data, error } = await supabase
+    .from('groups')
+    .insert({ name: payload.name, description: payload.description ?? null })
+    .select()
+    .single();
+  if (error) throw new Error(error.message);
+  return data as Group;
+}
+
+export async function updateGroup(id: string, payload: { name: string; description?: string; level?: string }): Promise<void> {
+  invalidateAdminCache();
+  const { error } = await supabase
+    .from('groups')
+    .update({ name: payload.name, description: payload.description ?? null })
+    .eq('id', id);
+  if (error) throw new Error(error.message);
+}
+
+export async function deleteGroup(id: string): Promise<void> {
+  invalidateAdminCache();
+  const { error } = await supabase.from('groups').delete().eq('id', id);
+  if (error) throw new Error(error.message);
+}
+
+// ─── Instructors ───────────────────────────────────────────────────────────────
+// (fetchAllInstructors consolidated above)
+
+export async function fetchInstructorGroups(instructorId: string): Promise<Group[]> {
+  const { data, error } = await supabase
+    .from('levels')
+    .select('groups(*)')
+    .eq('instructor_id', instructorId);
+  if (error) throw new Error(error.message);
+  
+  // Return unique list of parent groups for this instructor's levels
+  const uniqueGroups = new Map<string, Group>();
+  (data ?? []).forEach((row: any) => {
+    if (row.groups) uniqueGroups.set(row.groups.id, row.groups);
+  });
+  return Array.from(uniqueGroups.values());
+}
+
+export async function assignInstructorToGroup(instructorId: string, groupId: string): Promise<void> {
+  const { error } = await supabase
+    .from('instructor_groups')
+    .upsert({ instructor_id: instructorId, group_id: groupId }, { onConflict: 'instructor_id,group_id' });
+  if (error) throw new Error(error.message);
+}
+
+export async function removeInstructorFromGroup(instructorId: string, groupId: string): Promise<void> {
+  const { error } = await supabase
+    .from('instructor_groups')
+    .delete()
+    .eq('instructor_id', instructorId)
+    .eq('group_id', groupId);
+  if (error) throw new Error(error.message);
+}
+
+export async function fetchGroupInstructors(groupId: string): Promise<Profile[]> {
+  const { data, error } = await supabase
+    .from('instructor_groups')
+    .select('profiles(*)')
+    .eq('group_id', groupId);
+  if (error) throw new Error(error.message);
+  return (data ?? []).map((row: any) => row.profiles) as Profile[];
+}
+
+// ─── Students & Groups ─────────────────────────────────────────────────────────
+
+export async function assignStudentToGroup(studentId: string, groupId: string | null): Promise<void> {
+  invalidateAdminCache();
+  const { error } = await supabase
+    .from('profiles')
+    .update({ group_id: groupId })
+    .eq('id', studentId);
+  if (error) throw new Error(error.message);
+}
+
+export async function fetchStudentsInGroup(groupId: string): Promise<Profile[]> {
+  // Query students through all levels belonging to that group
+  const { data: levelData } = await supabase.from('levels').select('id').eq('group_id', groupId);
+  const ids = (levelData ?? []).map(l => l.id);
+  if (ids.length === 0) return [];
+
+  const { data, error } = await supabase
+    .from('level_students')
+    .select('student:profiles(*)')
+    .in('level_id', ids);
+  
+  if (error) throw new Error(error.message);
+  const profiles = (data ?? []).map((r: any) => r.student).filter(Boolean) as Profile[];
+  
+  // Sign avatar URLs
+  return await Promise.all(profiles.map(async (p) => {
+    if (!p.avatar_url || p.avatar_url.startsWith('http')) return p;
+    const { data: signed } = await supabase.storage.from('avatars').createSignedUrl(p.avatar_url, 60 * 60);
+    return { ...p, avatar_url: signed?.signedUrl ?? p.avatar_url };
+  }));
+}
+
+// ─── Instructor Assignments & Exams ──────────────────────────────────────────
+
+export async function fetchAssignmentsForInstructor(instructorId: string): Promise<(Assignment & { groups: { name: string }[] })[]> {
+  // 1. Get all levels assigned to this instructor
+  const { data: levelsData, error: levelsError } = await supabase
+    .from('levels')
+    .select('id, name, groups(name)')
+    .eq('instructor_id', instructorId);
+  if (levelsError) throw new Error(levelsError.message);
+  
+  const levelIds = (levelsData ?? []).map((l: any) => l.id);
+  if (levelIds.length === 0) return [];
+
+  // 2. Get assignments for these levels
+  const { data: assignmentsData, error: assignmentsError } = await supabase
+    .from('assignments')
+    .select('*')
+    .in('level_id', levelIds);
+  if (assignmentsError) throw new Error(assignmentsError.message);
+
+  // Hydrate groups into assignments
+  return (assignmentsData ?? []).map((a: any) => {
+    const levelInfo = levelsData?.find(ld => ld.id === a.level_id);
+    return {
+      ...a,
+      groups: levelInfo?.groups ? [{ name: (levelInfo.groups as any).name }] : []
+    };
+  }) as (Assignment & { groups: { name: string }[] })[];
+}
+
+export async function fetchExamsForInstructor(instructorId: string): Promise<(Exam & { groups: { name: string }[] })[]> {
+  // 1. Get all levels assigned to this instructor
+  const { data: levelsData, error: levelsError } = await supabase
+    .from('levels')
+    .select('id, name, groups(name)')
+    .eq('instructor_id', instructorId);
+  if (levelsError) throw new Error(levelsError.message);
+  
+  const levelIds = (levelsData ?? []).map((l: any) => l.id);
+  if (levelIds.length === 0) return [];
+
+  // 2. Get exams for these levels
+  const { data: examsData, error: examsError } = await supabase
+    .from('exams')
+    .select('*')
+    .in('level_id', levelIds);
+  if (examsError) throw new Error(examsError.message);
+
+  // Hydrate groups into exams
+  return (examsData ?? []).map((e: any) => {
+    const levelInfo = levelsData?.find(ld => ld.id === e.level_id);
+    return {
+      ...e,
+      groups: levelInfo?.groups ? [{ name: (levelInfo.groups as any).name }] : []
+    };
+  }) as (Exam & { groups: { name: string }[] })[];
+}
+
+export async function assignAssignmentToGroup(assignmentId: string, groupId: string): Promise<void> {
+  const { error } = await supabase
+    .from('group_assignments')
+    .upsert({ assignment_id: assignmentId, group_id: groupId }, { onConflict: 'assignment_id,group_id' });
+  if (error) throw new Error(error.message);
+}
+
+export async function assignExamToGroup(examId: string, groupId: string): Promise<void> {
+  const { error } = await supabase
+    .from('group_exams')
+    .upsert({ exam_id: examId, group_id: groupId }, { onConflict: 'exam_id,group_id' });
+  if (error) throw new Error(error.message);
 }

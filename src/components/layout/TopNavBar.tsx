@@ -14,7 +14,7 @@ export default function TopNavBar() {
   const { user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('hero');
-  const [dbRole, setDbRole] = useState<'student' | 'admin' | null>(null);
+  const [dbRole, setDbRole] = useState<'student' | 'admin' | 'instructor' | null>(null);
   const { deferredPrompt, installApp: handleInstallApp } = usePWAInstall();
 
   const navItems = [
@@ -66,7 +66,7 @@ export default function TopNavBar() {
       if (cancelled) return;
 
       const role = data?.role;
-      if (role === 'student' || role === 'admin') {
+      if (role === 'student' || role === 'admin' || role === 'instructor') {
         setDbRole(role);
       } else {
         setDbRole(user.role);
@@ -81,8 +81,17 @@ export default function TopNavBar() {
 
   const resolvedRole = dbRole ?? user?.role ?? null;
   const isSignedIn = Boolean(user);
-  const portalLabel = resolvedRole === 'admin' ? 'Admin Dashboard' : 'Student Portal';
-  const portalPath = resolvedRole === 'admin' ? '/admin' : '/student';
+  
+  let portalLabel = 'Student Portal';
+  let portalPath = '/student';
+
+  if (resolvedRole === 'admin') {
+    portalLabel = 'Admin Dashboard';
+    portalPath = '/admin';
+  } else if (resolvedRole === 'instructor') {
+    portalLabel = 'Instructor Dashboard';
+    portalPath = '/instructor';
+  }
 
   const handleScroll = (id: string) => {
     setIsOpen(false);

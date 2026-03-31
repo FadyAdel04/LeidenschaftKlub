@@ -20,6 +20,13 @@ function getCache(key: string) {
 function setCache(key: string, data: any) { STUDENT_CACHE[key] = { data, timestamp: Date.now() }; }
 export function invalidateStudentCache() { Object.keys(STUDENT_CACHE).forEach(k => delete STUDENT_CACHE[k]); }
 
+export interface LevelProgress {
+  totalItems: number;
+  completedItems: number;
+  percentage: number;
+  levelName: string;
+}
+
 // ─── Auth User (full metadata from Supabase Auth) ─────────────────────────────
 
 export interface AuthUserInfo {
@@ -55,15 +62,37 @@ export interface Profile {
   email: string;
   phone: string | null;
   avatar_url?: string | null;
-  role: 'student' | 'admin';
+  role: 'student' | 'admin' | 'instructor';
   current_level: string;
+  group_id?: string | null;
   created_at: string;
+  group?: { name: string } | null;
+  instructor?: { name: string } | null;
+}
+
+export interface Group {
+  id: string;
+  name: string;
+  level: string; // updated to allow dynamic level names
+  created_at: string;
+  student_count?: number;
+}
+
+export interface InstructorGroup {
+  id: string;
+  instructor_id: string;
+  group_id: string;
+  assigned_at: string;
 }
 
 export interface Level {
   id: string;
   name: string;
   description: string | null;
+  parent_level_id?: string | null;
+  instructor_id?: string | null;
+  instructor?: { name: string } | null;
+  student_count?: number;
 }
 
 export interface Material {
@@ -104,6 +133,8 @@ export interface Assignment {
   level_id: string;
   deadline: string | null;
   created_at: string;
+  instructor_id?: string | null;
+  instructor?: { name: string } | null;
 }
 
 export interface Submission {
@@ -117,6 +148,7 @@ export interface Submission {
   feedback?: string | null;
   status: 'pending' | 'submitted' | 'graded' | 'returned';
   submitted_at: string;
+  assignments?: { title: string } | null;
 }
 
 function resolveSubmissionsPath(fileUrlOrPath: string): string {
@@ -145,6 +177,8 @@ export interface Exam {
   level_id: string;
   duration: number;
   created_at: string;
+  instructor_id?: string | null;
+  instructor?: { name: string } | null;
 }
 
 export interface ExamQuestion {
@@ -250,14 +284,49 @@ export async function fetchProfile(userId: string): Promise<Profile> {
 
   // 2. Row exists — return it
   if (data) {
-    const profile = data as Profile;
-    // Guard against legacy rows with missing level.
-    if (!profile.current_level || !String(profile.current_level).trim()) {
-      profile.current_level = 'A1';
-    }
+    const profile = data as any;
     const signedAvatar = await getSignedAvatarUrl(profile.avatar_url);
     if (signedAvatar) profile.avatar_url = signedAvatar;
-    return profile;
+
+    // ── NEW: resolve level / group / instructor from level_students join table ─
+    const { data: enrollment } = await supabase
+      .from('level_students')
+      .select('level_id, assigned_at, levels(id, name, instructor_id, group_id, groups(id, name))')
+      .eq('student_id', userId)
+      .order('assigned_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (enrollment?.levels) {
+      const lvl = enrollment.levels as any;
+
+      // Current level name e.g. "A1.1"
+      profile.current_level = lvl.name ?? profile.current_level ?? '';
+
+      // Parent group e.g. "A1"
+      profile.group = lvl.groups ? { id: lvl.groups.id, name: lvl.groups.name } : null;
+
+      // Instructor name
+      profile.level_id = lvl.id;
+      if (lvl.instructor_id) {
+        const { data: inst } = await supabase
+          .from('profiles')
+          .select('id, name')
+          .eq('id', lvl.instructor_id)
+          .maybeSingle();
+        profile.instructor = inst ? { id: inst.id, name: inst.name } : null;
+      } else {
+        profile.instructor = null;
+      }
+    } else {
+      // Student not yet assigned to any level
+      profile.current_level = profile.current_level ?? null;
+      profile.group         = null;
+      profile.instructor    = null;
+      profile.level_id      = null;
+    }
+
+    return profile as Profile;
   }
 
   // 3. Row missing — pull auth user to build a sane default
@@ -269,8 +338,9 @@ export async function fetchProfile(userId: string): Promise<Profile> {
     name:          (authUser?.user_metadata?.name as string) ?? authUser?.email?.split('@')[0] ?? '',
     email:         authUser?.email ?? '',
     phone:         null,
-    role:          ((authUser?.user_metadata?.role as string) ?? 'student') as 'student' | 'admin',
+    role:          ((authUser?.user_metadata?.role as string) ?? 'student') as 'student' | 'admin' | 'instructor',
     current_level: 'A1',
+    group_id:      null,
   };
 
   // 4. Upsert the default row so future fetches work
@@ -458,7 +528,7 @@ export async function fetchAssignmentsByLevel(levelId: string): Promise<Assignme
 export async function fetchSubmissionsByStudent(studentId: string): Promise<Submission[]> {
   const { data, error } = await supabase
     .from('submissions')
-    .select('*')
+    .select('*, assignments(title)')
     .eq('student_id', studentId);
   if (error) throw new Error(error.message);
 
@@ -911,4 +981,58 @@ export async function fetchStudentExamResultDetail(
     answerRow: byQ.get(q.id) ?? null,
   }));
   return { result, rows };
+}
+export async function fetchLevelProgress(studentId: string): Promise<LevelProgress | null> {
+  try {
+    // 1. Get student's current level
+    const { data: mapping } = await supabase
+      .from('level_students')
+      .select('level_id, levels(name)')
+      .eq('student_id', studentId)
+      .maybeSingle();
+    
+    if (!mapping?.level_id) return null;
+    const levelId = mapping.level_id;
+    const levelName = (mapping.levels as any)?.name || 'Unknown Level';
+
+    // 2. Total Assignments in this level
+    const { count: totalAsgn } = await supabase
+      .from('assignments')
+      .select('*', { count: 'exact', head: true })
+      .eq('level_id', levelId);
+
+    // 3. Completed Assignments (submissions)
+    const { count: completedAsgn } = await supabase
+      .from('submissions')
+      .select('*', { count: 'exact', head: true })
+      .eq('student_id', studentId)
+      .in('assignment_id', (await supabase.from('assignments').select('id').eq('level_id', levelId)).data?.map(a => a.id) || []);
+
+    // 4. Total Exams in this level
+    const { count: totalExams } = await supabase
+      .from('exams')
+      .select('*', { count: 'exact', head: true })
+      .eq('level_id', levelId);
+
+    // 5. Completed Exams (results)
+    const { count: completedExams } = await supabase
+      .from('results')
+      .select('*', { count: 'exact', head: true })
+      .eq('student_id', studentId)
+      .in('exam_id', (await supabase.from('exams').select('id').eq('level_id', levelId)).data?.map(e => e.id) || []);
+
+    const total = (totalAsgn || 0) + (totalExams || 0);
+    const completed = (completedAsgn || 0) + (completedExams || 0);
+    const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+    return {
+      totalItems: total,
+      completedItems: completed,
+      percentage,
+      levelName
+    };
+  } catch (err) {
+    console.error('Error fetching progress:', err);
+    return null;
+  }
 }

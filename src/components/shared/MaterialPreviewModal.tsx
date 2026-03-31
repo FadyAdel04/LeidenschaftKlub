@@ -68,7 +68,7 @@ export default function MaterialPreviewModal({ open, material, onClose }: Materi
             <button
               type="button"
               onClick={onClose}
-              className="w-9 h-9 rounded-xl bg-[#F5F5F0] text-[#1A1A1A]/60 hover:text-[#C62828] transition-colors flex items-center justify-center"
+              className="w-9 h-9 rounded-xl bg-[#F5F5F0] text-[#1A1A1A]/60 hover:text-[#F97316] transition-colors flex items-center justify-center"
             >
               <X className="w-5 h-5" />
             </button>
@@ -114,7 +114,7 @@ export default function MaterialPreviewModal({ open, material, onClose }: Materi
 
           {fileType === 'other' && (
             <div className="w-full h-full flex flex-col items-center justify-center text-center p-8">
-              <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center mb-4 text-[#C62828] shadow-sm">
+              <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center mb-4 text-[#F97316] shadow-sm">
                 <FileText className="w-7 h-7" />
               </div>
               <h4 className="text-lg font-black text-[#1A1A1A] mb-2">Preview not available</h4>

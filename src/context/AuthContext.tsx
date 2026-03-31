@@ -10,13 +10,14 @@ import { supabase } from '../lib/supabase';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-export type UserRole = 'student' | 'admin';
+export type UserRole = 'student' | 'admin' | 'instructor';
 
 export interface AppUser {
   id: string;
   email: string;
   name: string;
   role: UserRole;
+  avatar_url?: string | null;
 }
 
 
@@ -24,9 +25,10 @@ interface AuthContextType {
   user: AppUser | null;
   session: Session | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string, phone: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<AppUser>;
+  register: (name: string, email: string, password: string, phone: string, role: UserRole) => Promise<void>;
   logout: () => Promise<void>;
+  refreshUser: () => Promise<void>;
 }
 
 // ─── Context ──────────────────────────────────────────────────────────────────
@@ -42,6 +44,7 @@ function mapUser(supabaseUser: User): AppUser {
     email: supabaseUser.email ?? '',
     name: (meta.name as string) ?? (meta.full_name as string) ?? supabaseUser.email ?? '',
     role: (meta.role as UserRole) ?? 'student',
+    avatar_url: (meta.avatar_url as string) ?? null,
   };
 }
 
@@ -49,18 +52,26 @@ async function mapUserFromProfile(supabaseUser: User): Promise<AppUser> {
   const fallback = mapUser(supabaseUser);
   const { data } = await supabase
     .from('profiles')
-    .select('name, role')
+    .select('name, role, avatar_url')
     .eq('id', supabaseUser.id)
     .maybeSingle();
 
-  const dbRole = data?.role;
-  const role: UserRole = dbRole === 'admin' || dbRole === 'student' ? dbRole : fallback.role;
+  const dbRole = data?.role as UserRole | undefined;
+  const role: UserRole = (dbRole === 'admin' || dbRole === 'student' || dbRole === 'instructor') ? dbRole : fallback.role;
   const name = data?.name || fallback.name;
+  let avatarUrl = data?.avatar_url || fallback.avatar_url;
+
+  // Hydrate avatar if it's a relative path
+  if (avatarUrl && !avatarUrl.startsWith('http')) {
+     const { data: signed } = await supabase.storage.from('avatars').createSignedUrl(avatarUrl, 60*60);
+     avatarUrl = signed?.signedUrl ?? avatarUrl;
+  }
 
   return {
     ...fallback,
     name,
     role,
+    avatar_url: avatarUrl,
   };
 }
 
@@ -135,14 +146,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // ── Login ──────────────────────────────────────────────────────────────────
 
-  const login = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const login = async (email: string, password: string): Promise<AppUser> => {
+    const { data: { user: supabaseUser }, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw new Error(error.message);
+    if (!supabaseUser) throw new Error('Identity verification failed.');
+    return await mapUserFromProfile(supabaseUser);
   };
 
   // ── Register ───────────────────────────────────────────────────────────────
 
-  const register = async (name: string, email: string, password: string, phone: string) => {
+  const register = async (name: string, email: string, password: string, phone: string, role: UserRole = 'student') => {
     const phoneTrim = phone.trim();
     const phoneNorm = phoneTrim.replace(/[\s\-().]/g, '');
     if (!phoneNorm || phoneNorm.length < 8) {
@@ -153,7 +166,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       email,
       password,
       options: {
-        data: { name, role: 'student', phone: phoneTrim },
+        data: { name, role, phone: phoneTrim },
       },
     });
     if (error) throw new Error(error.message);
@@ -166,8 +179,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (error) throw new Error(error.message);
   };
 
+  // ── Refresh ────────────────────────────────────────────────────────────────
+  
+  const refreshUser = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session?.user) {
+      const hydrated = await mapUserFromProfile(session.user);
+      setUser(hydrated);
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, session, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, session, loading, login, register, logout, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );

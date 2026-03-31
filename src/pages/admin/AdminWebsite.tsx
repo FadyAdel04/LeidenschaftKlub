@@ -248,7 +248,7 @@ export default function AdminWebsite() {
         <motion.header variants={ci} className="mb-8">
           <p className="text-[#D4A373] font-black uppercase tracking-[0.3em] text-xs mb-2">Website content</p>
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tighter text-[#1A1A1A] leading-none uppercase">
-            Landing Page<br /><span className="text-[#C62828]">Manager.</span>
+            Landing Page<br /><span className="text-[#F97316]">Manager.</span>
           </h1>
           <p className="mt-4 text-sm sm:text-base text-[#1A1A1A]/60 font-bold max-w-2xl">
             Manage “Our Spaces” gallery and “Upcoming Events”. Event enrollments are stored and counted automatically.
@@ -256,8 +256,8 @@ export default function AdminWebsite() {
         </motion.header>
 
         {error && (
-          <motion.div variants={ci} className="mb-6 bg-white border border-[#C62828]/20 rounded-3xl p-5">
-            <p className="text-sm font-black text-[#C62828]">{error}</p>
+          <motion.div variants={ci} className="mb-6 bg-white border border-[#F97316]/20 rounded-3xl p-5">
+            <p className="text-sm font-black text-[#F97316]">{error}</p>
           </motion.div>
         )}
 
@@ -300,7 +300,7 @@ export default function AdminWebsite() {
                   <p className="text-[10px] font-black uppercase tracking-widest text-[#1A1A1A]/40">Image</p>
                   <input type="file" accept="image/*" onChange={e => setSImage(e.target.files?.[0] ?? null)} className="w-full" />
                 </div>
-                <button disabled={savingSpace} onClick={handleCreateSpace} className="w-full mt-2 bg-[#C62828] text-white py-3 rounded-2xl font-black uppercase tracking-widest text-xs disabled:opacity-60">
+                <button disabled={savingSpace} onClick={handleCreateSpace} className="w-full mt-2 bg-[#F97316] text-white py-3 rounded-2xl font-black uppercase tracking-widest text-xs disabled:opacity-60">
                   {savingSpace ? 'Saving…' : 'Add space'}
                 </button>
               </div>
@@ -314,7 +314,7 @@ export default function AdminWebsite() {
                       <img src={publicAssetUrl(s.image_path) ?? ''} alt={s.title} className="w-full h-full object-cover" />
                     </div>
                     <div className="p-5">
-                      <p className="text-[10px] font-black uppercase tracking-widest text-[#C62828]">{s.category ?? 'Space'}</p>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-[#F97316]">{s.category ?? 'Space'}</p>
                       <p className="text-lg font-black tracking-tight text-[#1A1A1A]">{s.title}</p>
                       {s.description && <p className="text-sm text-[#1A1A1A]/60 font-bold mt-1">{s.description}</p>}
                       <div className="mt-4 flex gap-2">
@@ -326,7 +326,7 @@ export default function AdminWebsite() {
                         </button>
                         <button
                           onClick={async () => { if (!window.confirm('Delete this space?')) return; await adminDeleteSpace(s.id); await refresh(); }}
-                          className="px-4 py-2 rounded-2xl bg-[#F5F5F0] text-[#C62828] font-black text-[10px] uppercase tracking-widest"
+                          className="px-4 py-2 rounded-2xl bg-[#F5F5F0] text-[#F97316] font-black text-[10px] uppercase tracking-widest"
                         >
                           Delete
                         </button>
@@ -379,7 +379,7 @@ export default function AdminWebsite() {
                   <p className="text-[10px] font-black uppercase tracking-widest text-[#1A1A1A]/40">Image</p>
                   <input type="file" accept="image/*" onChange={e => setEImage(e.target.files?.[0] ?? null)} className="w-full" />
                 </div>
-                <button disabled={savingEvent} onClick={handleCreateEvent} className="w-full mt-2 bg-[#C62828] text-white py-3 rounded-2xl font-black uppercase tracking-widest text-xs disabled:opacity-60">
+                <button disabled={savingEvent} onClick={handleCreateEvent} className="w-full mt-2 bg-[#F97316] text-white py-3 rounded-2xl font-black uppercase tracking-widest text-xs disabled:opacity-60">
                   {savingEvent ? 'Saving…' : 'Add event'}
                 </button>
               </div>
@@ -396,7 +396,7 @@ export default function AdminWebsite() {
                   <div className="p-6">
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <p className="text-[10px] font-black uppercase tracking-widest text-[#C62828]">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-[#F97316]">
                           {ev.type ?? 'Event'} • {new Date(ev.starts_at).toLocaleString()}
                         </p>
                         <p className="text-2xl font-black tracking-tight text-[#1A1A1A]">{ev.title}</p>
@@ -426,7 +426,7 @@ export default function AdminWebsite() {
                       </button>
                       <button
                         onClick={async () => { if (!window.confirm('Delete this event?')) return; await adminDeleteEvent(ev.id); setSelectedEventId(null); await refresh(); }}
-                        className="px-4 py-2 rounded-2xl bg-[#F5F5F0] text-[#C62828] font-black text-[10px] uppercase tracking-widest"
+                        className="px-4 py-2 rounded-2xl bg-[#F5F5F0] text-[#F97316] font-black text-[10px] uppercase tracking-widest"
                       >
                         Delete
                       </button>
@@ -501,7 +501,7 @@ export default function AdminWebsite() {
 
             <div className="mt-6 flex justify-end gap-3">
               <button onClick={() => setEditSpace(null)} className="px-5 py-3 rounded-2xl bg-[#F5F5F0] font-black text-xs uppercase tracking-widest">Cancel</button>
-              <button onClick={saveEditSpace} disabled={savingEditSpace} className="px-6 py-3 rounded-2xl bg-[#C62828] text-white font-black text-xs uppercase tracking-widest disabled:opacity-60">
+              <button onClick={saveEditSpace} disabled={savingEditSpace} className="px-6 py-3 rounded-2xl bg-[#F97316] text-white font-black text-xs uppercase tracking-widest disabled:opacity-60">
                 {savingEditSpace ? 'Saving…' : 'Save'}
               </button>
             </div>
@@ -566,7 +566,7 @@ export default function AdminWebsite() {
 
             <div className="mt-6 flex justify-end gap-3">
               <button onClick={() => setEditEvent(null)} className="px-5 py-3 rounded-2xl bg-[#F5F5F0] font-black text-xs uppercase tracking-widest">Cancel</button>
-              <button onClick={saveEditEvent} disabled={savingEditEvent} className="px-6 py-3 rounded-2xl bg-[#C62828] text-white font-black text-xs uppercase tracking-widest disabled:opacity-60">
+              <button onClick={saveEditEvent} disabled={savingEditEvent} className="px-6 py-3 rounded-2xl bg-[#F97316] text-white font-black text-xs uppercase tracking-widest disabled:opacity-60">
                 {savingEditEvent ? 'Saving…' : 'Save'}
               </button>
             </div>

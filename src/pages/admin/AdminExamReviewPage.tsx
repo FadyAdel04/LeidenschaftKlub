@@ -122,7 +122,7 @@ export default function AdminExamReviewPage() {
   if (!examId || !studentId) {
     return (
       <div className="min-h-screen bg-[#F5F5F0] flex items-center justify-center p-6">
-        <p className="font-black text-[#C62828]">Invalid link.</p>
+        <p className="font-black text-[#F97316]">Invalid link.</p>
       </div>
     );
   }
@@ -135,7 +135,7 @@ export default function AdminExamReviewPage() {
         <button
           type="button"
           onClick={() => navigate('/admin/exams')}
-          className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-[#1A1A1A]/50 hover:text-[#C62828] mb-8"
+          className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-[#1A1A1A]/50 hover:text-[#F97316] mb-8"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to exams
@@ -143,10 +143,10 @@ export default function AdminExamReviewPage() {
 
         {loading ? (
           <div className="flex justify-center py-24">
-            <Loader className="w-10 h-10 animate-spin text-[#C62828]" />
+            <Loader className="w-10 h-10 animate-spin text-[#F97316]" />
           </div>
         ) : error && !bundle ? (
-          <div className="p-6 rounded-2xl bg-red-50 border border-red-200 text-[#C62828] font-bold flex items-center gap-2">
+          <div className="p-6 rounded-2xl bg-red-50 border border-red-200 text-[#F97316] font-bold flex items-center gap-2">
             <AlertCircle className="w-5 h-5 shrink-0" />
             {error}
           </div>
@@ -181,7 +181,7 @@ export default function AdminExamReviewPage() {
             </header>
 
             {error && (
-              <div className="mb-6 p-4 rounded-2xl bg-red-50 border border-red-200 text-sm font-bold text-[#C62828]">
+              <div className="mb-6 p-4 rounded-2xl bg-red-50 border border-red-200 text-sm font-bold text-[#F97316]">
                 {error}
               </div>
             )}
@@ -242,7 +242,7 @@ export default function AdminExamReviewPage() {
                           {ans?.is_correct != null && (
                             <span
                               className={`text-[10px] font-black uppercase px-2 py-1 rounded-full ${
-                                ans.is_correct ? 'bg-green-100 text-green-800' : 'bg-red-50 text-[#C62828]'
+                                ans.is_correct ? 'bg-green-100 text-green-800' : 'bg-red-50 text-[#F97316]'
                               }`}
                             >
                               {ans.is_correct ? 'Correct' : 'Incorrect'}
@@ -300,7 +300,7 @@ export default function AdminExamReviewPage() {
                               type="button"
                               disabled={savingId === ans.id}
                               onClick={() => void saveWriting(ans.id)}
-                              className="inline-flex items-center gap-2 bg-[#C62828] text-white px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:opacity-95 disabled:opacity-50"
+                              className="inline-flex items-center gap-2 bg-[#F97316] text-white px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:opacity-95 disabled:opacity-50"
                             >
                               {savingId === ans.id ? (
                                 <Loader className="w-4 h-4 animate-spin" />
@@ -353,7 +353,7 @@ export default function AdminExamReviewPage() {
           <button
             type="button"
             onClick={() => navigate('/admin/exams')}
-            className="text-[10px] font-black uppercase tracking-widest text-[#C62828] border border-[#C62828]/30 px-5 py-2 rounded-xl hover:bg-[#C62828]/5"
+            className="text-[10px] font-black uppercase tracking-widest text-[#F97316] border border-[#F97316]/30 px-5 py-2 rounded-xl hover:bg-[#F97316]/5"
           >
             Submissions list
           </button>

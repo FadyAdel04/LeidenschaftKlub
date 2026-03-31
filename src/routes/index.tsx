@@ -4,6 +4,7 @@ import MainLayout from '../layouts/MainLayout';
 import AuthLayout from '../layouts/AuthLayout';
 import StudentLayout from '../layouts/StudentLayout';
 import AdminLayout from '../layouts/AdminLayout';
+import InstructorLayout from '../layouts/InstructorLayout';
 import ProtectedRoute from '../components/shared/ProtectedRoute';
 import PublicOnlyRoute from '../components/shared/PublicOnlyRoute';
 
@@ -31,6 +32,15 @@ const AdminExamReview    = lazy(() => import('../pages/admin/AdminExamReviewPage
 const AdminResults       = lazy(() => import('../pages/admin/AdminResults'));
 const AdminWebsite       = lazy(() => import('../pages/admin/AdminWebsite'));
 const AdminNotifications = lazy(() => import('../pages/admin/AdminNotifications'));
+const AdminGroups        = lazy(() => import('../pages/admin/AdminGroups'));
+
+const InstructorDashboard   = lazy(() => import('../pages/instructor/InstructorDashboard'));
+const InstructorGroups      = lazy(() => import('../pages/instructor/InstructorGroups'));
+const InstructorStudents    = lazy(() => import('../pages/instructor/InstructorStudents'));
+const InstructorAssignments = lazy(() => import('../pages/instructor/InstructorAssignments'));
+const InstructorExams       = lazy(() => import('../pages/instructor/InstructorExams'));
+const InstructorExamReview  = lazy(() => import('../pages/instructor/InstructorExamReviewPage'));
+const InstructorProfile     = lazy(() => import('../pages/instructor/InstructorProfile'));
 
 const Spinner = () => (
   <div className="flex h-screen w-screen items-center justify-center bg-[#F5F5F0]">
@@ -85,6 +95,20 @@ export default function AppRoutes() {
             <Route path="results"          element={<AdminResults />} />
             <Route path="website"          element={<AdminWebsite />} />
             <Route path="Notifications"   element={<AdminNotifications />} />
+            <Route path="groups"          element={<AdminGroups />} />
+          </Route>
+        </Route>
+
+        {/* ── Instructor (protected: role = instructor) ──────────── */}
+        <Route element={<ProtectedRoute allowedRoles={['instructor']} />}>
+          <Route path="/instructor" element={<InstructorLayout />}>
+            <Route index                   element={<InstructorDashboard />} />
+            <Route path="levels"           element={<InstructorGroups />} />
+            <Route path="students"         element={<InstructorStudents />} />
+            <Route path="assignments"      element={<InstructorAssignments />} />
+            <Route path="exams"            element={<InstructorExams />} />
+            <Route path="exams/:examId/review/:studentId" element={<InstructorExamReview />} />
+            <Route path="profile"          element={<InstructorProfile />} />
           </Route>
         </Route>
 

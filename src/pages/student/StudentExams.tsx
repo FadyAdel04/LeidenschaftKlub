@@ -63,20 +63,20 @@ export default function StudentExams() {
       <StudentSidebar profile={profile} open={sidebarOpen} onClose={() => setSidebarOpen(false)} onToggle={() => setSidebarOpen(p => !p)} />
 
       <main className="pt-14 lg:pt-0 lg:ml-80 flex-1 p-4 sm:p-6 md:p-10 lg:p-16 xl:p-20 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-[50vw] h-[50vw] bg-[#C62828]/[0.02] rounded-full blur-[100px] pointer-events-none -translate-y-1/2 translate-x-1/2" />
+        <div className="absolute top-0 right-0 w-[50vw] h-[50vw] bg-[#F97316]/[0.02] rounded-full blur-[100px] pointer-events-none -translate-y-1/2 translate-x-1/2" />
 
         {/* Header */}
         <motion.header variants={ci} className="mb-10 lg:mb-16 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6 relative z-10">
           <div className="space-y-3">
-            <span className="text-[#C62828] font-black tracking-[0.5em] text-[10px] uppercase italic">
+            <span className="text-[#F97316] font-black tracking-[0.5em] text-[10px] uppercase italic">
               Level {profile?.current_level ?? '—'} Assessments
             </span>
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tighter text-[#1A1A1A] leading-none uppercase">
-              My<br /><span className="text-[#C62828]">Exams.</span>
+              My<br /><span className="text-[#F97316]">Exams.</span>
             </h1>
           </div>
           <div className="flex items-center gap-4 bg-white p-4 pr-8 rounded-2xl border border-[#1A1A1A]/5 shadow-xl">
-            <div className="w-12 h-12 rounded-xl bg-[#C62828]/10 flex items-center justify-center text-[#C62828] shrink-0">
+            <div className="w-12 h-12 rounded-xl bg-[#F97316]/10 flex items-center justify-center text-[#F97316] shrink-0">
               <HelpCircle className="w-6 h-6" />
             </div>
             <div>
@@ -90,8 +90,8 @@ export default function StudentExams() {
 
         {error && (
           <motion.div variants={ci} className="mb-8 flex items-center gap-3 bg-red-50 border border-red-200 rounded-2xl p-4">
-            <AlertCircle className="w-5 h-5 text-[#C62828] shrink-0" />
-            <p className="text-sm font-bold text-[#C62828]">{error}</p>
+            <AlertCircle className="w-5 h-5 text-[#F97316] shrink-0" />
+            <p className="text-sm font-bold text-[#F97316]">{error}</p>
           </motion.div>
         )}
 
@@ -123,7 +123,7 @@ export default function StudentExams() {
                     whileHover={{ y: -6 }}
                     className={`rounded-[2rem] p-8 border relative overflow-hidden shadow-sm hover:shadow-2xl transition-all group ${taken ? 'bg-[#1A1A1A] border-[#1A1A1A]' : 'bg-white border-[#1A1A1A]/5'}`}
                   >
-                    <div className={`absolute top-0 right-0 w-40 h-40 rounded-full -translate-y-1/2 translate-x-1/2 blur-[60px] transition-all ${taken ? 'bg-[#C62828]/20 group-hover:bg-[#C62828]/40' : 'bg-[#C62828]/[0.04] group-hover:bg-[#C62828]/10'}`} />
+                    <div className={`absolute top-0 right-0 w-40 h-40 rounded-full -translate-y-1/2 translate-x-1/2 blur-[60px] transition-all ${taken ? 'bg-[#F97316]/20 group-hover:bg-[#F97316]/40' : 'bg-[#F97316]/[0.04] group-hover:bg-[#F97316]/10'}`} />
 
                     <div className="relative z-10 space-y-6">
                       {/* Status badge */}
@@ -134,8 +134,8 @@ export default function StudentExams() {
                               ? 'bg-amber-500/20 text-amber-200'
                               : result.passed
                                 ? 'bg-green-500/20 text-green-400'
-                                : 'bg-[#C62828]/20 text-[#C62828]'
-                            : 'bg-[#C62828]/5 text-[#C62828]'
+                                : 'bg-[#F97316]/20 text-[#F97316]'
+                            : 'bg-[#F97316]/5 text-[#F97316]'
                         }`}>
                           {taken
                             ? pendingReview
@@ -145,8 +145,8 @@ export default function StudentExams() {
                                 : '✗ Failed'
                             : 'Not Taken'}
                         </span>
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${taken ? 'bg-white/10' : 'bg-[#C62828]/10'}`}>
-                          <HelpCircle className={`w-5 h-5 ${taken ? 'text-[#D4A373]' : 'text-[#C62828]'}`} />
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${taken ? 'bg-white/10' : 'bg-[#F97316]/10'}`}>
+                          <HelpCircle className={`w-5 h-5 ${taken ? 'text-[#D4A373]' : 'text-[#F97316]'}`} />
                         </div>
                       </div>
 
@@ -173,7 +173,7 @@ export default function StudentExams() {
                         <div className="space-y-1">
                           <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
                             <div
-                              className={`h-full rounded-full ${result.passed ? 'bg-green-400' : 'bg-[#C62828]'}`}
+                              className={`h-full rounded-full ${result.passed ? 'bg-green-400' : 'bg-[#F97316]'}`}
                               style={{ width: `${result.score}%` }}
                             />
                           </div>
@@ -192,7 +192,7 @@ export default function StudentExams() {
                       ) : (
                         <button
                           onClick={() => navigate(`/student/exams/${exam.id}`)}
-                          className="flex items-center gap-2 bg-[#C62828] text-white px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest hover:shadow-xl hover:-translate-y-0.5 transition-all active:scale-95 group/btn"
+                          className="flex items-center gap-2 bg-[#F97316] text-white px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest hover:shadow-xl hover:-translate-y-0.5 transition-all active:scale-95 group/btn"
                         >
                           <Play className="w-4 h-4 group-hover/btn:scale-125 transition-transform" />
                           Start Exam

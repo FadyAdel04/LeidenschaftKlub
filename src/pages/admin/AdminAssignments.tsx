@@ -152,18 +152,18 @@ export default function AdminAssignments() {
       <main className="pt-14 lg:pt-0 lg:ml-80 flex-1 p-4 sm:p-6 md:p-10 lg:p-16 xl:p-20 relative overflow-hidden">
         <motion.header variants={ci} className="mb-10 flex flex-col sm:flex-row items-start sm:items-end justify-between gap-6 relative z-10">
           <div>
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tighter text-[#1A1A1A] leading-none uppercase mb-3">Manage<br/><span className="text-[#C62828]">Assignments.</span></h1>
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tighter text-[#1A1A1A] leading-none uppercase mb-3">Manage<br/><span className="text-[#D4A373]">Assignments.</span></h1>
             <p className="text-[#D4A373] font-black uppercase text-[10px] tracking-[0.5em] italic">{loading ? '—' : `${assignments.length} Created`}</p>
           </div>
           <button onClick={() => { setShowForm(p => !p); setFormError(''); }}
-            className="flex items-center gap-3 bg-[#1A1A1A] text-white px-7 py-4 rounded-2xl font-black text-sm uppercase tracking-wider hover:bg-[#C62828] transition-all active:scale-95 shadow-lg shrink-0">
+            className="flex items-center gap-3 bg-[#1A1A1A] text-white px-7 py-4 rounded-2xl font-black text-sm uppercase tracking-wider hover:bg-[#D4A373] transition-all active:scale-95 shadow-lg shrink-0">
             <Plus className={`w-5 h-5 transition-transform ${showForm ? 'rotate-45' : ''}`} /> New Assignment
           </button>
         </motion.header>
 
         <AnimatePresence>
           {success && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="mb-6 flex items-center gap-3 bg-green-50 border border-green-200 rounded-2xl p-4 relative z-10"><CheckCircle className="w-4 h-4 text-green-600 shrink-0" /><p className="text-xs font-bold text-green-700">{success}</p></motion.div>}
-          {error && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="mb-6 flex items-center gap-3 bg-red-50 border border-red-200 rounded-2xl p-4 relative z-10"><AlertCircle className="w-4 h-4 text-[#C62828] shrink-0" /><p className="text-xs font-bold text-[#C62828]">{error}</p></motion.div>}
+          {error && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="mb-6 flex items-center gap-3 bg-red-50 border border-red-200 rounded-2xl p-4 relative z-10"><AlertCircle className="w-4 h-4 text-[#D4A373] shrink-0" /><p className="text-xs font-bold text-[#D4A373]">{error}</p></motion.div>}
         </AnimatePresence>
 
         {/* Create Form */}
@@ -172,14 +172,14 @@ export default function AdminAssignments() {
             <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
               className="bg-white rounded-[2.5rem] p-8 lg:p-10 border border-[#1A1A1A]/5 shadow-sm mb-8 relative z-10">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="font-black text-[#1A1A1A] tracking-tighter uppercase text-lg flex items-center gap-3"><LetterText className="w-5 h-5 text-[#C62828]" /> New Assignment</h3>
-                <button onClick={() => setShowForm(false)} className="p-2 rounded-xl bg-[#F5F5F0] text-[#1A1A1A]/40 hover:text-[#C62828]"><X className="w-4 h-4" /></button>
+                <h3 className="font-black text-[#1A1A1A] tracking-tighter uppercase text-lg flex items-center gap-3"><LetterText className="w-5 h-5 text-[#D4A373]" /> New Assignment</h3>
+                <button onClick={() => setShowForm(false)} className="p-2 rounded-xl bg-[#F5F5F0] text-[#1A1A1A]/40 hover:text-[#D4A373]"><X className="w-4 h-4" /></button>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
                 <div className="space-y-2">
                   <label className="text-[9px] font-black uppercase tracking-[0.4em] text-[#D4A373] ml-1 block">Title</label>
                   <input type="text" value={title} onChange={e => setTitle(e.target.value)} placeholder="e.g. Passive Voice Exercise"
-                    className="w-full px-5 py-3.5 bg-[#F5F5F0] rounded-2xl font-black text-sm text-[#1A1A1A] placeholder:text-[#1A1A1A]/20 outline-none focus:ring-4 focus:ring-[#C62828]/10 transition-all" />
+                    className="w-full px-5 py-3.5 bg-[#F5F5F0] rounded-2xl font-black text-sm text-[#1A1A1A] placeholder:text-[#1A1A1A]/20 outline-none focus:ring-4 focus:ring-[#D4A373]/10 transition-all" />
                 </div>
                 <div className="space-y-2">
                   <label className="text-[9px] font-black uppercase tracking-[0.4em] text-[#D4A373] ml-1 block">Level</label>
@@ -191,13 +191,13 @@ export default function AdminAssignments() {
                 <div className="space-y-2">
                   <label className="text-[9px] font-black uppercase tracking-[0.4em] text-[#D4A373] ml-1 block">Deadline (optional)</label>
                   <input type="datetime-local" value={deadline} onChange={e => setDeadline(e.target.value)}
-                    className="w-full px-5 py-3.5 bg-[#F5F5F0] rounded-2xl font-black text-sm text-[#1A1A1A] outline-none focus:ring-4 focus:ring-[#C62828]/10 transition-all" />
+                    className="w-full px-5 py-3.5 bg-[#F5F5F0] rounded-2xl font-black text-sm text-[#1A1A1A] outline-none focus:ring-4 focus:ring-[#D4A373]/10 transition-all" />
                 </div>
               </div>
               <div className="space-y-2 mb-6">
                 <label className="text-[9px] font-black uppercase tracking-[0.4em] text-[#D4A373] ml-1 block">Description</label>
                 <textarea value={desc} onChange={e => setDesc(e.target.value)} placeholder="Describe the assignment…" rows={3}
-                  className="w-full px-5 py-3.5 bg-[#F5F5F0] rounded-2xl font-black text-sm text-[#1A1A1A] placeholder:text-[#1A1A1A]/20 outline-none focus:ring-4 focus:ring-[#C62828]/10 resize-none transition-all" />
+                  className="w-full px-5 py-3.5 bg-[#F5F5F0] rounded-2xl font-black text-sm text-[#1A1A1A] placeholder:text-[#1A1A1A]/20 outline-none focus:ring-4 focus:ring-[#D4A373]/10 resize-none transition-all" />
               </div>
               <div className="space-y-2 mb-6">
                 <label className="text-[9px] font-black uppercase tracking-[0.4em] text-[#D4A373] ml-1 block">Audio Attachment (optional)</label>
@@ -207,15 +207,15 @@ export default function AdminAssignments() {
               </div>
               {uploadMetrics?.status === 'uploading' && (
                 <div className="mb-6 rounded-2xl border border-[#1A1A1A]/10 bg-[#F5F5F0] p-4">
-                  <div className="h-2 rounded-full bg-white overflow-hidden"><div className="h-full bg-[#C62828]" style={{ width: `${uploadMetrics.progress}%` }} /></div>
+                  <div className="h-2 rounded-full bg-white overflow-hidden"><div className="h-full bg-[#D4A373]" style={{ width: `${uploadMetrics.progress}%` }} /></div>
                   <p className="mt-2 text-[10px] font-black uppercase tracking-wider text-[#1A1A1A]/50">{uploadMetrics.progress}% - ETA {uploadMetrics.etaSeconds ?? '...' }s</p>
                 </div>
               )}
-              {formError && <div className="flex items-center gap-3 bg-red-50 border border-red-200 rounded-2xl p-4 mb-6"><AlertCircle className="w-4 h-4 text-[#C62828] shrink-0" /><p className="text-xs font-bold text-[#C62828]">{formError}</p></div>}
+              {formError && <div className="flex items-center gap-3 bg-red-50 border border-red-200 rounded-2xl p-4 mb-6"><AlertCircle className="w-4 h-4 text-[#D4A373] shrink-0" /><p className="text-xs font-bold text-[#D4A373]">{formError}</p></div>}
               <div className="flex gap-3 justify-end">
                 <button onClick={() => setShowForm(false)} className="px-6 py-3 bg-[#F5F5F0] rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-[#1A1A1A] hover:text-white transition-all active:scale-95">Cancel</button>
                 <button onClick={handleCreate} disabled={creating}
-                  className="flex items-center gap-2 px-8 py-3 bg-[#C62828] text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:shadow-xl transition-all active:scale-95 disabled:opacity-60">
+                  className="flex items-center gap-2 px-8 py-3 bg-[#D4A373] text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:shadow-xl transition-all active:scale-95 disabled:opacity-60">
                   {creating ? <Loader className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />} {creating ? 'Creating…' : 'Create'}
                 </button>
               </div>
@@ -232,23 +232,26 @@ export default function AdminAssignments() {
                 {assignments.map(a => (
                   <motion.div key={a.id} variants={ci} whileHover={{ x: 6 }}
                     className="bg-white rounded-4xl p-6 sm:p-8 border border-[#1A1A1A]/5 shadow-sm hover:shadow-xl transition-all flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 group">
-                    <div className="w-12 h-12 rounded-2xl bg-[#C62828]/10 flex items-center justify-center text-[#C62828] shrink-0 group-hover:bg-[#C62828] group-hover:text-white transition-all">
+                    <div className="w-12 h-12 rounded-2xl bg-[#D4A373]/10 flex items-center justify-center text-[#D4A373] shrink-0 group-hover:bg-[#D4A373] group-hover:text-white transition-all">
                       <LetterText className="w-6 h-6" />
                     </div>
                     <div className="flex-1 min-w-0 space-y-1">
                       <div className="flex flex-wrap items-center gap-3">
                         <span className="text-[8px] font-black uppercase tracking-[0.4em] text-[#D4A373] italic">Level {a.levels?.name ?? '—'}</span>
+                        <span className="text-[8px] font-black uppercase tracking-widest text-[#1A1A1A]/30 border-l border-[#1A1A1A]/10 pl-3">
+                          By {a.instructor?.name || 'Leidenschaft Admin'}
+                        </span>
                         {a.deadline && (
                           <span className="flex items-center gap-1 text-[8px] font-black uppercase tracking-wider text-[#1A1A1A]/30">
                             <Clock className="w-3 h-3" /> {new Date(a.deadline).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
                           </span>
                         )}
                       </div>
-                      <h3 className="text-lg font-black text-[#1A1A1A] tracking-tighter uppercase leading-tight group-hover:text-[#C62828] transition-colors truncate">{a.title}</h3>
+                      <h3 className="text-lg font-black text-[#1A1A1A] tracking-tighter uppercase leading-tight group-hover:text-[#D4A373] transition-colors truncate">{a.title}</h3>
                       {a.description && <p className="text-xs text-[#1A1A1A]/40 italic line-clamp-1">{a.description}</p>}
                     </div>
                     <button onClick={() => handleDelete(a.id)} disabled={deleting === a.id}
-                      className="w-10 h-10 rounded-xl bg-[#F5F5F0] flex items-center justify-center text-[#1A1A1A]/30 hover:bg-red-50 hover:text-[#C62828] transition-all active:scale-95 shrink-0 disabled:opacity-60">
+                      className="w-10 h-10 rounded-xl bg-[#F5F5F0] flex items-center justify-center text-[#1A1A1A]/30 hover:bg-red-50 hover:text-[#D4A373] transition-all active:scale-95 shrink-0 disabled:opacity-60">
                       {deleting === a.id ? <Loader className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
                     </button>
                     <button onClick={() => openEdit(a)}
@@ -301,12 +304,12 @@ export default function AdminAssignments() {
                       <td className="px-8 py-4">
                         <div className="space-y-2">
                           {s.file_url ? (
-                            <a href={s.file_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-[#C62828] hover:underline">
+                            <a href={s.file_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-[#D4A373] hover:underline">
                               <ExternalLink className="w-3.5 h-3.5" /> file
                             </a>
                           ) : null}
                           {s.audio_answer_url ? (
-                            <a href={s.audio_answer_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-[#C62828] hover:underline">
+                            <a href={s.audio_answer_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-[#D4A373] hover:underline">
                               <ExternalLink className="w-3.5 h-3.5" /> Audio
                             </a>
                           ) : null}
@@ -336,7 +339,7 @@ export default function AdminAssignments() {
                         {gradingId === s.id ? (
                           <div className="flex gap-2">
                             <button onClick={() => handleGradeSave(s.id)} disabled={grading}
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#C62828] text-white rounded-xl text-[10px] font-black uppercase tracking-widest disabled:opacity-60">
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#D4A373] text-white rounded-xl text-[10px] font-black uppercase tracking-widest disabled:opacity-60">
                               {grading ? <Loader className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />} Save
                             </button>
                             <button onClick={() => setGradingId(null)} className="p-1.5 bg-[#F5F5F0] rounded-xl text-[#1A1A1A]/40 hover:text-[#1A1A1A]">
@@ -359,7 +362,7 @@ export default function AdminAssignments() {
 
         <AnimatePresence>
           {editing && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="xed inset-0 z-110">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[110]">
               <button className="absolute inset-0 bg-black/60" onClick={() => setEditing(null)} />
               <div className="absolute inset-4 md:inset-10 bg-white rounded-3xl border border-[#1A1A1A]/10 shadow-2xl p-6 md:p-8 overflow-y-auto">
                 <div className="flex items-center justify-between mb-6">
@@ -380,11 +383,11 @@ export default function AdminAssignments() {
                     className="w-full px-4 py-3 rounded-2xl bg-[#F5F5F0] border border-[#1A1A1A]/10 text-xs font-black" />
                   {editing.audio_url && <audio src={editing.audio_url} controls className="w-full mt-3" />}
                 </div>
-                {formError && <p className="mt-4 text-xs font-black text-[#C62828]">{formError}</p>}
+                {formError && <p className="mt-4 text-xs font-black text-[#D4A373]">{formError}</p>}
                 <div className="mt-6 flex justify-end gap-3">
                   <button onClick={() => setEditing(null)} className="px-6 py-3 bg-[#F5F5F0] rounded-2xl font-black text-xs uppercase tracking-widest">Cancel</button>
                   <button onClick={handleUpdate} disabled={updating}
-                    className="inline-flex items-center gap-2 px-6 py-3 bg-[#C62828] text-white rounded-2xl font-black text-xs uppercase tracking-widest disabled:opacity-60">
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-[#D4A373] text-white rounded-2xl font-black text-xs uppercase tracking-widest disabled:opacity-60">
                     {updating ? <Loader className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Save Changes
                   </button>
                 </div>

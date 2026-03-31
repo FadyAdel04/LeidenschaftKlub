@@ -5,6 +5,8 @@ import { Mail, Lock, User, ArrowRight, ShieldCheck, Check, AlertCircle, Loader2,
 import TopNavBar from '../../components/layout/TopNavBar';
 import Footer from '../../components/layout/Footer';
 import { useAuth } from '../../context/AuthContext';
+import type { UserRole } from '../../context/AuthContext';
+import { GraduationCap, Briefcase } from 'lucide-react';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -22,6 +24,7 @@ export default function RegisterPage() {
   const [email, setEmail]       = useState('');
   const [phone, setPhone]       = useState('');
   const [password, setPassword] = useState('');
+  const [role, setRole]         = useState<UserRole>('student');
   const [agreed, setAgreed]     = useState(false);
   const [error, setError]       = useState('');
   const [success, setSuccess]   = useState('');
@@ -37,7 +40,7 @@ export default function RegisterPage() {
     if (digits.length < 8) { setError('Enter a valid phone number (at least 8 digits).'); return; }
     setLoading(true);
     try {
-      await register(name, email, password, phone);
+      await register(name, email, password, phone, role);
       setSuccess('Account created! Check your email to confirm your address, then log in.');
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Registration failed. Please try again.');
@@ -127,6 +130,40 @@ export default function RegisterPage() {
 
               <form className="space-y-4" onSubmit={handleSubmit}>
                 <motion.div variants={containerVariants} className="space-y-4">
+                  {/* Role Selection */}
+                  <div className="space-y-1.5">
+                    <label className="block text-[8px] font-black uppercase tracking-[0.3em] text-[#D4A373] ml-3">Membership Type</label>
+                    <div className="grid grid-cols-2 gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setRole('student')}
+                        className={`flex items-center gap-3 p-3 rounded-xl border-2 transition-all ${
+                          role === 'student'
+                            ? 'border-[#C62828] bg-[#C62828]/5 text-[#C62828]'
+                            : 'border-[#1A1A1A]/5 bg-[#F5F5F0] text-[#1A1A1A]/40 hover:border-[#1A1A1A]/10'
+                        }`}
+                      >
+                        <GraduationCap className="w-4 h-4" />
+                        <div className="text-left">
+                          <p className="text-[10px] font-black uppercase tracking-tighter leading-none">Student</p>
+                        </div>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setRole('instructor')}
+                        className={`flex items-center gap-3 p-3 rounded-xl border-2 transition-all ${
+                          role === 'instructor'
+                            ? 'border-[#C62828] bg-[#C62828]/5 text-[#C62828]'
+                            : 'border-[#1A1A1A]/5 bg-[#F5F5F0] text-[#1A1A1A]/40 hover:border-[#1A1A1A]/10'
+                        }`}
+                      >
+                        <Briefcase className="w-4 h-4" />
+                        <div className="text-left">
+                          <p className="text-[10px] font-black uppercase tracking-tighter leading-none">Instructor</p>
+                        </div>
+                      </button>
+                    </div>
+                  </div>
                   {/* Name */}
                   <div className="space-y-1.5">
                     <label className="block text-[8px] font-black uppercase tracking-[0.3em] text-[#D4A373] ml-3">Candidate Name</label>

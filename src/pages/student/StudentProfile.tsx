@@ -12,20 +12,19 @@ import {
   fetchProfile,
   fetchAuthUser,
   fetchResultsByStudent,
+  fetchSubmissionsByStudent,
   type Result,
   updateProfile,
   uploadProfileImage,
   getSignedAvatarUrl,
-  fetchAllLevelsPublic,
+  fetchLevelProgress,
   type Profile,
   type AuthUserInfo,
-  type Level,
+  type LevelProgress
 } from '../../services/studentService';
 
 const cv = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.07, delayChildren: 0.1 } } };
 const ci = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } };
-
-const FALLBACK_LEVELS = ['A1', 'A2', 'B1', 'B2'] as const;
 
 function getInitials(name: string) {
   return name.split(' ').slice(0, 2).map(p => p[0]?.toUpperCase() ?? '').join('') || '?';
@@ -39,7 +38,7 @@ function formatDateTime(iso: string | null | undefined) {
   return new Date(iso).toLocaleString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
 function levelColor(level: string) {
-  const map: Record<string, string> = { A1: '#6B7280', A2: '#D4A373', B1: '#C62828', B2: '#1A1A1A' };
+  const map: Record<string, string> = { A1: '#6B7280', A2: '#D4A373', B1: '#F97316', B2: '#1A1A1A' };
   return map[level] ?? '#1A1A1A';
 }
 function levelLabel(level: string) {
@@ -48,15 +47,15 @@ function levelLabel(level: string) {
 }
 
 export default function StudentProfile() {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const [profile,  setProfile]  = useState<Profile | null>(null);
   const [authInfo, setAuthInfo] = useState<AuthUserInfo | null>(null);
-  const [results,  setResults]  = useState<Result[]>([]);
-  const [loading,  setLoading]  = useState(true);
+  const [results,     setResults]     = useState<Result[]>([]);
+  const [loading,     setLoading]     = useState(true);
+  const [progress,    setProgress]    = useState<LevelProgress | null>(null);
   const [error,    setError]    = useState('');
-  const [levels,   setLevels]   = useState<Level[]>([]);
 
   // Edit state
   const [editing,   setEditing]   = useState(false);
@@ -77,12 +76,11 @@ export default function StudentProfile() {
     let cancelled = false;
     async function load() {
       try {
-        // Fetch all in parallel — fetchProfile auto-creates row if missing
-        const [prof, auth, ress, lvls] = await Promise.all([
+        const [prof, auth, ress, prog] = await Promise.all([
           fetchProfile(user!.id),
           fetchAuthUser(),
           fetchResultsByStudent(user!.id),
-          fetchAllLevelsPublic(),
+          fetchLevelProgress(user!.id),
         ]);
         if (cancelled) return;
         const avatarSigned = await getSignedAvatarUrl(prof.avatar_url);
@@ -91,8 +89,8 @@ export default function StudentProfile() {
           setProfile({ ...prof, avatar_url: avatarSigned });
         }
         setAuthInfo(auth);
-        setLevels(lvls);
         setResults(ress);
+        setProgress(prog);
         setEditName(prof.name);
         setEditPhone(prof.phone ?? '');
       } catch (e: unknown) {
@@ -111,6 +109,7 @@ export default function StudentProfile() {
     try {
       await updateProfile(user.id, { name: editName.trim(), phone: editPhone.trim() || null });
       setProfile(p => p ? { ...p, name: editName.trim(), phone: editPhone.trim() || null } : p);
+      await refreshUser();
       setSaveMsg('Profile updated successfully.');
       setEditing(false);
     } catch (e: unknown) {
@@ -142,7 +141,6 @@ export default function StudentProfile() {
     ? Math.round(graded.reduce((s, r) => s + (r.score ?? 0), 0) / graded.length)
     : 0;
   const currentLevel = profile?.current_level ?? 'A1';
-  const levelNames = (levels.length ? levels.map(l => l.name) : [...FALLBACK_LEVELS]) as string[];
 
   return (
     <motion.div initial="hidden" animate="visible" variants={cv} className="min-h-screen bg-[#F5F5F0] lg:flex">
@@ -154,20 +152,21 @@ export default function StudentProfile() {
       />
 
       <main className="pt-14 lg:pt-0 lg:ml-80 flex-1 p-4 sm:p-6 md:p-10 lg:p-16 xl:p-20 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-[50vw] h-[50vw] bg-[#C62828]/2 rounded-full blur-[100px] pointer-events-none -translate-y-1/2 translate-x-1/2" />
+        <div className="absolute top-0 right-0 w-[50vw] h-[50vw] bg-[#F97316]/[0.02] rounded-full blur-[100px] pointer-events-none -translate-y-1/2 translate-x-1/2" />
+
 
         {/* Header */}
         <motion.header variants={ci} className="mb-10 lg:mb-14 relative z-10">
-          <span className="text-[#C62828] font-black tracking-[0.5em] text-[10px] uppercase italic block mb-3">Institutional Identity</span>
+          <span className="text-[#F97316] font-black tracking-[0.5em] text-[10px] uppercase italic block mb-3">Institutional Identity</span>
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tighter text-[#1A1A1A] leading-none uppercase">
-            My<br /><span className="text-[#C62828]">Profile.</span>
+            My<br /><span className="text-[#F97316]">Profile.</span>
           </h1>
         </motion.header>
 
         {error && (
           <motion.div variants={ci} className="mb-8 flex items-center gap-3 bg-red-50 border border-red-200 rounded-2xl p-4">
-            <FiAlertCircle className="w-5 h-5 text-[#C62828] shrink-0" />
-            <p className="text-sm font-bold text-[#C62828]">{error}</p>
+            <FiAlertCircle className="w-5 h-5 text-[#F97316] shrink-0" />
+            <p className="text-sm font-bold text-[#F97316]">{error}</p>
           </motion.div>
         )}
 
@@ -176,10 +175,10 @@ export default function StudentProfile() {
           {/* ── Left: Avatar + Level Card ─────────────────────────────── */}
           <motion.div variants={ci} className="col-span-1 lg:col-span-4">
             <div className="bg-[#1A1A1A] rounded-[2.5rem] p-10 text-white relative overflow-hidden shadow-2xl border border-white/5 group flex flex-col items-center text-center h-full">
-              <div className="absolute top-0 right-0 w-48 h-48 bg-[#C62828]/20 rounded-full -translate-y-1/2 translate-x-1/2 blur-[80px] group-hover:bg-[#C62828]/40 transition-all duration-1000" />
+              <div className="absolute top-0 right-0 w-48 h-48 bg-[#F97316]/20 rounded-full -translate-y-1/2 translate-x-1/2 blur-[80px] group-hover:bg-[#F97316]/40 transition-all duration-1000" />
 
               {/* Avatar */}
-              <div className="relative z-10 w-28 h-28 rounded-4xl bg-[#C62828] flex items-center justify-center text-white font-black text-4xl shadow-2xl shadow-[#C62828]/30 mb-6 group-hover:scale-105 transition-transform">
+              <div className="relative z-10 w-28 h-28 rounded-4xl bg-[#F97316] flex items-center justify-center text-white font-black text-4xl shadow-2xl shadow-[#F97316]/30 mb-6 group-hover:scale-105 transition-transform">
                 {loading
                   ? <FiUser className="w-12 h-12 text-white/40 animate-pulse" />
                   : profile?.avatar_url
@@ -227,24 +226,33 @@ export default function StudentProfile() {
                 </div>
               )}
 
-              {/* Level progress track */}
-              <div className="relative z-10 w-full space-y-3">
-                <p className="text-[9px] font-black uppercase tracking-[0.4em] text-white/20 text-left mb-2">Level Pathway</p>
-                <div className="flex items-center gap-1.5">
-                  {levelNames.map((lv, i) => {
-                    const current = levelNames.indexOf(currentLevel);
-                    const safeCurrent = current === -1 ? 0 : current;
-                    const done    = i < safeCurrent;
-                    const active  = i === safeCurrent;
-                    return (
-                      <div key={lv} className="flex-1 flex flex-col items-center gap-1.5">
-                        <div className={`h-2 w-full rounded-full transition-all ${done ? 'bg-[#C62828]' : active ? 'bg-[#C62828]/60 animate-pulse' : 'bg-white/10'}`} />
-                        <span className={`text-[8px] font-black uppercase tracking-wider ${active ? 'text-[#D4A373]' : done ? 'text-[#C62828]/60' : 'text-white/20'}`}>{lv}</span>
+              {/* Progress Tracker */}
+              {progress && (
+                <div className="relative z-10 w-full mt-auto pt-8 border-t border-white/5">
+                   <div className="flex items-center justify-between mb-4">
+                      <div className="text-left">
+                        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/20 mb-1">Level Completion</p>
+                        <p className="text-xl font-black text-[#F97316]">{progress.percentage}%</p>
                       </div>
-                    );
-                  })}
+                      <div className="w-12 h-12 rounded-2xl bg-white/5 backdrop-blur-md flex items-center justify-center text-[#F97316]">
+                        <RiFlashlightLine className="w-6 h-6 animate-pulse" />
+                      </div>
+                   </div>
+                   
+                   <div className="h-3 w-full bg-white/5 rounded-full overflow-hidden mb-3 p-0.5">
+                      <motion.div 
+                        initial={{ width: 0 }} 
+                        animate={{ width: `${progress.percentage}%` }} 
+                        transition={{ duration: 1, ease: 'easeOut' }}
+                        className="h-full bg-gradient-to-r from-[#F97316] to-[#DE0002] rounded-full shadow-[0_0_20px_rgba(249,115,22,0.3)]"
+                      />
+                   </div>
+                   
+                   <p className="text-[8px] font-black uppercase tracking-[0.4em] text-white/30 text-center">
+                     {progress.completedItems} / {progress.totalItems} Milestones Reached
+                   </p>
                 </div>
-              </div>
+              )}
 
               {/* Auth provider chip */}
               {authInfo && (
@@ -263,13 +271,12 @@ export default function StudentProfile() {
           <motion.div variants={ci} className="col-span-1 lg:col-span-8 space-y-6">
 
             {/* Account Details card */}
-              <div className="bg-white rounded-[2.5rem] p-8 sm:p-10 border border-[#1A1A1A]/5 shadow-sm relative overflow-hidden group hover:shadow-2xl transition-all">
-              <div className="absolute top-0 right-0 w-40 h-40 bg-[#C62828]/3 rounded-full -translate-y-1/2 translate-x-1/2 group-hover:bg-[#C62828]/[0.07] transition-all" />
+            <div className="bg-white rounded-[2.5rem] p-8 sm:p-10 border border-[#1A1A1A]/5 shadow-sm relative overflow-hidden group hover:shadow-2xl transition-all">
+              <div className="absolute top-0 right-0 w-40 h-40 bg-[#F97316]/3 rounded-full -translate-y-1/2 translate-x-1/2 group-hover:bg-[#F97316]/[0.07] transition-all" />
 
-              {/* Card header */}
               <div className="flex items-center justify-between mb-8 relative z-10">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-2xl bg-[#C62828]/10 flex items-center justify-center text-[#C62828]">
+                  <div className="w-12 h-12 rounded-2xl bg-[#F97316]/10 flex items-center justify-center text-[#F97316]">
                     <FiUser className="w-6 h-6" />
                   </div>
                   <div>
@@ -280,7 +287,7 @@ export default function StudentProfile() {
                 {!editing ? (
                   <button
                     onClick={() => { setEditing(true); setSaveMsg(''); setSaveErr(''); }}
-                    className="flex items-center gap-2 bg-[#F5F5F0] hover:bg-[#C62828] hover:text-white text-[#1A1A1A] px-5 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all active:scale-95 border border-[#1A1A1A]/5"
+                    className="flex items-center gap-2 bg-[#F5F5F0] hover:bg-[#F97316] hover:text-white text-[#1A1A1A] px-5 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all active:scale-95 border border-[#1A1A1A]/5"
                   >
                     <FiEdit2 className="w-3.5 h-3.5" /> Edit
                   </button>
@@ -295,7 +302,7 @@ export default function StudentProfile() {
                     <button
                       onClick={handleSave}
                       disabled={saving}
-                      className="flex items-center gap-2 bg-[#C62828] text-white px-5 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all active:scale-95 shadow-md disabled:opacity-60"
+                      className="flex items-center gap-2 bg-[#F97316] text-white px-5 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all active:scale-95 shadow-md disabled:opacity-60"
                     >
                       {saving ? <FiLoader className="w-3.5 h-3.5 animate-spin" /> : <FiSave className="w-3.5 h-3.5" />}
                       {saving ? 'Saving…' : 'Save'}
@@ -312,8 +319,8 @@ export default function StudentProfile() {
               )}
               {saveErr && (
                 <div className="mb-6 flex items-center gap-3 bg-red-50 border border-red-200 rounded-2xl p-4 relative z-10">
-                  <FiAlertCircle className="w-4 h-4 text-[#C62828] shrink-0" />
-                  <p className="text-xs font-bold text-[#C62828]">{saveErr}</p>
+                  <FiAlertCircle className="w-4 h-4 text-[#F97316] shrink-0" />
+                  <p className="text-xs font-bold text-[#F97316]">{saveErr}</p>
                 </div>
               )}
 
@@ -321,34 +328,29 @@ export default function StudentProfile() {
                 ? <div className="space-y-4">{[1,2,3,4,5,6].map(i => <div key={i} className="h-14 bg-[#F5F5F0] rounded-2xl animate-pulse" />)}</div>
                 : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 relative z-10">
-
-                    {/* Full Name — editable */}
                     <Field icon={FiUser} label="Full Name">
                       {editing
                         ? <input type="text" value={editName} onChange={e => setEditName(e.target.value)}
-                            className="w-full px-5 py-3.5 bg-[#F5F5F0] rounded-2xl font-black text-sm text-[#1A1A1A] outline-none focus:ring-4 focus:ring-[#C62828]/10 border border-transparent focus:border-[#C62828]/20 transition-all" />
+                            className="w-full px-5 py-3.5 bg-[#F5F5F0] rounded-2xl font-black text-sm text-[#1A1A1A] outline-none focus:ring-4 focus:ring-[#F97316]/10 border border-transparent focus:border-[#F97316]/20 transition-all" />
                         : <ReadField>{profile?.name || '—'}</ReadField>
                       }
                     </Field>
 
-                    {/* Email — read-only, from auth */}
                     <Field icon={FiMail} label="Email Address">
                       <ReadField dim suffix="Secured">
                         {authInfo?.email || profile?.email || '—'}
                       </ReadField>
                     </Field>
 
-                    {/* Phone — editable */}
                     <Field icon={FiPhone} label="Phone Number">
                       {editing
                         ? <input type="tel" value={editPhone} onChange={e => setEditPhone(e.target.value)}
                             placeholder="+1 234 567 8900"
-                            className="w-full px-5 py-3.5 bg-[#F5F5F0] rounded-2xl font-black text-sm text-[#1A1A1A] outline-none focus:ring-4 focus:ring-[#C62828]/10 border border-transparent focus:border-[#C62828]/20 placeholder:text-[#1A1A1A]/20 transition-all" />
+                            className="w-full px-5 py-3.5 bg-[#F5F5F0] rounded-2xl font-black text-sm text-[#1A1A1A] outline-none focus:ring-4 focus:ring-[#F97316]/10 border border-transparent focus:border-[#F97316]/20 placeholder:text-[#1A1A1A]/20 transition-all" />
                         : <ReadField>{profile?.phone || <span className="text-[#1A1A1A]/30 italic">Not provided</span>}</ReadField>
                       }
                     </Field>
 
-                    {/* Current Level */}
                     <Field icon={FiBookOpen} label="Current Level">
                       <ReadField>
                         <span className="inline-flex items-center gap-3">
@@ -361,10 +363,9 @@ export default function StudentProfile() {
                       </ReadField>
                     </Field>
 
-                    {/* Role */}
                     <Field icon={FiShield} label="Role">
                       <ReadField suffix={
-                        <span className="text-[8px] font-black uppercase tracking-widest px-3 py-1 bg-[#C62828]/10 text-[#C62828] rounded-full">
+                        <span className="text-[8px] font-black uppercase tracking-widest px-3 py-1 bg-[#F97316]/10 text-[#F97316] rounded-full">
                           {profile?.role ?? 'student'}
                         </span>
                       }>
@@ -372,27 +373,23 @@ export default function StudentProfile() {
                       </ReadField>
                     </Field>
 
-                    {/* Email Verified */}
                     <Field icon={FiCheckCircle} label="Email Verified">
                       <ReadField>
                         {authInfo?.emailConfirmedAt
                           ? <span className="text-green-600">✓ Verified on {formatDate(authInfo.emailConfirmedAt)}</span>
-                          : <span className="text-[#C62828] italic">Not verified</span>
+                          : <span className="text-[#F97316] italic">Not verified</span>
                         }
                       </ReadField>
                     </Field>
 
-                    {/* Member Since — from auth */}
                     <Field icon={FiCalendar} label="Member Since">
                       <ReadField>{formatDate(authInfo?.createdAt ?? profile?.created_at)}</ReadField>
                     </Field>
 
-                    {/* Last Sign In */}
                     <Field icon={FiWifi} label="Last Sign In">
                       <ReadField>{formatDateTime(authInfo?.lastSignInAt)}</ReadField>
                     </Field>
 
-                    {/* Account ID — full width */}
                     <div className="sm:col-span-2 space-y-2">
                       <label className="flex items-center gap-2 text-[9px] font-black uppercase tracking-[0.4em] text-[#D4A373] ml-1">
                         <FiKey className="w-3 h-3" /> Account ID
@@ -409,7 +406,7 @@ export default function StudentProfile() {
             {/* ── Academic Stats ─────────────────────────────────────── */}
             <motion.div variants={ci} className="grid grid-cols-1 sm:grid-cols-3 gap-5">
               {[
-                { icon: RiFlashlightLine, label: 'Exams Taken',  value: loading ? '—' : results.length,       color: '#C62828' },
+                { icon: RiFlashlightLine, label: 'Exams Taken',  value: loading ? '—' : results.length,       color: '#F97316' },
                 { icon: FiAward,          label: 'Average Score', value: loading ? '—' : `${avgScore}%`,       color: '#D4A373' },
                 { icon: RiMedalLine,      label: 'Pass Rate',     value: loading ? '—' : `${passRate}%`,       color: '#1A1A1A' },
               ].map((s, i) => (
@@ -428,38 +425,33 @@ export default function StudentProfile() {
             {results.length > 0 && (
               <motion.div variants={ci} className="bg-white rounded-[2.5rem] p-8 sm:p-10 border border-[#1A1A1A]/5 shadow-sm">
                 <h3 className="font-black text-[#1A1A1A] tracking-tighter uppercase text-lg mb-6 flex items-center gap-3">
-                  <FiAward className="text-[#C62828] w-5 h-5" />
+                  <FiAward className="text-[#F97316] w-5 h-5" />
                   Exam History
                 </h3>
                 <div className="space-y-3">
                   {results.slice(0, 8).map((r, i) => {
                     const pending = r.review_status === 'pending_review';
                     return (
-                    <div key={i} className="flex items-center gap-4 p-4 bg-[#F5F5F0] rounded-2xl group hover:bg-[#C62828]/5 transition-all">
-                      <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-white font-black text-xs shrink-0 ${pending ? 'bg-amber-500' : r.passed ? 'bg-green-500' : 'bg-[#C62828]'}`}>
-                        {pending ? '…' : r.passed ? '✓' : '✗'}
+                      <div key={i} className="flex items-center gap-4 p-4 bg-[#F5F5F0] rounded-2xl group hover:bg-[#F97316]/5 transition-all">
+                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-white font-black text-xs shrink-0 ${pending ? 'bg-amber-500' : r.passed ? 'bg-green-500' : 'bg-[#F97316]'}`}>
+                          {pending ? '…' : r.passed ? '✓' : '✗'}
+                        </div>
+                        <div className="flex-1 min-w-0 space-y-1.5">
+                          {r.exams?.title && <p className="text-xs font-black text-[#1A1A1A] truncate">{r.exams.title}</p>}
+                          {!pending && r.score != null && (
+                            <div className="h-1.5 bg-[#1A1A1A]/5 rounded-full overflow-hidden">
+                              <div className={`h-full rounded-full transition-all ${r.passed ? 'bg-green-400' : 'bg-[#F97316]'}`} style={{ width: `${r.score}%` }} />
+                            </div>
+                          )}
+                        </div>
+                        <div className="text-right shrink-0 space-y-0.5">
+                          <p className="font-black text-sm text-[#1A1A1A]">{pending ? '—' : `${(r.score ?? 0).toFixed(0)}%`}</p>
+                          <p className="text-[8px] font-black uppercase tracking-wider text-[#1A1A1A]/30">{formatDate(r.taken_at)}</p>
+                        </div>
+                        <span className={`text-[9px] font-black uppercase px-2.5 py-1 rounded-full shrink-0 ${pending ? 'bg-amber-50 text-amber-900' : r.passed ? 'bg-green-50 text-green-600' : 'bg-red-50 text-[#F97316]'}`}>
+                          {pending ? 'Review' : r.passed ? 'Pass' : 'Fail'}
+                        </span>
                       </div>
-                      <div className="flex-1 min-w-0 space-y-1.5">
-                        {r.exams?.title && (
-                          <p className="text-xs font-black text-[#1A1A1A] truncate">{r.exams.title}</p>
-                        )}
-                        {!pending && r.score != null && (
-                          <div className="h-1.5 bg-[#1A1A1A]/5 rounded-full overflow-hidden">
-                            <div className={`h-full rounded-full transition-all ${r.passed ? 'bg-green-400' : 'bg-[#C62828]'}`}
-                              style={{ width: `${r.score}%` }} />
-                          </div>
-                        )}
-                      </div>
-                      <div className="text-right shrink-0 space-y-0.5">
-                        <p className="font-black text-sm text-[#1A1A1A]">
-                          {pending ? '—' : `${(r.score ?? 0).toFixed(0)}%`}
-                        </p>
-                        <p className="text-[8px] font-black uppercase tracking-wider text-[#1A1A1A]/30">{formatDate(r.taken_at)}</p>
-                      </div>
-                      <span className={`text-[9px] font-black uppercase px-2.5 py-1 rounded-full shrink-0 ${pending ? 'bg-amber-50 text-amber-900' : r.passed ? 'bg-green-50 text-green-600' : 'bg-red-50 text-[#C62828]'}`}>
-                        {pending ? 'Review' : r.passed ? 'Pass' : 'Fail'}
-                      </span>
-                    </div>
                   );})}
                 </div>
               </motion.div>
@@ -471,9 +463,7 @@ export default function StudentProfile() {
   );
 }
 
-// ── Small reusable sub-components ─────────────────────────────────────────────
-
-function Field({ icon: Icon, label, children }: { icon: React.ElementType; label: string; children: React.ReactNode }) {
+function Field({ icon: Icon, label, children }: { icon: any; label: string; children: React.ReactNode }) {
   return (
     <div className="space-y-2">
       <label className="flex items-center gap-2 text-[9px] font-black uppercase tracking-[0.4em] text-[#D4A373] ml-1">

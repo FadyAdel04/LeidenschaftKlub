@@ -17,13 +17,13 @@ export default function ToastStack() {
           >
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <p className="text-[10px] font-black uppercase tracking-widest text-[#C62828]">Notication</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-[#F97316]">Notication</p>
                 <p className="text-sm font-black text-[#1A1A1A] truncate">{t.title}</p>
                 <p className="text-xs font-bold text-[#1A1A1A]/60 mt-1 line-clamp-2">{t.message}</p>
               </div>
               <button
                 onClick={() => dismissToast(t.id)}
-                className="w-8 h-8 rounded-xl bg-[#F5F5F0] font-black text-[#1A1A1A]/50 hover:text-[#C62828]"
+                className="w-8 h-8 rounded-xl bg-[#F5F5F0] font-black text-[#1A1A1A]/50 hover:text-[#F97316]"
               >
                 ✕
               </button>

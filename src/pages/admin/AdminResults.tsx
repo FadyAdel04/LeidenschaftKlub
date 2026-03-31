@@ -96,11 +96,11 @@ export default function AdminResults() {
     <motion.div initial="hidden" animate="visible" variants={cv} className="min-h-screen bg-[#F5F5F0] lg:flex">
       <AdminSidebar />
       <main className="pt-14 lg:pt-0 lg:ml-80 flex-1 p-4 sm:p-6 md:p-10 lg:p-16 xl:p-20 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-[50vw] h-[50vw] bg-[#C62828]/[0.02] rounded-full blur-[100px] pointer-events-none -translate-y-1/2 translate-x-1/2" />
+        <div className="absolute top-0 right-0 w-[50vw] h-[50vw] bg-[#F97316]/[0.02] rounded-full blur-[100px] pointer-events-none -translate-y-1/2 translate-x-1/2" />
 
         <motion.header variants={ci} className="mb-10 lg:mb-14 relative z-10">
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tighter text-[#1A1A1A] leading-none uppercase mb-3">
-            Review<br /><span className="text-[#C62828]">Submissions.</span>
+            Review<br /><span className="text-[#F97316]">Submissions.</span>
           </h1>
           <p className="text-[#D4A373] font-black uppercase text-[10px] tracking-[0.5em] italic">
             {loading ? '—' : `${submissions.length} Total Submissions`}
@@ -115,8 +115,8 @@ export default function AdminResults() {
         )}
         {error && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mb-6 flex items-center gap-3 bg-red-50 border border-red-200 rounded-2xl p-4 relative z-10">
-            <AlertCircle className="w-4 h-4 text-[#C62828] shrink-0" />
-            <p className="text-xs font-bold text-[#C62828]">{error}</p>
+            <AlertCircle className="w-4 h-4 text-[#F97316] shrink-0" />
+            <p className="text-xs font-bold text-[#F97316]">{error}</p>
           </motion.div>
         )}
 
@@ -150,7 +150,7 @@ export default function AdminResults() {
                           </td>
                           <td className="px-8 py-5">
                             {s.file_url ? (
-                              <a href={s.file_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-[#C62828] hover:underline whitespace-nowrap">
+                              <a href={s.file_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-[#F97316] hover:underline whitespace-nowrap">
                                 <ExternalLink className="w-3.5 h-3.5" /> View Work
                               </a>
                             ) : (
@@ -168,13 +168,13 @@ export default function AdminResults() {
                             {editingId === s.id ? (
                               <div className="flex flex-col gap-2">
                                 <input type="number" value={editGrade} onChange={e => setEditGrade(e.target.value)} min="0" max="100" placeholder="0-100"
-                                  className="w-20 px-3 py-1.5 bg-[#F5F5F0] rounded-xl font-black text-sm text-[#1A1A1A] outline-none focus:ring-2 focus:ring-[#C62828]/20 border border-[#C62828]/20" />
+                                  className="w-20 px-3 py-1.5 bg-[#F5F5F0] rounded-xl font-black text-sm text-[#1A1A1A] outline-none focus:ring-2 focus:ring-[#F97316]/20 border border-[#F97316]/20" />
                                 <textarea
                                   value={editFeedback}
                                   onChange={e => setEditFeedback(e.target.value)}
                                   placeholder="Feedback for student"
                                   rows={2}
-                                  className="w-56 px-3 py-2 bg-[#F5F5F0] rounded-xl text-xs font-black text-[#1A1A1A] outline-none focus:ring-2 focus:ring-[#C62828]/20 border border-[#C62828]/20 resize-none"
+                                  className="w-56 px-3 py-2 bg-[#F5F5F0] rounded-xl text-xs font-black text-[#1A1A1A] outline-none focus:ring-2 focus:ring-[#F97316]/20 border border-[#F97316]/20 resize-none"
                                 />
                               </div>
                             ) : s.status === 'graded' ? (
@@ -195,7 +195,7 @@ export default function AdminResults() {
                           <td className="px-8 py-5">
                             {editingId === s.id ? (
                               <div className="flex items-center gap-2">
-                                <button onClick={() => handleSave(s.id)} disabled={saving} className="flex items-center gap-1.5 px-3 py-1.5 bg-[#C62828] text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:shadow-lg transition-all active:scale-95 disabled:opacity-60">
+                                <button onClick={() => handleSave(s.id)} disabled={saving} className="flex items-center gap-1.5 px-3 py-1.5 bg-[#F97316] text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:shadow-lg transition-all active:scale-95 disabled:opacity-60">
                                   {saving ? <Loader className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />} Save
                                 </button>
                                 <button onClick={() => setEditingId(null)} className="p-1.5 bg-[#F5F5F0] rounded-xl text-[#1A1A1A]/40 hover:text-[#1A1A1A]">
@@ -222,7 +222,7 @@ export default function AdminResults() {
             <h3 className="font-black text-[#1A1A1A] tracking-tighter uppercase text-lg">Exam Results Tracking</h3>
             <p className="text-[9px] font-black uppercase tracking-[0.4em] text-[#1A1A1A]/30 mt-1">{examResults.length} attempts • {passRate}% pass rate</p>
             <div className="mt-3 h-2 bg-[#F5F5F0] rounded-full overflow-hidden">
-              <div className="h-full bg-[#C62828] rounded-full" style={{ width: `${passRate}%` }} />
+              <div className="h-full bg-[#F97316] rounded-full" style={{ width: `${passRate}%` }} />
             </div>
           </div>
           {loading ? (
@@ -255,7 +255,7 @@ export default function AdminResults() {
                         </p>
                       </td>
                       <td className="px-8 py-4">
-                        <span className={`px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${r.passed ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-[#C62828] border border-red-200'}`}>
+                        <span className={`px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${r.passed ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-[#F97316] border border-red-200'}`}>
                           {r.passed ? 'Passed' : 'Failed'}
                         </span>
                       </td>
@@ -331,20 +331,20 @@ export default function AdminResults() {
                                 value={writingGrade}
                                 onChange={(e) => setWritingGrade(e.target.value)}
                                 placeholder="0-100"
-                                className="w-24 px-3 py-1.5 bg-[#F5F5F0] rounded-xl font-black text-sm outline-none border border-[#C62828]/20"
+                                className="w-24 px-3 py-1.5 bg-[#F5F5F0] rounded-xl font-black text-sm outline-none border border-[#F97316]/20"
                               />
                               <textarea
                                 value={writingFeedback}
                                 onChange={(e) => setWritingFeedback(e.target.value)}
                                 placeholder="Feedback for student"
                                 rows={2}
-                                className="w-72 px-3 py-2 bg-[#F5F5F0] rounded-xl text-xs font-black outline-none border border-[#C62828]/20 resize-none"
+                                className="w-72 px-3 py-2 bg-[#F5F5F0] rounded-xl text-xs font-black outline-none border border-[#F97316]/20 resize-none"
                               />
                               <div className="flex gap-2 items-center">
                                 <button
                                   onClick={() => handleWritingSave(a.id)}
                                   disabled={writingSaving}
-                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#C62828] text-white rounded-xl text-[10px] font-black uppercase tracking-widest disabled:opacity-60"
+                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#F97316] text-white rounded-xl text-[10px] font-black uppercase tracking-widest disabled:opacity-60"
                                 >
                                   {writingSaving ? <Loader className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
                                   Save

@@ -172,18 +172,18 @@ export default function StudentAssignments() {
       <StudentSidebar profile={profile} open={sidebarOpen} onClose={() => setSidebarOpen(false)} onToggle={() => setSidebarOpen(p => !p)} />
 
       <main className="pt-14 lg:pt-0 lg:ml-80 min-h-screen p-4 sm:p-6 md:p-10 lg:p-16 xl:p-20 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-[40vw] h-[40vw] bg-[#C62828]/[0.02] rounded-full blur-[100px] pointer-events-none -translate-y-1/2 translate-x-1/2" />
+        <div className="absolute top-0 right-0 w-[40vw] h-[40vw] bg-[#F97316]/[0.02] rounded-full blur-[100px] pointer-events-none -translate-y-1/2 translate-x-1/2" />
 
         {/* Header */}
         <motion.header variants={ci} className="mb-10 lg:mb-16 flex flex-col md:flex-row justify-between items-start md:items-end gap-6 relative z-10">
           <div className="space-y-3">
             <h2 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tighter text-[#1A1A1A] leading-none uppercase">
-              Curated<br /><span className="text-[#C62828]">Tasks.</span>
+              Curated<br /><span className="text-[#F97316]">Tasks.</span>
             </h2>
             <p className="text-[#D4A373] font-black uppercase text-[10px] tracking-[0.5em] italic">Level {profile?.current_level ?? '—'} Assignments</p>
           </div>
           <div className="flex items-center gap-4 bg-white p-3 pr-8 rounded-2xl border border-[#1A1A1A]/5 shadow-xl group">
-            <div className="bg-[#C62828] w-12 h-12 rounded-xl flex items-center justify-center text-white shadow-xl shadow-[#C62828]/20 group-hover:rotate-12 transition-transform shrink-0">
+            <div className="bg-[#F97316] w-12 h-12 rounded-xl flex items-center justify-center text-white shadow-xl shadow-[#F97316]/20 group-hover:rotate-12 transition-transform shrink-0">
               <LucideEdit className="w-6 h-6" />
             </div>
             <div>
@@ -197,8 +197,8 @@ export default function StudentAssignments() {
 
         {error && (
           <motion.div variants={ci} className="mb-8 flex items-center gap-3 bg-red-50 border border-red-200 rounded-2xl p-4">
-            <AlertCircle className="w-5 h-5 text-[#C62828] shrink-0" />
-            <p className="text-sm font-bold text-[#C62828]">{error}</p>
+            <AlertCircle className="w-5 h-5 text-[#F97316] shrink-0" />
+            <p className="text-sm font-bold text-[#F97316]">{error}</p>
           </motion.div>
         )}
 
@@ -224,7 +224,7 @@ export default function StudentAssignments() {
                         className={`p-6 sm:p-8 rounded-[2rem] border cursor-pointer transition-all relative overflow-hidden ${isActive ? 'bg-[#1A1A1A] border-[#1A1A1A] shadow-2xl' : 'bg-white border-[#1A1A1A]/5 hover:shadow-xl hover:bg-[#F5F5F0]/50'}`}
                       >
                         <div className="flex justify-between items-start mb-4 gap-2">
-                          <span className={`text-[9px] font-black uppercase tracking-[0.3em] px-3 py-1.5 rounded-full ${isActive ? 'bg-[#C62828] text-white' : 'bg-[#C62828]/5 text-[#C62828]'}`}>
+                          <span className={`text-[9px] font-black uppercase tracking-[0.3em] px-3 py-1.5 rounded-full ${isActive ? 'bg-[#F97316] text-white' : 'bg-[#F97316]/5 text-[#F97316]'}`}>
                             {days !== null ? (days < 0 ? 'Overdue' : days === 0 ? 'Due Today' : `${days}d left`) : 'No deadline'}
                           </span>
                           <p className={`text-[10px] font-black uppercase tracking-widest italic ${isActive ? 'text-white/40' : 'text-[#1A1A1A]/30'}`}>
@@ -254,7 +254,7 @@ export default function StudentAssignments() {
               </div>
             ) : (
               <div className="bg-white rounded-[2.5rem] p-6 sm:p-10 lg:p-14 shadow-xl border border-[#1A1A1A]/5 relative overflow-hidden group">
-                <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-[#C62828]/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-[100px] -z-0" />
+                <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-[#F97316]/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-[100px] -z-0" />
 
                 {loadingSubmission ? (
                   <div className="space-y-4">
@@ -264,7 +264,7 @@ export default function StudentAssignments() {
                   <div className="relative z-10 space-y-8">
                     {/* Assignment details */}
                     <div className="flex items-start gap-6">
-                      <div className="w-14 h-14 rounded-2xl bg-[#C62828]/10 flex items-center justify-center text-[#C62828] shrink-0">
+                      <div className="w-14 h-14 rounded-2xl bg-[#F97316]/10 flex items-center justify-center text-[#F97316] shrink-0">
                         <Edit className="w-7 h-7" />
                       </div>
                       <div className="min-w-0">
@@ -309,7 +309,7 @@ export default function StudentAssignments() {
                             <p className="text-xs text-green-600 italic mt-0.5">{submission?.answer && `"${submission.answer.slice(0, 80)}…"`}</p>
                             {submission?.feedback && (
                               <p className="text-xs text-[#1A1A1A]/60 mt-2">
-                                <span className="font-black uppercase tracking-wider text-[10px] text-[#C62828]">Admin Feedback:</span> {submission.feedback}
+                                <span className="font-black uppercase tracking-wider text-[10px] text-[#F97316]">Admin Feedback:</span> {submission.feedback}
                               </p>
                             )}
                           </div>
@@ -328,7 +328,7 @@ export default function StudentAssignments() {
                             value={answer}
                             onChange={e => setAnswer(e.target.value)}
                             disabled={submitting}
-                            className="w-full bg-[#F5F5F0]/50 border border-[#1A1A1A]/5 rounded-[2rem] p-8 text-[#1A1A1A] placeholder:text-[#1A1A1A]/20 focus:ring-4 focus:ring-[#C62828]/5 outline-none text-base font-black shadow-inner min-h-[200px] tracking-tight transition-all resize-none disabled:opacity-60"
+                            className="w-full bg-[#F5F5F0]/50 border border-[#1A1A1A]/5 rounded-[2rem] p-8 text-[#1A1A1A] placeholder:text-[#1A1A1A]/20 focus:ring-4 focus:ring-[#F97316]/5 outline-none text-base font-black shadow-inner min-h-[200px] tracking-tight transition-all resize-none disabled:opacity-60"
                             placeholder="Type your response here…"
                           />
                         </div>
@@ -347,24 +347,24 @@ export default function StudentAssignments() {
                           />
                           <div
                             onClick={() => leInputRef.current?.click()}
-                            className={`border-4 border-dashed rounded-[2rem] p-10 flex flex-col items-center justify-center cursor-pointer transition-all group/upload ${file ? 'border-[#C62828]/40 bg-[#C62828]/5' : 'border-[#1A1A1A]/10 bg-[#F5F5F0]/30 hover:bg-white hover:border-[#C62828]/40'}`}
+                            className={`border-4 border-dashed rounded-[2rem] p-10 flex flex-col items-center justify-center cursor-pointer transition-all group/upload ${file ? 'border-[#F97316]/40 bg-[#F97316]/5' : 'border-[#1A1A1A]/10 bg-[#F5F5F0]/30 hover:bg-white hover:border-[#F97316]/40'}`}
                           >
                             {file ? (
                               <div className="flex items-center gap-3">
-                                <FileText className="w-6 h-6 text-[#C62828]" />
-                                <p className="font-black text-[#C62828] text-sm">{file.name}</p>
+                                <FileText className="w-6 h-6 text-[#F97316]" />
+                                <p className="font-black text-[#F97316] text-sm">{file.name}</p>
                                 <button
                                   onClick={e => { e.stopPropagation(); setFile(null); }}
-                                  className="w-6 h-6 rounded-full bg-[#C62828]/10 flex items-center justify-center hover:bg-[#C62828] hover:text-white transition-all"
+                                  className="w-6 h-6 rounded-full bg-[#F97316]/10 flex items-center justify-center hover:bg-[#F97316] hover:text-white transition-all"
                                 >
                                   <X className="w-3 h-3" />
                                 </button>
                               </div>
                             ) : (
                               <>
-                                <UploadCloud className="w-12 h-12 text-[#1A1A1A]/10 group-hover/upload:text-[#C62828] transition-all mb-4 group-hover/upload:-translate-y-2" />
+                                <UploadCloud className="w-12 h-12 text-[#1A1A1A]/10 group-hover/upload:text-[#F97316] transition-all mb-4 group-hover/upload:-translate-y-2" />
                                 <p className="text-base font-black text-[#1A1A1A] uppercase tracking-tighter">
-                                  Drop file or <span className="text-[#C62828]">browse</span>
+                                  Drop file or <span className="text-[#F97316]">browse</span>
                                 </p>
                                 <p className="text-[9px] text-[#1A1A1A]/20 mt-3 uppercase tracking-[0.4em] font-black italic">PDF, DOCX up to 10MB</p>
                               </>
@@ -382,7 +382,7 @@ export default function StudentAssignments() {
                               </button>
                             ) : (
                               <button type="button" onClick={stopRecording}
-                                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#C62828] text-white text-[10px] font-black uppercase tracking-widest">
+                                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#F97316] text-white text-[10px] font-black uppercase tracking-widest">
                                 <StopCircle className="w-4 h-4" /> Stop ({recordingSeconds}s)
                               </button>
                             )}
@@ -403,7 +403,7 @@ export default function StudentAssignments() {
                         {uploadMetrics?.status === 'uploading' && (
                           <div className="rounded-2xl border border-[#1A1A1A]/10 bg-[#F5F5F0] p-4">
                             <div className="h-2 rounded-full bg-white overflow-hidden">
-                              <div className="h-full bg-[#C62828]" style={{ width: `${uploadMetrics.progress}%` }} />
+                              <div className="h-full bg-[#F97316]" style={{ width: `${uploadMetrics.progress}%` }} />
                             </div>
                             <p className="mt-2 text-[10px] font-black uppercase tracking-wider text-[#1A1A1A]/50">
                               {uploadMetrics.progress}% - {formatBytes(uploadMetrics.uploadedBytes)} / {formatBytes(uploadMetrics.totalBytes)}
@@ -415,8 +415,8 @@ export default function StudentAssignments() {
                         {/* Error */}
                         {submitError && (
                           <div className="flex items-center gap-3 bg-red-50 border border-red-200 rounded-2xl p-4">
-                            <AlertCircle className="w-5 h-5 text-[#C62828] shrink-0" />
-                            <p className="text-sm font-bold text-[#C62828]">{submitError}</p>
+                            <AlertCircle className="w-5 h-5 text-[#F97316] shrink-0" />
+                            <p className="text-sm font-bold text-[#F97316]">{submitError}</p>
                           </div>
                         )}
 
@@ -431,13 +431,13 @@ export default function StudentAssignments() {
                         {/* Action Row */}
                         <div className="flex items-center justify-between pt-6 border-t border-[#1A1A1A]/5">
                           <div className="flex items-center gap-3">
-                            <span className="w-3 h-3 rounded-full bg-[#C62828] animate-pulse shadow-[0_0_20px_rgba(198,40,40,0.6)]" />
+                            <span className="w-3 h-3 rounded-full bg-[#F97316] animate-pulse shadow-[0_0_20px_rgba(198,40,40,0.6)]" />
                             <span className="text-[10px] font-black text-[#1A1A1A]/40 uppercase tracking-[0.4em] italic">Auto-save: Active</span>
                           </div>
                           <button
                             onClick={handleSubmit}
                             disabled={submitting || (!answer.trim() && !file && !audioBlob)}
-                            className="flex items-center gap-3 px-10 py-5 bg-[#C62828] text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-2xl shadow-[#C62828]/20 hover:-translate-y-1 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+                            className="flex items-center gap-3 px-10 py-5 bg-[#F97316] text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-2xl shadow-[#F97316]/20 hover:-translate-y-1 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
                           >
                             {submitting ? <Loader className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
                             {submitting ? 'Submitting…' : 'Submit'}

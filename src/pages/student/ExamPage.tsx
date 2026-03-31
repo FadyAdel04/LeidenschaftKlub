@@ -434,7 +434,7 @@ export default function ExamPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-[#F5F5F0] flex items-center justify-center">
-        <Loader className="w-8 h-8 animate-spin text-[#C62828]" />
+        <Loader className="w-8 h-8 animate-spin text-[#F97316]" />
       </div>
     );
   }
@@ -447,7 +447,7 @@ export default function ExamPage() {
           <p className="text-sm text-[#1A1A1A]/50 mt-2">This exam has no questions yet.</p>
           <button
             onClick={() => navigate('/student/exams')}
-            className="mt-6 px-6 py-3 rounded-xl bg-[#C62828] text-white text-xs font-black uppercase tracking-widest"
+            className="mt-6 px-6 py-3 rounded-xl bg-[#F97316] text-white text-xs font-black uppercase tracking-widest"
           >
             Back to exams
           </button>
@@ -478,7 +478,7 @@ export default function ExamPage() {
           <div className="flex items-center gap-4">
             <button
               onClick={() => requestLeave(() => navigate('/student/exams'))}
-              className="w-10 h-10 rounded-xl bg-[#F5F5F0] text-[#1A1A1A]/60 hover:text-[#C62828]"
+              className="w-10 h-10 rounded-xl bg-[#F5F5F0] text-[#1A1A1A]/60 hover:text-[#F97316]"
             >
               <ArrowLeft className="w-5 h-5 mx-auto" />
             </button>
@@ -489,7 +489,7 @@ export default function ExamPage() {
           </div>
           <div
             className={`px-4 py-2 rounded-xl font-black text-sm flex items-center gap-2 ${
-              timeLeft < 120 ? 'bg-[#C62828] text-white' : 'bg-[#F5F5F0] text-[#1A1A1A]'
+              timeLeft < 120 ? 'bg-[#F97316] text-white' : 'bg-[#F5F5F0] text-[#1A1A1A]'
             }`}
           >
             <Clock className="w-4 h-4" />
@@ -500,7 +500,7 @@ export default function ExamPage() {
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-8 grid grid-cols-1 lg:grid-cols-12 gap-6">
         <section className="lg:col-span-8 bg-white rounded-3xl border border-[#1A1A1A]/10 p-6 sm:p-8 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-[240px] h-[240px] bg-[#C62828]/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-[60px]" />
+          <div className="absolute top-0 right-0 w-[240px] h-[240px] bg-[#F97316]/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-[60px]" />
 
           <div className="relative z-10">
             <p className="text-[10px] font-black uppercase tracking-widest text-[#D4A373] mb-3">
@@ -524,7 +524,7 @@ export default function ExamPage() {
                   <button
                     type="button"
                     onClick={replayListening}
-                    className="px-4 py-2 rounded-xl bg-white text-[#1A1A1A] text-xs font-black uppercase tracking-widest border border-[#1A1A1A]/10 hover:border-[#C62828] hover:text-[#C62828]"
+                    className="px-4 py-2 rounded-xl bg-white text-[#1A1A1A] text-xs font-black uppercase tracking-widest border border-[#1A1A1A]/10 hover:border-[#F97316] hover:text-[#F97316]"
                   >
                     <RotateCcw className="w-4 h-4 inline-block mr-2" />
                     Replay
@@ -568,7 +568,7 @@ export default function ExamPage() {
                         type="button"
                         onClick={() => setAnswerForCurrent(normalizeParagraphAnswer(currentQuestion, isTF ? option.trim().toLowerCase() === 'true' : option))}
                         className={`w-full text-left p-4 rounded-2xl border transition-all ${
-                          checked ? 'border-[#C62828] bg-[#C62828]/5' : 'border-[#1A1A1A]/10 bg-[#F5F5F0] hover:border-[#C62828]/40'
+                          checked ? 'border-[#F97316] bg-[#F97316]/5' : 'border-[#1A1A1A]/10 bg-[#F5F5F0] hover:border-[#F97316]/40'
                         }`}
                       >
                         <span className="font-black text-sm text-[#1A1A1A]">
@@ -592,7 +592,7 @@ export default function ExamPage() {
                       type="button"
                       onClick={() => setAnswerForCurrent(option)}
                       className={`w-full text-left p-4 rounded-2xl border transition-all ${
-                        checked ? 'border-[#C62828] bg-[#C62828]/5' : 'border-[#1A1A1A]/10 bg-[#F5F5F0] hover:border-[#C62828]/40'
+                        checked ? 'border-[#F97316] bg-[#F97316]/5' : 'border-[#1A1A1A]/10 bg-[#F5F5F0] hover:border-[#F97316]/40'
                       }`}
                     >
                       <span className="font-black text-sm text-[#1A1A1A]">
@@ -616,7 +616,7 @@ export default function ExamPage() {
                       return (
                         <>
                           <span>{parts[0]}</span>
-                          <span className="mx-2 inline-flex items-center px-4 py-2 rounded-xl bg-white border border-[#1A1A1A]/10 font-black text-[#C62828]">
+                          <span className="mx-2 inline-flex items-center px-4 py-2 rounded-xl bg-white border border-[#1A1A1A]/10 font-black text-[#F97316]">
                             {typeof answers[currentQuestion.id] === 'string' && (answers[currentQuestion.id] as string).trim()
                               ? (answers[currentQuestion.id] as string)
                               : '_____'}
@@ -630,7 +630,7 @@ export default function ExamPage() {
 
                 <div
                   className={`rounded-[2rem] border-4 border-dashed bg-white p-6 ${
-                    grammarDragOver ? 'border-[#C62828]/70 bg-[#C62828]/5' : 'border-[#C62828]/30'
+                    grammarDragOver ? 'border-[#F97316]/70 bg-[#F97316]/5' : 'border-[#F97316]/30'
                   }`}
                   onDragOver={(e) => {
                     e.preventDefault();
@@ -658,7 +658,7 @@ export default function ExamPage() {
                           }}
                           onClick={() => setAnswerForCurrent(word)}
                           className={`cursor-grab px-4 py-2 rounded-xl border transition-all inline-flex items-center gap-3 ${
-                            checked ? 'border-[#C62828] bg-[#C62828]/5' : 'border-[#1A1A1A]/10 bg-[#F5F5F0] hover:border-[#C62828]/40'
+                            checked ? 'border-[#F97316] bg-[#F97316]/5' : 'border-[#1A1A1A]/10 bg-[#F5F5F0] hover:border-[#F97316]/40'
                           }`}
                         >
                           <span className="font-black text-[#1A1A1A] text-sm">{word}</span>
@@ -688,7 +688,7 @@ export default function ExamPage() {
                   value={typeof answers[currentQuestion.id] === 'string' ? (answers[currentQuestion.id] as string) : ''}
                   onChange={(e) => setAnswerForCurrent(e.target.value)}
                   disabled={submitting}
-                  className="w-full bg-[#F5F5F0]/50 border border-[#1A1A1A]/5 rounded-[2rem] p-8 text-[#1A1A1A] placeholder:text-[#1A1A1A]/20 focus:ring-4 focus:ring-[#C62828]/5 outline-none text-base font-black shadow-inner min-h-[240px] tracking-tight transition-all resize-none disabled:opacity-60"
+                  className="w-full bg-[#F5F5F0]/50 border border-[#1A1A1A]/5 rounded-[2rem] p-8 text-[#1A1A1A] placeholder:text-[#1A1A1A]/20 focus:ring-4 focus:ring-[#F97316]/5 outline-none text-base font-black shadow-inner min-h-[240px] tracking-tight transition-all resize-none disabled:opacity-60"
                   placeholder="Write your answer…"
                 />
               </div>
@@ -708,7 +708,7 @@ export default function ExamPage() {
                       type="button"
                       onClick={() => setAnswerForCurrent(label)}
                       className={`w-full text-left p-4 rounded-2xl border transition-all ${
-                        checked ? 'border-[#C62828] bg-[#C62828]/5' : 'border-[#1A1A1A]/10 bg-[#F5F5F0] hover:border-[#C62828]/40'
+                        checked ? 'border-[#F97316] bg-[#F97316]/5' : 'border-[#1A1A1A]/10 bg-[#F5F5F0] hover:border-[#F97316]/40'
                       }`}
                     >
                       <span className="font-black text-sm text-[#1A1A1A]">
@@ -746,7 +746,7 @@ export default function ExamPage() {
         <aside className="lg:col-span-4 bg-[#1A1A1A] text-white rounded-3xl p-6">
           <h3 className="font-black uppercase tracking-tight text-lg mb-4">Progress</h3>
           <div className="h-2 rounded-full bg-white/10 overflow-hidden mb-2">
-            <div className="h-full bg-[#C62828]" style={{ width: `${progress}%` }} />
+            <div className="h-full bg-[#F97316]" style={{ width: `${progress}%` }} />
           </div>
           <p className="text-[10px] font-black uppercase tracking-widest text-white/60 mb-6">
             {answeredCount}/{questions.length} answered
@@ -761,7 +761,7 @@ export default function ExamPage() {
                   currentIndex === i
                     ? 'bg-white text-[#1A1A1A]'
                     : isAnswered(q, answers[q.id])
-                      ? 'bg-[#C62828] text-white'
+                      ? 'bg-[#F97316] text-white'
                       : 'bg-white/10 text-white/40'
                 }`}
               >
@@ -775,7 +775,7 @@ export default function ExamPage() {
           <button
             onClick={() => setSubmitConrmOpen(true)}
             disabled={submitting}
-            className="w-full py-3 rounded-xl bg-[#C62828] text-white text-xs font-black uppercase tracking-widest hover:brightness-95 disabled:opacity-60 inline-flex items-center justify-center gap-2"
+            className="w-full py-3 rounded-xl bg-[#F97316] text-white text-xs font-black uppercase tracking-widest hover:brightness-95 disabled:opacity-60 inline-flex items-center justify-center gap-2"
           >
             {submitting ? <Loader className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
             {submitting ? 'Submitting...' : 'Submit exam'}
@@ -800,7 +800,7 @@ export default function ExamPage() {
                 <button onClick={cancelLeave} className="px-5 py-3 rounded-2xl bg-[#F5F5F0] font-black text-xs uppercase tracking-widest">
                   Stay on Exam
                 </button>
-                <button onClick={conrmLeave} className="px-6 py-3 rounded-2xl bg-[#C62828] text-white font-black text-xs uppercase tracking-widest">
+                <button onClick={conrmLeave} className="px-6 py-3 rounded-2xl bg-[#F97316] text-white font-black text-xs uppercase tracking-widest">
                   Leave Anyway
                 </button>
               </div>
@@ -828,7 +828,7 @@ export default function ExamPage() {
                 </button>
                 <button
                   onClick={() => { setSubmitConrmOpen(false); void handleSubmit(); }}
-                  className="px-6 py-3 rounded-2xl bg-[#C62828] text-white font-black text-xs uppercase tracking-widest"
+                  className="px-6 py-3 rounded-2xl bg-[#F97316] text-white font-black text-xs uppercase tracking-widest"
                   disabled={submitting}
                 >
                   {submitting ? 'Submitting…' : 'Submit'}

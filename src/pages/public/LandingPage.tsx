@@ -5,7 +5,7 @@ import { ArrowRight, MapPin, Mail, Calendar, Users, ChevronRight } from 'lucide-
 import TopNavBar from '../../components/layout/TopNavBar';
 import Footer from '../../components/layout/Footer';
 import logo from '../../assets/logo.jpg';
-import { fetchAllLevels, type Level } from '../../services/adminService';
+import levelsData from '../../data/levels.json';
 import { bookWebsiteEvent, fetchWebsiteEvents, fetchWebsiteSpaces, publicAssetUrl, type WebsiteEvent, type WebsiteSpace } from '../../services/websiteService';
 import { useAuth } from '../../context/AuthContext';
 import background from '../../assets/background.jpg';
@@ -26,7 +26,6 @@ export default function LandingPage() {
   const { user } = useAuth();
   const [spaces, setSpaces] = useState<WebsiteSpace[]>([]);
   const [events, setEvents] = useState<WebsiteEvent[]>([]);
-  const [levels, setLevels] = useState<Level[]>([]);
   const [bookingOpen, setBookingOpen] = useState(false);
   const [bookingEvent, setBookingEvent] = useState<WebsiteEvent | null>(null);
   const [bName, setBName] = useState('');
@@ -61,15 +60,13 @@ export default function LandingPage() {
     let cancelled = false;
     async function loadLandingContent() {
       try {
-        const [s, e, l] = await Promise.all([
+        const [s, e] = await Promise.all([
           fetchWebsiteSpaces(),
           fetchWebsiteEvents(),
-          fetchAllLevels(),
         ]);
         if (cancelled) return;
         setSpaces(s);
         setEvents(e);
-        setLevels(l);
       } catch {
         // silently fallback: keep landing page usable even if CMS is empty
       }
@@ -77,16 +74,6 @@ export default function LandingPage() {
     loadLandingContent();
     return () => { cancelled = true; };
   }, []);
-
-  const curatedPath = useMemo(() => {
-    const sorted = [...levels].sort((a, b) => a.name.localeCompare(b.name));
-    const cols = ['lg:col-span-1', 'lg:col-span-1', 'lg:col-span-2', 'lg:col-span-1', 'lg:col-span-1', 'lg:col-span-2'];
-    return sorted.slice(0, 6).map((lv, idx) => ({
-      tag: lv.name,
-      title: lv.description || 'CEFR-aligned progression',
-      col: cols[idx] ?? 'lg:col-span-1',
-    }));
-  }, [levels]);
 
   const fallbackSpaces: WebsiteSpace[] = useMemo(() => ([
     {
@@ -415,32 +402,30 @@ export default function LandingPage() {
             </motion.div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
-              {(curatedPath.length ? curatedPath : [
-                { tag: "A1", title: "Discovery", col: "lg:col-span-1" },
-                { tag: "A2", title: "Waystage", col: "lg:col-span-1" },
-                { tag: "B1", title: "Threshold", col: "lg:col-span-2" },
-                { tag: "B2", title: "Vantage", col: "lg:col-span-1" },
-                { tag: "C1", title: "Advanced", col: "lg:col-span-1" },
-                { tag: "C2", title: "Mastery", col: "lg:col-span-2" }
-              ]).map((lvl, idx) => (
-                <motion.div 
-                  key={idx}
-                  whileHover={{ y: -10 }}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: idx * 0.1 }}
-                  onClick={() => navigate(`/levels/${encodeURIComponent(lvl.tag)}`)}
-                  className={`${lvl.col} bg-[#F5F5F0] p-6 sm:p-8 md:p-10 rounded-3xl sm:rounded-4xl border-l-8 border-[#C62828] group cursor-pointer transition-all hover:bg-[#1A1A1A] hover:border-[#D4A373] hover:shadow-2xl hover:shadow-[#1A1A1A]/20`}
-                >
-                  <div className="flex justify-between items-start mb-4 sm:mb-6 md:mb-8">
-                    <span className="text-4xl sm:text-5xl md:text-6xl font-black text-[#1A1A1A]/10 group-hover:text-white/20 transition-colors">{lvl.tag}</span>
-                    <ArrowRight className="text-[#C62828] group-hover:text-[#D4A373] group-hover:translate-x-2 transition-all w-6 h-6 sm:w-8 sm:h-8" />
-                  </div>
-                  <h3 className="text-2xl sm:text-3xl font-black mb-2 sm:mb-4 group-hover:text-white transition-colors">{lvl.tag}</h3>
-                  <p className="text-sm sm:text-base text-[#1A1A1A]/60 group-hover:text-white/60 transition-colors font-medium">Standardized excellence based on CEFR frameworks.</p>
-                </motion.div>
-              ))}
+              {levelsData.map((lvl, idx) => {
+                const colClass = (idx + 1) % 3 === 0 ? "lg:col-span-2" : "lg:col-span-1";
+                return (
+                  <motion.div 
+                    key={idx}
+                    whileHover={{ y: -10 }}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: idx * 0.05 }}
+                    onClick={() => navigate(`/levels/${encodeURIComponent(lvl.name)}`)}
+                    className={`${colClass} bg-[#F5F5F0] p-6 sm:p-8 md:p-10 rounded-3xl sm:rounded-4xl border-l-8 border-[#C62828] group cursor-pointer transition-all hover:bg-[#1A1A1A] hover:border-[#D4A373] hover:shadow-2xl hover:shadow-[#1A1A1A]/20`}
+                  >
+                    <div className="flex justify-between items-start mb-4 sm:mb-6 md:mb-8">
+                      <span className="text-4xl sm:text-5xl md:text-6xl font-black text-[#1A1A1A]/10 group-hover:text-white/20 transition-colors">{lvl.name}</span>
+                      <ArrowRight className="text-[#C62828] group-hover:text-[#D4A373] group-hover:translate-x-2 transition-all w-6 h-6 sm:w-8 sm:h-8" />
+                    </div>
+                    <h3 className="text-2xl sm:text-3xl font-black mb-2 sm:mb-4 group-hover:text-white transition-colors">{lvl.headline || lvl.name}</h3>
+                    <p className="text-sm sm:text-base text-[#1A1A1A]/60 group-hover:text-white/60 transition-colors font-medium">
+                      {lvl.summary || "Standardized excellence based on CEFR frameworks."}
+                    </p>
+                  </motion.div>
+                );
+              })}
             </div>
           </div>
         </section>

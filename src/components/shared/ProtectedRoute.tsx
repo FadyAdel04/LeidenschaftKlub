@@ -7,11 +7,18 @@ interface ProtectedRouteProps {
   redirectTo?: string;
 }
 
+/** Returns the home portal path for a given role. */
+function portalFor(role: UserRole): string {
+  if (role === 'admin')      return '/admin';
+  if (role === 'instructor') return '/instructor';
+  return '/student';
+}
+
 /**
- * Wraps routes that require authentication (and optionally a specic role).
+ * Wraps routes that require authentication (and optionally a specific role).
  * - Shows a spinner while the session is being loaded.
  * - Redirects to /login if the user is not authenticated.
- * - Redirects to / if the user's role is not allowed.
+ * - Redirects to the user's OWN portal if their role is not allowed here.
  */
 export default function ProtectedRoute({
   allowedRoles,
@@ -23,7 +30,7 @@ export default function ProtectedRoute({
   if (loading) {
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-[#F5F5F0]">
-        <div className="w-8 h-8 rounded-full border-4 border-[#1A1A1A]/10 border-t-[#C62828] animate-spin" />
+        <div className="w-8 h-8 rounded-full border-4 border-[#1A1A1A]/10 border-t-[#DE0002] animate-spin" />
       </div>
     );
   }
@@ -31,9 +38,9 @@ export default function ProtectedRoute({
   // Not authenticated → go to login
   if (!user) return <Navigate to={redirectTo} replace />;
 
-  // Role check
+  // Wrong role → send to their correct portal (not landing page)
   if (allowedRoles && !allowedRoles.includes(user.role)) {
-    return <Navigate to="/" replace />;
+    return <Navigate to={portalFor(user.role)} replace />;
   }
 
   return <Outlet />;

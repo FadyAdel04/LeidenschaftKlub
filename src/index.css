@@ -2,8 +2,10 @@
 
 @layer base {
   :root {
-    --primary: #dc2626; /* Adjust red as per design */
-    --primary-dark: #b91c1c;
+    --primary: #1A1A1A;     /* Black */
+    --secondary: #DE0002;   /* German Red */
+    --accent: #D4A373;      /* German Gold/Beige */
+    --orange: #F97316;      /* Detail Orange */
   }
 
   *, *::before, *::after {

@@ -17,18 +17,28 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Ignore non-GET requests (like POST) and ignore Chrome-extension schemes or non-HTTP schemes
-  if (request.method !== 'GET' || !url.protocol.startsWith('http')) {
+  // Ignore:
+  // 1. Non-GET requests (POST, PUT, DELETE, etc.)
+  // 2. Non-HTTP schemes (chrome-extension, etc.)
+  // 3. Supabase Auth/API calls (they usually handle their own caching/headers)
+  // 4. Localhost dev websocket (Vite/HMR)
+  if (
+    request.method !== 'GET' || 
+    !url.protocol.startsWith('http') ||
+    url.host.includes('supabase.co') ||
+    url.pathname.includes('socket.io') ||
+    url.pathname.includes('vite') ||
+    url.pathname.includes('hot-update')
+  ) {
     return;
   }
 
-  // Provide a generic response for failed fetches (offline mode support can be added here)
-  event.respondWith(
-    fetch(request).catch(err => {
-      // If the fetch fails (e.g., offline), we could serve a cached asset here.
-      console.warn('[SW] Fetch failed for:', request.url, err);
-      // For now just fail cleanly
-      throw err;
-    })
-  );
+  // Bypassing service worker for localhost HTML/navigation during dev 
+  // to avoid 'Failed to fetch' errors when the server restarts or has hmr issues
+  if (url.hostname === 'localhost') {
+    return;
+  }
+
+  // Active interception disabled to prevent fetch errors
+  // event.respondWith(...)
 });

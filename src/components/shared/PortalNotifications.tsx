@@ -43,11 +43,11 @@ export default function PortalNotifications() {
         <Bell className="w-5 h-5 text-[#1A1A1A]" />
         {unreadCount > 0 && (
           <>
-            <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full bg-[#C62828] text-white text-[10px] font-black flex items-center justify-center">
+            <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full bg-[#F97316] text-white text-[10px] font-black flex items-center justify-center">
               {unreadCount > 99 ? '99+' : unreadCount}
             </span>
-            <span className="absolute top-1 right-2 w-2 h-2 rounded-full bg-[#C62828] shadow-[0_0_0_4px_rgba(198,40,40,0.25)]" />
-            <span className="absolute top-1 right-2 w-2 h-2 rounded-full bg-[#C62828] animate-ping opacity-70" />
+            <span className="absolute top-1 right-2 w-2 h-2 rounded-full bg-[#F97316] shadow-[0_0_0_4px_rgba(198,40,40,0.25)]" />
+            <span className="absolute top-1 right-2 w-2 h-2 rounded-full bg-[#F97316] animate-ping opacity-70" />
           </>
         )}
       </button>
@@ -90,7 +90,7 @@ export default function PortalNotifications() {
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <p className="text-[10px] font-black uppercase tracking-widest text-[#C62828]">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-[#F97316]">
                           {n.type}
                           {n.priority ? ` • ${n.priority}` : ''}
                         </p>
@@ -100,7 +100,7 @@ export default function PortalNotifications() {
                           {timeAgo(n.created_at)}
                         </p>
                       </div>
-                      {!n.is_read && <span className="w-2.5 h-2.5 rounded-full bg-[#C62828] shrink-0 mt-1" />}
+                      {!n.is_read && <span className="w-2.5 h-2.5 rounded-full bg-[#F97316] shrink-0 mt-1" />}
                     </div>
                   </button>
                 ))}
@@ -115,7 +115,7 @@ export default function PortalNotifications() {
           <button className="absolute inset-0 bg-black/60" onClick={() => setSelectedId(null)} />
           <div className="relative w-full max-w-xl bg-white rounded-3xl border border-[#1A1A1A]/10 shadow-2xl overflow-hidden">
             <div className="p-6 sm:p-8 border-b border-[#1A1A1A]/10">
-              <p className="text-[10px] font-black uppercase tracking-widest text-[#C62828]">
+              <p className="text-[10px] font-black uppercase tracking-widest text-[#F97316]">
                 {selected.type}
                 {selected.priority ? ` • ${selected.priority}` : ''}
               </p>

@@ -69,16 +69,16 @@ export default function StudentCourses() {
       <StudentSidebar profile={profile} open={sidebarOpen} onClose={() => setSidebarOpen(false)} onToggle={() => setSidebarOpen(p => !p)} />
 
       <main className="pt-14 lg:pt-0 lg:ml-80 flex-1 p-4 sm:p-6 md:p-10 lg:p-16 xl:p-20 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-[50vw] h-[50vw] bg-[#C62828]/[0.02] rounded-full blur-[100px] pointer-events-none -translate-y-1/2 translate-x-1/2" />
+        <div className="absolute top-0 right-0 w-[50vw] h-[50vw] bg-[#F97316]/[0.02] rounded-full blur-[100px] pointer-events-none -translate-y-1/2 translate-x-1/2" />
 
         {/* Header */}
         <motion.header variants={ci} className="mb-10 lg:mb-16 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6 relative z-10">
           <div className="space-y-3">
-            <span className="text-[#C62828] font-black tracking-[0.5em] text-[10px] uppercase italic">
+            <span className="text-[#F97316] font-black tracking-[0.5em] text-[10px] uppercase italic">
               Level {profile?.current_level ?? '—'} Curriculum
             </span>
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tighter text-[#1A1A1A] leading-none uppercase">
-              My<br /><span className="text-[#C62828]">Materials.</span>
+              My<br /><span className="text-[#F97316]">Materials.</span>
             </h1>
           </div>
 
@@ -90,7 +90,7 @@ export default function StudentCourses() {
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Search materials…"
-              className="w-full pl-11 pr-4 py-3.5 bg-white border border-[#1A1A1A]/5 rounded-2xl font-black text-sm text-[#1A1A1A] placeholder:text-[#1A1A1A]/20 outline-none focus:ring-4 focus:ring-[#C62828]/10 shadow-sm transition-all"
+              className="w-full pl-11 pr-4 py-3.5 bg-white border border-[#1A1A1A]/5 rounded-2xl font-black text-sm text-[#1A1A1A] placeholder:text-[#1A1A1A]/20 outline-none focus:ring-4 focus:ring-[#F97316]/10 shadow-sm transition-all"
             />
           </div>
         </motion.header>
@@ -98,8 +98,8 @@ export default function StudentCourses() {
         {/* Error */}
         {error && (
           <motion.div variants={ci} className="mb-8 flex items-center gap-3 bg-red-50 border border-red-200 rounded-2xl p-4">
-            <AlertCircle className="w-5 h-5 text-[#C62828] shrink-0" />
-            <p className="text-sm font-bold text-[#C62828]">{error}</p>
+            <AlertCircle className="w-5 h-5 text-[#F97316] shrink-0" />
+            <p className="text-sm font-bold text-[#F97316]">{error}</p>
           </motion.div>
         )}
 
@@ -146,11 +146,11 @@ export default function StudentCourses() {
                   whileHover={{ y: -6 }}
                   className="bg-white rounded-[2rem] p-8 border border-[#1A1A1A]/5 shadow-sm hover:shadow-2xl transition-all group relative overflow-hidden"
                 >
-                  <div className="absolute top-0 right-0 w-24 h-24 bg-[#C62828]/[0.03] rounded-full -translate-y-1/2 translate-x-1/2 group-hover:bg-[#C62828]/10 transition-all" />
+                  <div className="absolute top-0 right-0 w-24 h-24 bg-[#F97316]/[0.03] rounded-full -translate-y-1/2 translate-x-1/2 group-hover:bg-[#F97316]/10 transition-all" />
                   <div className="relative z-10">
                     {/* Icon */}
-                    <div className="w-14 h-14 rounded-2xl bg-[#C62828]/10 flex items-center justify-center mb-6 group-hover:bg-[#C62828] transition-all">
-                      <BookOpen className="w-7 h-7 text-[#C62828] group-hover:text-white transition-colors" />
+                    <div className="w-14 h-14 rounded-2xl bg-[#F97316]/10 flex items-center justify-center mb-6 group-hover:bg-[#F97316] transition-all">
+                      <BookOpen className="w-7 h-7 text-[#F97316] group-hover:text-white transition-colors" />
                     </div>
 
                     {/* Material number */}
@@ -159,7 +159,7 @@ export default function StudentCourses() {
                     </p>
 
                     {/* Title */}
-                    <h3 className="text-lg font-black text-[#1A1A1A] tracking-tighter uppercase leading-tight mb-4 group-hover:text-[#C62828] transition-colors line-clamp-2">
+                    <h3 className="text-lg font-black text-[#1A1A1A] tracking-tighter uppercase leading-tight mb-4 group-hover:text-[#F97316] transition-colors line-clamp-2">
                       {m.title}
                     </h3>
 
@@ -174,7 +174,7 @@ export default function StudentCourses() {
                     <button
                       type="button"
                       onClick={() => { setSelectedMaterial(m); setPreviewOpen(true); }}
-                      className="inline-flex items-center gap-2 bg-[#1A1A1A] text-white px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-[#C62828] transition-all shadow-md active:scale-95"
+                      className="inline-flex items-center gap-2 bg-[#1A1A1A] text-white px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-[#F97316] transition-all shadow-md active:scale-95"
                     >
                       <PlayCircle className="w-4 h-4" />
                       Preview Material

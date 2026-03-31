@@ -5,8 +5,6 @@ import { Mail, Lock, ArrowRight, Shield, Check, AlertCircle, Loader2 } from 'luc
 import TopNavBar from '../../components/layout/TopNavBar';
 import Footer from '../../components/layout/Footer';
 import { useAuth } from '../../context/AuthContext';
-import { supabase } from '../../lib/supabase';
-
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
@@ -29,22 +27,15 @@ export default function LoginPage() {
     setError('');
     setLoading(true);
     try {
-      await login(email, password);
-      const { data: authData } = await supabase.auth.getUser();
-      const userId = authData.user?.id;
-
-      if (!userId) {
+      const user = await login(email, password);
+      
+      if (user.role === 'admin') {
+        navigate('/admin');
+      } else if (user.role === 'instructor') {
+        navigate('/instructor');
+      } else {
         navigate('/student');
-        return;
       }
-
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', userId)
-        .maybeSingle();
-
-      navigate(profile?.role === 'admin' ? '/admin' : '/student');
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Login failed. Please try again.');
     } finally {

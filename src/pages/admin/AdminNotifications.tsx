@@ -158,7 +158,7 @@ export default function AdminNotifications() {
         <motion.header variants={ci} className="mb-10 flex flex-col sm:flex-row items-start sm:items-end justify-between gap-6 relative z-10">
           <div>
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tighter text-[#1A1A1A] leading-none uppercase mb-3">
-              Notifications<br /><span className="text-[#C62828]">Manager.</span>
+              Notifications<br /><span className="text-[#F97316]">Manager.</span>
             </h1>
             <p className="text-[#D4A373] font-black uppercase text-[10px] tracking-[0.5em] italic">
               Realtime announcements for student levels
@@ -167,7 +167,7 @@ export default function AdminNotifications() {
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => { setfilterLevel('all'); setfilterActive('all'); }}
-              className="px-4 py-3 rounded-2xl bg-white text-[10px] font-black uppercase tracking-widest text-[#1A1A1A]/60 border border-[#1A1A1A]/10 hover:text-[#C62828]"
+              className="px-4 py-3 rounded-2xl bg-white text-[10px] font-black uppercase tracking-widest text-[#1A1A1A]/60 border border-[#1A1A1A]/10 hover:text-[#F97316]"
             >
               Reset filters
             </button>
@@ -183,7 +183,7 @@ export default function AdminNotifications() {
             )}
             {error && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} variants={ci} className="mb-6 flex items-center gap-3 bg-red-50 border border-red-200 rounded-2xl p-4">
-                <p className="text-xs font-bold text-[#C62828]">{error}</p>
+                <p className="text-xs font-bold text-[#F97316]">{error}</p>
               </motion.div>
             )}
           </AnimatePresence>
@@ -253,7 +253,7 @@ export default function AdminNotifications() {
                     Cancel
                   </button>
                 ) : null}
-                <button onClick={() => void handleSubmit()} disabled={saving} className="px-6 py-3 bg-[#C62828] text-white rounded-2xl font-black text-xs uppercase tracking-widest disabled:opacity-60">
+                <button onClick={() => void handleSubmit()} disabled={saving} className="px-6 py-3 bg-[#F97316] text-white rounded-2xl font-black text-xs uppercase tracking-widest disabled:opacity-60">
                   {saving ? 'Saving…' : editingId ? 'Update' : 'Send'}
                 </button>
               </div>
@@ -262,7 +262,7 @@ export default function AdminNotifications() {
             <div className="mt-8 bg-[#F5F5F0] rounded-4xl border border-[#1A1A1A]/5 p-5">
               <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[#D4A373]">Preview</p>
               <div className="mt-3">
-                <p className="text-xs font-black uppercase tracking-widest text-[#C62828]">
+                <p className="text-xs font-black uppercase tracking-widest text-[#F97316]">
                   {type} {priority ? `• ${priority}` : ''}
                 </p>
                 <h4 className="text-xl font-black text-[#1A1A1A] mt-1">{preview.title}</h4>
@@ -310,7 +310,7 @@ export default function AdminNotifications() {
                     <div key={g.announcement_id} className="bg-[#F5F5F0] rounded-4xl border border-[#1A1A1A]/5 p-5">
                       <div className="flex items-start justify-between gap-4">
                         <div className="min-w-0">
-                          <p className="text-[10px] font-black uppercase tracking-widest text-[#C62828]">
+                          <p className="text-[10px] font-black uppercase tracking-widest text-[#F97316]">
                             {g.type} {g.priority ? `• ${g.priority}` : ''} {g.is_active ? '' : '• Inactive'}
                           </p>
                           <p className="text-lg font-black text-[#1A1A1A] mt-1 truncate">{g.title}</p>
@@ -333,7 +333,7 @@ export default function AdminNotifications() {
                               await load();
                               setSuccess('notification deleted.');
                             }}
-                            className="px-4 py-2 rounded-2xl bg-white text-[#C62828] font-black text-[10px] uppercase tracking-widest border border-[#C62828]/20 hover:bg-[#C62828]/5"
+                            className="px-4 py-2 rounded-2xl bg-white text-[#F97316] font-black text-[10px] uppercase tracking-widest border border-[#F97316]/20 hover:bg-[#F97316]/5"
                           >
                             Delete
                           </button>

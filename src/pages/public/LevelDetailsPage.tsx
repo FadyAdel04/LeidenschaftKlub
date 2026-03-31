@@ -4,7 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ChevronRight, CheckCircle2, GraduationCap } from 'lucide-react';
 import TopNavBar from '../../components/layout/TopNavBar';
 import Footer from '../../components/layout/Footer';
-import { fetchAllLevels, type Level } from '../../services/adminService';
+
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../lib/supabase';
 import levelData from '../../data/levels.json';
@@ -62,30 +62,8 @@ export default function LevelDetailsPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  const [levels, setLevels] = useState<Level[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [signedInLevel, setSignedInLevel] = useState<string | null>(null);
   const currentName = useMemo(() => normalizeLevelSlug(level ?? ''), [level]);
-
-  useEffect(() => {
-    let cancelled = false;
-    async function load() {
-      setLoading(true);
-      setError('');
-      try {
-        const rows = await fetchAllLevels();
-        if (cancelled) return;
-        setLevels(rows);
-      } catch (e: unknown) {
-        if (!cancelled) setError(e instanceof Error ? e.message : 'Failed to load levels');
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    }
-    load();
-    return () => { cancelled = true; };
-  }, []);
 
   // Get level data from JSON
   const details = useMemo(() => {
@@ -93,16 +71,12 @@ export default function LevelDetailsPage() {
     return found || null;
   }, [currentName]);
 
-  const selected = useMemo(() => {
-    const exact = levels.find(l => l.name.toLowerCase() === currentName.toLowerCase());
-    if (exact) return exact;
-    return levels.find(l => l.name.toLowerCase() === decodeURIComponent(currentName).toLowerCase());
-  }, [levels, currentName]);
+  const selected = details;
 
   const otherLevels = useMemo(() => {
-    const sorted = [...levels].sort((a, b) => a.name.localeCompare(b.name));
+    const sorted = [...levelsMetadata].sort((a, b) => a.name.localeCompare(b.name));
     return sorted;
-  }, [levels]);
+  }, []);
 
   // "current level" marker for signed-in student (from profiles table)
   useEffect(() => {
@@ -141,7 +115,7 @@ export default function LevelDetailsPage() {
                     <p className="mt-1 text-xs font-bold text-[#1A1A1A]/50">Jump to any level</p>
                   </div>
 
-                  {loading ? (
+                  {false ? (
                     <div className="p-6 space-y-3">
                       {[1, 2, 3, 4, 5, 6].map(i => (
                         <div key={i} className="h-16 bg-[#F5F5F0] rounded-2xl animate-pulse" />
@@ -150,12 +124,12 @@ export default function LevelDetailsPage() {
                   ) : (
                     <div className="p-4 space-y-2">
                       {otherLevels.map((lv) => {
-                        const isActive = selected?.id === lv.id;
+                        const isActive = selected?.key === lv.key;
                         const isMine = signedInLevel && signedInLevel.toLowerCase() === lv.name.toLowerCase();
-                        const levelMeta = (levelData as LevelDetail[]).find(l => l.key === lv.name);
+                        const levelMeta = lv;
                         return (
                           <button
-                            key={lv.id}
+                            key={lv.key}
                             onClick={() => navigate(`/levels/${encodeURIComponent(lv.name)}`)}
                             className={`w-full text-left p-4 rounded-2xl border transition-all duration-200 group ${
                               isActive 
@@ -200,12 +174,6 @@ export default function LevelDetailsPage() {
             {/* Right Main Content */}
             <motion.section variants={ci} className="lg:col-span-9">
               <div className="space-y-16">
-                {error && (
-                  <div className="bg-red-50 border border-red-200 rounded-4xl p-4 text-sm font-bold text-[#C62828]">
-                    {error}
-                  </div>
-                )}
-
                 {/* Overview (code.html style) */}
                 <section id="overview" className="scroll-mt-28">
                   <div className="grid grid-cols-12 gap-6">
@@ -218,7 +186,7 @@ export default function LevelDetailsPage() {
                         <span className="text-[#C62828]">{details?.headline ?? details?.badge ?? 'Level'}</span>
                       </h1>
                       <p className="mt-6 text-base sm:text-lg font-bold text-[#1A1A1A]/60 leading-relaxed max-w-3xl">
-                        {details?.summary ?? selected?.description ?? 'CEFR-aligned progression with structured materials, assignments, and exams.'}
+                        {details?.summary ?? 'CEFR-aligned progression with structured materials, assignments, and exams.'}
                       </p>
                       {signedInLevel && details?.name && signedInLevel.toLowerCase() === details.name.toLowerCase() && (
                         <p className="mt-6 inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest px-3 py-2 rounded-full bg-green-50 text-green-700 border border-green-200">

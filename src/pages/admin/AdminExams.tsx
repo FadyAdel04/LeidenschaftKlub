@@ -16,7 +16,7 @@ import { MAX_UPLOAD_BYTES } from '../../utils/storageUpload';
 
 const cv = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.07 } } };
 const ci = { hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } };
-type EW = Exam & { levels?: { name: string } };
+type EW = Exam & { levels?: { name: string }; instructor?: { name: string } | null };
 
 type QuestionAction =
   | { type: 'SET_QUESTIONS'; payload: ExamQuestion[] }
@@ -417,12 +417,12 @@ export default function AdminExams() {
         <motion.header variants={ci} initial={hasAnimated ? false : "hidden"} animate="visible" className="mb-10 flex flex-col gap-6 relative z-10">
           <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-6 w-full">
             <div>
-              <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tighter text-[#1A1A1A] leading-none uppercase mb-3">Manage<br/><span className="text-[#C62828]">Exams.</span></h1>
+              <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tighter text-[#1A1A1A] leading-none uppercase mb-3">Manage<br/><span className="text-[#D4A373]">Exams.</span></h1>
               <p className="text-[#D4A373] font-black uppercase text-[10px] tracking-[0.5em] italic">{loading ? '—' : `${exams.length} Created`}</p>
             </div>
             {adminTab === 'bank' && (
               <button onClick={() => { setShowForm(p => !p); setFormError(''); }}
-                className="flex items-center gap-3 bg-[#1A1A1A] text-white px-7 py-4 rounded-2xl font-black text-sm uppercase tracking-wider hover:bg-[#C62828] transition-all active:scale-95 shadow-lg shrink-0">
+                className="flex items-center gap-3 bg-[#1A1A1A] text-white px-7 py-4 rounded-2xl font-black text-sm uppercase tracking-wider hover:bg-[#D4A373] transition-all active:scale-95 shadow-lg shrink-0">
                 <Plus className={`w-5 h-5 transition-transform ${showForm ? 'rotate-45' : ''}`} /> New Exam
               </button>
             )}
@@ -449,7 +449,7 @@ export default function AdminExams() {
         <>
         <AnimatePresence>
           {success && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="mb-6 flex items-center gap-3 bg-green-50 border border-green-200 rounded-2xl p-4 relative z-10"><CheckCircle className="w-4 h-4 text-green-600 shrink-0" /><p className="text-xs font-bold text-green-700">{success}</p></motion.div>}
-          {error && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="mb-6 flex items-center gap-3 bg-red-50 border border-red-200 rounded-2xl p-4 relative z-10"><AlertCircle className="w-4 h-4 text-[#C62828] shrink-0" /><p className="text-xs font-bold text-[#C62828]">{error}</p></motion.div>}
+          {error && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="mb-6 flex items-center gap-3 bg-red-50 border border-red-200 rounded-2xl p-4 relative z-10"><AlertCircle className="w-4 h-4 text-[#D4A373] shrink-0" /><p className="text-xs font-bold text-[#D4A373]">{error}</p></motion.div>}
         </AnimatePresence>
 
         {/* Create Form */}
@@ -458,14 +458,14 @@ export default function AdminExams() {
             <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
               className="bg-white rounded-[2.5rem] p-8 lg:p-10 border border-[#1A1A1A]/5 shadow-sm mb-8 relative z-10">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="font-black text-[#1A1A1A] tracking-tighter uppercase text-lg flex items-center gap-3"><Award className="w-5 h-5 text-[#C62828]" /> New Exam</h3>
-                <button onClick={() => setShowForm(false)} className="p-2 rounded-xl bg-[#F5F5F0] text-[#1A1A1A]/40 hover:text-[#C62828]"><X className="w-4 h-4" /></button>
+                <h3 className="font-black text-[#1A1A1A] tracking-tighter uppercase text-lg flex items-center gap-3"><Award className="w-5 h-5 text-[#D4A373]" /> New Exam</h3>
+                <button onClick={() => setShowForm(false)} className="p-2 rounded-xl bg-[#F5F5F0] text-[#1A1A1A]/40 hover:text-[#D4A373]"><X className="w-4 h-4" /></button>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-6">
                 <div className="space-y-2">
                   <label className="text-[9px] font-black uppercase tracking-[0.4em] text-[#D4A373] ml-1 block">Exam Title</label>
                   <input type="text" value={examData.title} onChange={e => setExamData(prev => ({ ...prev, title: e.target.value }))} placeholder="e.g. B1 Midterm"
-                    className="w-full px-5 py-3.5 bg-[#F5F5F0] rounded-2xl font-black text-sm text-[#1A1A1A] placeholder:text-[#1A1A1A]/20 outline-none focus:ring-4 focus:ring-[#C62828]/10 transition-all" />
+                    className="w-full px-5 py-3.5 bg-[#F5F5F0] rounded-2xl font-black text-sm text-[#1A1A1A] placeholder:text-[#1A1A1A]/20 outline-none focus:ring-4 focus:ring-[#D4A373]/10 transition-all" />
                 </div>
                 <div className="space-y-2">
                   <label className="text-[9px] font-black uppercase tracking-[0.4em] text-[#D4A373] ml-1 block">Level</label>
@@ -477,14 +477,14 @@ export default function AdminExams() {
                 <div className="space-y-2">
                   <label className="text-[9px] font-black uppercase tracking-[0.4em] text-[#D4A373] ml-1 block">Duration (min)</label>
                   <input type="number" value={examData.duration} onChange={e => setExamData(prev => ({ ...prev, duration: e.target.value }))} min="1" max="300"
-                    className="w-full px-5 py-3.5 bg-[#F5F5F0] rounded-2xl font-black text-sm text-[#1A1A1A] outline-none focus:ring-4 focus:ring-[#C62828]/10 transition-all" />
+                    className="w-full px-5 py-3.5 bg-[#F5F5F0] rounded-2xl font-black text-sm text-[#1A1A1A] outline-none focus:ring-4 focus:ring-[#D4A373]/10 transition-all" />
                 </div>
               </div>
-              {formError && <div className="flex items-center gap-3 bg-red-50 border border-red-200 rounded-2xl p-4 mb-6"><AlertCircle className="w-4 h-4 text-[#C62828] shrink-0" /><p className="text-xs font-bold text-[#C62828]">{formError}</p></div>}
+              {formError && <div className="flex items-center gap-3 bg-red-50 border border-red-200 rounded-2xl p-4 mb-6"><AlertCircle className="w-4 h-4 text-[#D4A373] shrink-0" /><p className="text-xs font-bold text-[#D4A373]">{formError}</p></div>}
               <div className="flex gap-3 justify-end">
                 <button onClick={() => setShowForm(false)} className="px-6 py-3 bg-[#F5F5F0] rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-[#1A1A1A] hover:text-white transition-all active:scale-95">Cancel</button>
                 <button onClick={handleCreate} disabled={creating}
-                  className="flex items-center gap-2 px-8 py-3 bg-[#C62828] text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:shadow-xl transition-all active:scale-95 disabled:opacity-60">
+                  className="flex items-center gap-2 px-8 py-3 bg-[#D4A373] text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:shadow-xl transition-all active:scale-95 disabled:opacity-60">
                   {creating ? <Loader className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />} {creating ? 'Creating…' : 'Create'}
                 </button>
               </div>
@@ -501,14 +501,14 @@ export default function AdminExams() {
                 {exams.map(e => (
                   <motion.div key={e.id} variants={ci} whileHover={{ y: -4 }}
                     className="bg-white rounded-[2rem] p-7 border border-[#1A1A1A]/5 shadow-sm hover:shadow-2xl transition-all group relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-20 h-20 bg-[#C62828]/[0.03] rounded-full -translate-y-1/2 translate-x-1/2 group-hover:bg-[#C62828]/10 transition-all" />
+                    <div className="absolute top-0 right-0 w-20 h-20 bg-[#D4A373]/[0.03] rounded-full -translate-y-1/2 translate-x-1/2 group-hover:bg-[#D4A373]/10 transition-all" />
                     <div className="flex items-start justify-between mb-5">
-                      <div className="w-12 h-12 rounded-2xl bg-[#C62828]/10 flex items-center justify-center group-hover:bg-[#C62828] transition-all shrink-0">
-                        <Award className="w-6 h-6 text-[#C62828] group-hover:text-white transition-colors" />
+                      <div className="w-12 h-12 rounded-2xl bg-[#D4A373]/10 flex items-center justify-center group-hover:bg-[#D4A373] transition-all shrink-0">
+                        <Award className="w-6 h-6 text-[#D4A373] group-hover:text-white transition-colors" />
                       </div>
                       <div className="flex items-center gap-2">
                         <button onClick={() => handleDelete(e.id)} disabled={deleting === e.id}
-                          className="w-8 h-8 rounded-lg bg-[#F5F5F0] flex items-center justify-center text-[#1A1A1A]/20 hover:bg-red-50 hover:text-[#C62828] transition-all active:scale-95 disabled:opacity-60 shrink-0">
+                          className="w-8 h-8 rounded-lg bg-[#F5F5F0] flex items-center justify-center text-[#1A1A1A]/20 hover:bg-red-50 hover:text-[#D4A373] transition-all active:scale-95 disabled:opacity-60 shrink-0">
                           {deleting === e.id ? <Loader className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
                         </button>
                         <button
@@ -521,14 +521,17 @@ export default function AdminExams() {
                       </div>
                     </div>
                     <span className="text-[8px] font-black uppercase tracking-[0.4em] text-[#D4A373] italic">Level {e.levels?.name ?? '—'}</span>
-                    <h3 className="text-lg font-black text-[#1A1A1A] tracking-tighter uppercase leading-tight mt-1 mb-4 line-clamp-2 group-hover:text-[#C62828] transition-colors">{e.title}</h3>
+                    <span className="text-[8px] font-black uppercase tracking-widest text-[#1A1A1A]/30 border-l border-[#1A1A1A]/10 pl-3">
+                      By {e.instructor?.name || 'Leidenschaft Admin'}
+                    </span>
+                    <h3 className="text-lg font-black text-[#1A1A1A] tracking-tighter uppercase leading-tight mt-1 mb-4 line-clamp-2 group-hover:text-[#D4A373] transition-colors">{e.title}</h3>
                     <div className="flex items-center gap-2 text-[9px] font-black text-[#1A1A1A]/30 uppercase tracking-widest">
                       <Clock className="w-3.5 h-3.5" />
                       <span>{e.duration} Minutes</span>
                     </div>
                     <button
                       onClick={() => openQuestions(e)}
-                      className="mt-4 w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#1A1A1A] text-white font-black text-[10px] uppercase tracking-widest hover:bg-[#C62828] transition-all"
+                      className="mt-4 w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#1A1A1A] text-white font-black text-[10px] uppercase tracking-widest hover:bg-[#D4A373] transition-all"
                     >
                       <List className="w-3.5 h-3.5" />
                       Manage Questions
@@ -543,7 +546,7 @@ export default function AdminExams() {
         {adminTab === 'submissions' && (
           <section className="relative z-10 bg-white rounded-3xl border border-[#1A1A1A]/10 shadow-sm overflow-hidden mb-8">
             <div className="px-6 py-4 border-b border-[#1A1A1A]/10 flex items-center gap-3">
-              <Clipboard className="w-5 h-5 text-[#C62828]" />
+              <Clipboard className="w-5 h-5 text-[#D4A373]" />
               <div>
                 <h3 className="font-black uppercase text-[#1A1A1A] tracking-tight">Exam submissions</h3>
                 <p className="text-[9px] font-black uppercase tracking-widest text-[#1A1A1A]/35">Review writing tasks and release Final scores</p>
@@ -551,7 +554,7 @@ export default function AdminExams() {
             </div>
             {subLoading ? (
               <div className="p-12 flex justify-center">
-                <Loader className="w-8 h-8 animate-spin text-[#C62828]" />
+                <Loader className="w-8 h-8 animate-spin text-[#D4A373]" />
               </div>
             ) : submissions.length === 0 ? (
               <div className="p-12 text-center font-black text-[#1A1A1A]/30 uppercase text-sm">No submissions yet.</div>
@@ -588,7 +591,7 @@ export default function AdminExams() {
                           <button
                             type="button"
                             onClick={() => navigate(`/admin/exams/${r.exam_id}/review/${r.student_id}`)}
-                            className="text-[10px] font-black uppercase tracking-widest text-[#C62828] hover:underline"
+                            className="text-[10px] font-black uppercase tracking-widest text-[#D4A373] hover:underline"
                           >
                             Review
                           </button>
@@ -617,7 +620,7 @@ export default function AdminExams() {
                     <p className="text-[9px] font-black uppercase tracking-[0.35em] text-[#D4A373]">Exam Question Bank</p>
                     <h3 className="text-lg md:text-xl font-black tracking-tight text-[#1A1A1A] uppercase mt-1">{activeExam.title}</h3>
                   </div>
-                  <button onClick={() => setActiveExam(null)} className="w-9 h-9 rounded-xl bg-[#F5F5F0] text-[#1A1A1A]/50 hover:text-[#C62828]">
+                  <button onClick={() => setActiveExam(null)} className="w-9 h-9 rounded-xl bg-[#F5F5F0] text-[#1A1A1A]/50 hover:text-[#F97316]">
                     <X className="w-5 h-5 mx-auto" />
                   </button>
                 </div>
@@ -779,7 +782,7 @@ export default function AdminExams() {
                       <button
                         onClick={handleSaveQuestion}
                         disabled={qSaving}
-                        className="w-full py-3 rounded-xl bg-[#C62828] text-white text-xs font-black uppercase tracking-widest hover:shadow-xl disabled:opacity-60"
+                        className="w-full py-3 rounded-xl bg-[#F97316] text-white text-xs font-black uppercase tracking-widest hover:shadow-xl disabled:opacity-60"
                       >
                         {qSaving ? 'Saving…' : editingQuestionId ? 'Update Question' : 'Add Question'}
                       </button>
@@ -803,7 +806,7 @@ export default function AdminExams() {
                             setQuestionAudioFile(null);
                             setListeningAudioUrl(null);
                           }}
-                          className="w-full mt-2 py-2 rounded-xl bg-[#F5F5F0] text-[#1A1A1A]/40 text-[10px] font-black uppercase tracking-widest hover:text-[#C62828]"
+                          className="w-full mt-2 py-2 rounded-xl bg-[#F5F5F0] text-[#1A1A1A]/40 text-[10px] font-black uppercase tracking-widest hover:text-[#F97316]"
                         >
                           Cancel Edit
                         </button>
@@ -824,7 +827,7 @@ export default function AdminExams() {
                       className="w-full px-4 py-3 rounded-xl bg-[#F5F5F0] border border-[#1A1A1A]/10 text-xs font-bold outline-none resize-none"
                     />
                     <button onClick={handleBulkUpload} disabled={bulkSaving}
-                      className="mt-3 w-full py-3 rounded-xl bg-[#1A1A1A] text-white text-xs font-black uppercase tracking-widest hover:bg-[#C62828] disabled:opacity-60 flex items-center justify-center gap-2">
+                      className="mt-3 w-full py-3 rounded-xl bg-[#1A1A1A] text-white text-xs font-black uppercase tracking-widest hover:bg-[#F97316] disabled:opacity-60 flex items-center justify-center gap-2">
                       <Upload className="w-4 h-4" />
                       {bulkSaving ? 'Uploading…' : 'Upload Questions'}
                     </button>
@@ -834,7 +837,7 @@ export default function AdminExams() {
                     <div className="flex items-center justify-between mb-4">
                       <h4 className="font-black text-[#1A1A1A] uppercase tracking-tight">Questions ({questions.length})</h4>
                     </div>
-                    {qError && <p className="mb-3 text-xs font-black text-[#C62828]">{qError}</p>}
+                    {qError && <p className="mb-3 text-xs font-black text-[#F97316]">{qError}</p>}
                     {questionsLoading ? (
                       <div className="space-y-3">{[1, 2, 3].map(i => <div key={i} className="h-16 bg-[#F5F5F0] rounded-xl animate-pulse" />)}</div>
                     ) : questions.length === 0 ? (
@@ -849,7 +852,7 @@ export default function AdminExams() {
                                 <button onClick={() => openEditQuestion(q)} className="text-[#1A1A1A]/30 hover:text-[#1A1A1A]">
                                   <Edit2 className="w-3.5 h-3.5" />
                                 </button>
-                                <button onClick={() => handleDeleteQuestion(q.id)} className="text-[#C62828]/30 hover:text-[#C62828]">
+                                <button onClick={() => handleDeleteQuestion(q.id)} className="text-[#F97316]/30 hover:text-[#F97316]">
                                   <Trash2 className="w-3.5 h-3.5" />
                                 </button>
                               </div>
@@ -890,11 +893,11 @@ export default function AdminExams() {
                   <input type="number" value={editExamState.duration} onChange={e => setEditExamState(prev => ({ ...prev, duration: e.target.value }))} min="1"
                     className="w-full px-5 py-3.5 bg-[#F5F5F0] rounded-2xl font-black text-sm outline-none" />
                 </div>
-                {formError && <p className="mt-2 text-xs font-black text-[#C62828]">{formError}</p>}
+                {formError && <p className="mt-2 text-xs font-black text-[#F97316]">{formError}</p>}
                 <div className="mt-6 flex justify-end gap-3">
                   <button onClick={() => setEditingExam(null)} className="px-6 py-3 bg-[#F5F5F0] rounded-2xl font-black text-xs uppercase tracking-widest">Cancel</button>
                   <button onClick={handleUpdateExam} disabled={updatingExam}
-                    className="inline-flex items-center gap-2 px-6 py-3 bg-[#C62828] text-white rounded-2xl font-black text-xs uppercase tracking-widest disabled:opacity-60">
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-[#F97316] text-white rounded-2xl font-black text-xs uppercase tracking-widest disabled:opacity-60">
                     {updatingExam ? <Loader className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Save Changes
                   </button>
                 </div>

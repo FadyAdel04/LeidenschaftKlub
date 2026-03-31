@@ -104,11 +104,11 @@ export default function StudentResults() {
         <header className="mb-10">
           <p className="text-[10px] font-black uppercase tracking-[0.4em] text-[#D4A373]">Exam Analytics</p>
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tighter text-[#1A1A1A] uppercase leading-none mt-2">
-            My <span className="text-[#C62828]">Results.</span>
+            My <span className="text-[#F97316]">Results.</span>
           </h1>
         </header>
 
-        {error && <div className="mb-6 p-4 rounded-2xl border border-red-200 bg-red-50 text-sm font-bold text-[#C62828]">{error}</div>}
+        {error && <div className="mb-6 p-4 rounded-2xl border border-red-200 bg-red-50 text-sm font-bold text-[#F97316]">{error}</div>}
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {[
@@ -118,7 +118,7 @@ export default function StudentResults() {
             { label: 'Progress', value: loading ? '—' : `${stats.progress}%`, icon: Clock },
           ].map((s) => (
             <div key={s.label} className="bg-white rounded-2xl border border-[#1A1A1A]/10 p-5 shadow-sm">
-              <s.icon className="w-5 h-5 text-[#C62828] mb-3" />
+              <s.icon className="w-5 h-5 text-[#F97316] mb-3" />
               <p className="text-3xl font-black tracking-tighter text-[#1A1A1A]">{s.value}</p>
               <p className="text-[9px] font-black uppercase tracking-widest text-[#1A1A1A]/35 mt-1">{s.label}</p>
             </div>
@@ -128,10 +128,10 @@ export default function StudentResults() {
         <div className="bg-white rounded-3xl border border-[#1A1A1A]/10 p-6 shadow-sm mb-8">
           <div className="flex items-center justify-between mb-3">
             <h3 className="font-black uppercase text-[#1A1A1A]">Visual Progress</h3>
-            <span className="text-xs font-black text-[#C62828]">{stats.progress}%</span>
+            <span className="text-xs font-black text-[#F97316]">{stats.progress}%</span>
           </div>
           <div className="h-3 bg-[#F5F5F0] rounded-full overflow-hidden">
-            <div className="h-full bg-[#C62828] rounded-full transition-all duration-700" style={{ width: `${stats.progress}%` }} />
+            <div className="h-full bg-[#F97316] rounded-full transition-all duration-700" style={{ width: `${stats.progress}%` }} />
           </div>
           <p className="text-[10px] font-black uppercase tracking-widest text-[#1A1A1A]/35 mt-3">Based on graded (completed) exams only</p>
         </div>
@@ -180,7 +180,7 @@ export default function StudentResults() {
                         {!pending && (
                           <span
                             className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
-                              r.passed ? 'bg-green-50 text-green-700' : 'bg-red-50 text-[#C62828]'
+                              r.passed ? 'bg-green-50 text-green-700' : 'bg-red-50 text-[#F97316]'
                             }`}
                           >
                             {r.passed ? <CheckCircle className="inline w-3 h-3 mr-1" /> : <XCircle className="inline w-3 h-3 mr-1" />}
