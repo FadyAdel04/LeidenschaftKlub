@@ -12,7 +12,6 @@ import {
   fetchProfile,
   fetchAuthUser,
   fetchResultsByStudent,
-  fetchSubmissionsByStudent,
   type Result,
   updateProfile,
   uploadProfileImage,
