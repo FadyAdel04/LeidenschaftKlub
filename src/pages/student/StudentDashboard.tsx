@@ -9,8 +9,8 @@ import MaterialPreviewModal from '../../components/shared/MaterialPreviewModal';
 import {
   fetchProfile, fetchMyAssignedMaterials,
   fetchAssignmentsByLevel, fetchExamsByLevel, fetchResultsByStudent, fetchSubmissionsByStudent,
-  fetchLevelProgress,
-  type Profile, type Material, type Assignment, type Exam, type Result, type Submission, type LevelProgress
+  fetchLevelProgress, fetchStudentAttendance,
+  type Profile, type Material, type Assignment, type Exam, type Result, type Submission, type LevelProgress, type AttendanceSummary
 } from '../../services/studentService';
 
 const cv = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.08, delayChildren: 0.1 } } };
@@ -37,6 +37,7 @@ export default function StudentDashboard() {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [selectedMaterial, setSelectedMaterial] = useState<Material | null>(null);
   const [progress, setProgress] = useState<LevelProgress | null>(null);
+  const [attendance, setAttendance] = useState<AttendanceSummary | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -50,13 +51,14 @@ export default function StudentDashboard() {
         // Use level_id resolved by fetchProfile from the new level_students table
         const levelId = (prof as any).level_id as string | null;
 
-        const [mats, asgns, exs, ress, subs, prog] = await Promise.all([
+        const [mats, asgns, exs, ress, subs, prog, att] = await Promise.all([
           fetchMyAssignedMaterials(user!.id),
           levelId ? fetchAssignmentsByLevel(levelId) : Promise.resolve([]),
           levelId ? fetchExamsByLevel(levelId)       : Promise.resolve([]),
           fetchResultsByStudent(user!.id),
           fetchSubmissionsByStudent(user!.id),
           fetchLevelProgress(user!.id),
+          fetchStudentAttendance(user!.id, levelId ?? undefined)
         ]);
         if (cancelled) return;
         setMaterials(mats);
@@ -65,6 +67,7 @@ export default function StudentDashboard() {
         setResults(ress);
         setSubmissions(subs);
         setProgress(prog);
+        setAttendance(att);
       } catch (e: unknown) {
         if (!cancelled) setError(e instanceof Error ? e.message : 'Failed to load dashboard');
       } finally {
@@ -237,9 +240,53 @@ export default function StudentDashboard() {
                            className="h-full bg-gradient-to-r from-[#D4A373] to-[#DE0002] rounded-full shadow-[0_0_15px_rgba(212,163,115,0.4)]" 
                         />
                       </div>
-                      <p className="text-[8px] font-black text-white/20 uppercase tracking-[0.4em] text-center">
-                        {progress?.completedItems ?? 0} / {progress?.totalItems ?? 0} Milestones Achieved
+                      
+                      <div className="grid grid-cols-3 gap-6 pt-2">
+                        <div className="text-center">
+                           <p className="text-[10px] font-black text-white">{progress?.attendance_p ?? 0}% / 25%</p>
+                           <p className="text-[7px] font-black uppercase text-white/40 tracking-widest">Attendance</p>
+                        </div>
+                        <div className="text-center border-x border-white/10">
+                           <p className="text-[10px] font-black text-white">{progress?.assignments_p ?? 0}% / 25%</p>
+                           <p className="text-[7px] font-black uppercase text-white/40 tracking-widest">Tasks</p>
+                        </div>
+                        <div className="text-center">
+                           <p className="text-[10px] font-black text-white">{progress?.exams_p ?? 0}% / 50%</p>
+                           <p className="text-[7px] font-black uppercase text-white/40 tracking-widest">Exams</p>
+                        </div>
+                      </div>
+
+                      <p className="text-[8px] font-black text-white/10 uppercase tracking-[0.4em] text-center pt-4">
+                        {progress?.completedItems ?? 0} / {progress?.totalItems ?? 0} total milestones
                       </p>
+                   </div>
+                   
+                   <div className="pt-6 border-t border-white/10 relative z-10 flex flex-col gap-4">
+                      <div className="flex items-center justify-between">
+                         <div className="flex items-center gap-2 text-[10px] font-black text-white/40 uppercase tracking-widest italic">
+                            <FiCalendar className="w-3.5 h-3.5 text-[#D4A373]" />
+                            Attendance Tracking
+                         </div>
+                         <p className="text-[10px] font-black text-[#D4A373] uppercase tracking-widest">
+                           {attendance?.attendedSessions ?? 0} / 8 Attended
+                         </p>
+                      </div>
+                      <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
+                         {Array.from({ length: 8 }).map((_, i) => {
+                            const sessionNum = i + 1;
+                            const record = attendance?.records.find((r: any) => r.session_number === sessionNum);
+                            return (
+                              <div key={i} className="flex flex-col gap-1 items-center">
+                                <div className={`w-full h-2 rounded-full transition-all ${
+                                  record?.status === 'present' ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.4)]' :
+                                  record?.status === 'absent' ? 'bg-[#DE0002] shadow-[0_0_10px_rgba(222,0,2,0.4)]' :
+                                  'bg-white/10 border border-white/5'
+                                }`} />
+                                <span className="text-[7px] font-black text-white/20 uppercase">{sessionNum}</span>
+                              </div>
+                            );
+                         })}
+                      </div>
                    </div>
                 </div>
               </div>

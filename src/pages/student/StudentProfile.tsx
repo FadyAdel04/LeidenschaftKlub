@@ -17,9 +17,11 @@ import {
   uploadProfileImage,
   getSignedAvatarUrl,
   fetchLevelProgress,
+  fetchStudentAttendance,
   type Profile,
   type AuthUserInfo,
-  type LevelProgress
+  type LevelProgress,
+  type AttendanceSummary
 } from '../../services/studentService';
 
 const cv = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.07, delayChildren: 0.1 } } };
@@ -54,6 +56,7 @@ export default function StudentProfile() {
   const [results,     setResults]     = useState<Result[]>([]);
   const [loading,     setLoading]     = useState(true);
   const [progress,    setProgress]    = useState<LevelProgress | null>(null);
+  const [attendance,  setAttendance]  = useState<AttendanceSummary | null>(null);
   const [error,    setError]    = useState('');
 
   // Edit state
@@ -75,11 +78,12 @@ export default function StudentProfile() {
     let cancelled = false;
     async function load() {
       try {
-        const [prof, auth, ress, prog] = await Promise.all([
+        const [prof, auth, ress, prog, att] = await Promise.all([
           fetchProfile(user!.id),
           fetchAuthUser(),
           fetchResultsByStudent(user!.id),
           fetchLevelProgress(user!.id),
+          fetchStudentAttendance(user!.id)
         ]);
         if (cancelled) return;
         const avatarSigned = await getSignedAvatarUrl(prof.avatar_url);
@@ -90,6 +94,7 @@ export default function StudentProfile() {
         setAuthInfo(auth);
         setResults(ress);
         setProgress(prog);
+        setAttendance(att);
         setEditName(prof.name);
         setEditPhone(prof.phone ?? '');
       } catch (e: unknown) {
@@ -238,7 +243,7 @@ export default function StudentProfile() {
                       </div>
                    </div>
                    
-                   <div className="h-3 w-full bg-white/5 rounded-full overflow-hidden mb-3 p-0.5">
+                    <div className="h-3 w-full bg-white/5 rounded-full overflow-hidden mb-4 p-0.5 shadow-inner">
                       <motion.div 
                         initial={{ width: 0 }} 
                         animate={{ width: `${progress.percentage}%` }} 
@@ -246,8 +251,23 @@ export default function StudentProfile() {
                         className="h-full bg-gradient-to-r from-[#F97316] to-[#DE0002] rounded-full shadow-[0_0_20px_rgba(249,115,22,0.3)]"
                       />
                    </div>
+
+                   <div className="grid grid-cols-3 gap-1 mb-5">
+                      <div className="text-center px-1">
+                         <p className="text-[10px] font-black text-white">{progress.attendance_p ?? 0}% / 25%</p>
+                         <p className="text-[6px] font-black uppercase tracking-widest text-[#F97316]">Attendance</p>
+                      </div>
+                      <div className="text-center border-x border-white/5 px-1">
+                         <p className="text-[10px] font-black text-white">{progress.assignments_p ?? 0}% / 25%</p>
+                         <p className="text-[6px] font-black uppercase tracking-widest text-[#F97316]">Assignments</p>
+                      </div>
+                      <div className="text-center px-1">
+                         <p className="text-[10px] font-black text-white">{progress.exams_p ?? 0}% / 50%</p>
+                         <p className="text-[6px] font-black uppercase tracking-widest text-[#F97316]">Exams</p>
+                      </div>
+                   </div>
                    
-                   <p className="text-[8px] font-black uppercase tracking-[0.4em] text-white/30 text-center">
+                   <p className="text-[8px] font-black uppercase tracking-[0.4em] text-white/10 text-center">
                      {progress.completedItems} / {progress.totalItems} Milestones Reached
                    </p>
                 </div>
@@ -418,6 +438,92 @@ export default function StudentProfile() {
                   <p className="text-[9px] font-black uppercase tracking-widest text-[#1A1A1A]/30 mt-1 relative z-10">{s.label}</p>
                 </div>
               ))}
+            </motion.div>
+
+            {/* ── Attendance History & Calendar ───────────────────────── */}
+            <motion.div variants={ci} className="space-y-6">
+              <div className="bg-[#1A1A1A] rounded-[2.5rem] p-8 sm:p-10 border border-white/5 shadow-2xl relative overflow-hidden group">
+                 <div className="absolute top-0 right-0 w-64 h-64 bg-[#F97316]/20 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2 group-hover:bg-[#F97316]/40 transition-all duration-1000" />
+                 <div className="relative z-10 space-y-8">
+                    <div className="flex justify-between items-start">
+                       <div className="space-y-1.5">
+                          <p className="text-[10px] font-black uppercase tracking-[0.4em] text-[#D4A373] italic leading-none mb-2">Curriculum Commitment</p>
+                          <h3 className="text-2xl sm:text-3xl font-black text-white uppercase tracking-tighter">Attendance<br /><span className="text-[#F97316]">Report.</span></h3>
+                       </div>
+                       <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-[#D4A373]">
+                          <FiCheckCircle className="w-6 h-6" />
+                       </div>
+                    </div>
+
+                    <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-10">
+                       <div className="flex-1 w-full space-y-4">
+                          <div className="flex justify-between items-end">
+                             <p className="text-[10px] font-black uppercase tracking-widest text-white/40">Level Session Progress</p>
+                             <p className="font-black text-white text-lg tracking-tighter">
+                                {attendance?.attendedSessions || 0} <span className="text-white/20 text-sm">/ 8 Complete</span>
+                             </p>
+                          </div>
+                          <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden p-0.5 border border-white/5">
+                             <motion.div 
+                                initial={{ width: 0 }}
+                                animate={{ width: `${((attendance?.attendedSessions || 0) / 8) * 100}%` }}
+                                className="h-full bg-gradient-to-r from-[#D4A373] to-[#F97316] rounded-full shadow-[0_0_12px_rgba(249,115,22,0.4)]"
+                             />
+                          </div>
+                       </div>
+
+                       <div className="flex gap-4 sm:gap-6 shrink-0">
+                          <div className="text-center p-4 rounded-3xl bg-white/5 border border-white/5 min-w-[100px]">
+                             <p className={`text-4xl font-black tracking-tighter ${(attendance?.absentSessions || 0) > 2 ? 'text-[#DE0002]' : (attendance?.absentSessions || 0) === 2 ? 'text-[#D4A373]' : 'text-white'}`}>
+                                {attendance?.absentSessions || 0}
+                             </p>
+                             <p className="text-[8px] font-black uppercase tracking-widest text-white/20 mt-1">Absences</p>
+                          </div>
+                          <div className="text-center p-4 rounded-3xl bg-white/5 border border-white/5 min-w-[100px]">
+                             <p className="text-4xl font-black tracking-tighter text-white">8</p>
+                             <p className="text-[8px] font-black uppercase tracking-widest text-white/20 mt-1">Capacities</p>
+                          </div>
+                       </div>
+                    </div>
+
+                    {(attendance?.absentSessions || 0) >= 2 && (
+                      <div className={`p-4 rounded-2xl border flex items-center gap-4 transition-all ${ (attendance?.absentSessions || 0) > 2 ? 'bg-[#DE0002]/10 border-[#DE0002]/20 text-[#DE0002]' : 'bg-[#D4A373]/10 border-[#D4A373]/20 text-[#D4A373]'}`}>
+                         <FiAlertCircle className="w-5 h-5 shrink-0 animate-pulse" />
+                         <div className="space-y-0.5">
+                            <p className="font-black text-[10px] uppercase tracking-widest">Absence Threshold Alert</p>
+                            <p className="text-[11px] font-bold leading-tight">
+                               {(attendance?.absentSessions || 0) > 2 
+                                 ? 'Critical: You have exceeded the absence limit. Please contact the administrative office.' 
+                                 : 'Warning: You have reached the maximum absence limit (2 sessions).'}
+                            </p>
+                         </div>
+                      </div>
+                    )}
+
+                    {/* Small Calendar Grid */}
+                    <div className="pt-8 border-t border-white/10 grid grid-cols-4 sm:grid-cols-8 gap-4">
+                       {Array.from({ length: 8 }).map((_, i) => {
+                          const sessionNum = i + 1;
+                          const record = attendance?.records
+                            .filter((r: any) => r.level_id === (profile as any)?.level_id)
+                            .find((r: any) => r.session_number === sessionNum);
+                          
+                          return (
+                            <div key={i} className="flex flex-col items-center gap-2 group/session">
+                               <div className={`w-10 h-10 rounded-2xl flex items-center justify-center text-[12px] font-black transition-all shadow-lg ${
+                                 record?.status === 'present' ? 'bg-green-500 text-white shadow-green-500/20' :
+                                 record?.status === 'absent' ? 'bg-[#DE0002] text-white shadow-red-500/20' :
+                                 'bg-white/5 text-white/20 border border-white/5 shadow-transparent'
+                               }`}>
+                                  {sessionNum}
+                               </div>
+                               <span className="text-[8px] font-black text-white/10 group-hover/session:text-[#D4A373] tracking-widest uppercase transition-colors">Session</span>
+                            </div>
+                          );
+                       })}
+                    </div>
+                 </div>
+              </div>
             </motion.div>
 
             {/* ── Exam History ───────────────────────────────────────── */}

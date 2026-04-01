@@ -11,6 +11,7 @@ interface ProtectedRouteProps {
 function portalFor(role: UserRole): string {
   if (role === 'admin')      return '/admin';
   if (role === 'instructor') return '/instructor';
+  if (role === 'secretary')  return '/secretary';
   return '/student';
 }
 

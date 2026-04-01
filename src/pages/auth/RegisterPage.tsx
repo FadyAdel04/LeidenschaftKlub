@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Mail, Lock, User, ArrowRight, ShieldCheck, Check, AlertCircle, Loader2, Phone } from 'lucide-react';
+import { Mail, Lock, User, ArrowRight, ShieldCheck, Check, AlertCircle, Loader2, Phone, Eye, EyeOff } from 'lucide-react';
 import TopNavBar from '../../components/layout/TopNavBar';
 import Footer from '../../components/layout/Footer';
 import { useAuth } from '../../context/AuthContext';
@@ -29,6 +29,7 @@ export default function RegisterPage() {
   const [error, setError]       = useState('');
   const [success, setSuccess]   = useState('');
   const [loading, setLoading]   = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,8 +37,15 @@ export default function RegisterPage() {
     setSuccess('');
     if (!agreed) { setError('You must accept the institutional protocol.'); return; }
     if (password.length < 8) { setError('Password must be at least 8 characters.'); return; }
+    
+    // Egyptian Phone Validation
     const digits = phone.replace(/\D/g, '');
-    if (digits.length < 8) { setError('Enter a valid phone number (at least 8 digits).'); return; }
+    const isEgyptian = /^0?1[0125]\d{8}$/.test(digits) || /^201[0125]\d{8}$/.test(digits);
+    if (!isEgyptian) { 
+      setError('Please enter a valid Egyptian phone number (e.g., 010..., 011..., 012..., 015...).'); 
+      return; 
+    }
+    
     setLoading(true);
     try {
       await register(name, email, password, phone, role);
@@ -226,14 +234,21 @@ export default function RegisterPage() {
                     <div className="relative group">
                       <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-[#1A1A1A]/20 w-3.5 h-3.5 group-focus-within:text-[#C62828] transition-colors" />
                       <input
-                        type="password"
+                        type={showPassword ? 'text' : 'password'}
                         value={password}
                         onChange={e => setPassword(e.target.value)}
-                        className="w-full pl-11 pr-4 py-2.5 bg-[#F5F5F0] border-none rounded-xl focus:ring-4 focus:ring-[#C62828]/10 transition-all text-[#1A1A1A] placeholder:text-[#1A1A1A]/20 outline-none text-sm font-black tracking-tight"
+                        className="w-full pl-11 pr-12 py-2.5 bg-[#F5F5F0] border-none rounded-xl focus:ring-4 focus:ring-[#C62828]/10 transition-all text-[#1A1A1A] placeholder:text-[#1A1A1A]/20 outline-none text-sm font-black tracking-tight"
                         placeholder="••••••••"
                         required
                         disabled={loading || !!success}
                       />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-[#1A1A1A]/20 hover:text-[#C62828] transition-all"
+                      >
+                         {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
                     </div>
                   </div>
                 </motion.div>

@@ -33,6 +33,8 @@ export default function LoginPage() {
         navigate('/admin');
       } else if (user.role === 'instructor') {
         navigate('/instructor');
+      } else if (user.role === 'secretary') {
+        navigate('/secretary/attendance');
       } else {
         navigate('/student');
       }

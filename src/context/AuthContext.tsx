@@ -10,7 +10,7 @@ import { supabase } from '../lib/supabase';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-export type UserRole = 'student' | 'admin' | 'instructor';
+export type UserRole = 'student' | 'admin' | 'instructor' | 'secretary';
 
 export interface AppUser {
   id: string;
@@ -57,7 +57,7 @@ async function mapUserFromProfile(supabaseUser: User): Promise<AppUser> {
     .maybeSingle();
 
   const dbRole = data?.role as UserRole | undefined;
-  const role: UserRole = (dbRole === 'admin' || dbRole === 'student' || dbRole === 'instructor') ? dbRole : fallback.role;
+  const role: UserRole = (dbRole === 'admin' || dbRole === 'student' || dbRole === 'instructor' || dbRole === 'secretary') ? dbRole : fallback.role;
   const name = data?.name || fallback.name;
   let avatarUrl = data?.avatar_url || fallback.avatar_url;
 

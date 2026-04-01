@@ -6,7 +6,23 @@
     "headline": "Absolute Beginner",
     "summary": "Learners start from zero. They learn the alphabet, pronunciation, basic greetings, and simple self-introduction (name, age, country).",
     "duration": "4 Weeks",
-    "intensity": "2 sessions/week (3 hours each)"
+    "intensity": "2 sessions/week (3 hours each)",
+    "translations": {
+      "ar": {
+        "badge": "مبتدئ",
+        "headline": "مبتدئ تماماً",
+        "summary": "يبدأ المتعلمون من الصفر. يتعلمون الأبجدية، والنطق، والتحيات الأساسية، والتعريف البسيط بالنفس (الاسم، العمر، البلد).",
+        "duration": "4 أسابيع",
+        "intensity": "جلستين في الأسبوع (3 ساعات لكل منهما)"
+      },
+      "de": {
+        "badge": "Anfänger",
+        "headline": "Absoluter Anfänger",
+        "summary": "Lernende fangen bei Null an. Sie lernen das Alphabet, die Aussprache, grundlegende Begrüßungen und einfache Selbstdarstellung (Name, Alter, Land).",
+        "duration": "4 Wochen",
+        "intensity": "2 Sitzungen/Woche (jeweils 3 Stunden)"
+      }
+    }
   },
   {
     "key": "A1.2",
@@ -15,7 +31,23 @@
     "headline": "Basic Communication",
     "summary": "Learners begin to handle simple everyday situations. They can talk about family, work, and daily routines using short and simple sentences.",
     "duration": "4 Weeks",
-    "intensity": "2 sessions/week (3 hours each)"
+    "intensity": "2 sessions/week (3 hours each)",
+    "translations": {
+      "ar": {
+        "badge": "مبتدئ",
+        "headline": "التواصل الأساسي",
+        "summary": "يبدأ المتعلمون في التعامل مع المواقف اليومية البسيطة. يمكنهم التحدث عن العائلة والعمل والروتين اليومي باستخدام جمل قصيرة وبسيطة.",
+        "duration": "4 أسابيع",
+        "intensity": "جلستين في الأسبوع (3 ساعات لكل منهما)"
+      },
+      "de": {
+        "badge": "Anfänger",
+        "headline": "Grundlegende Kommunikation",
+        "summary": "Lernende beginnen, einfache Alltagssituationen zu meistern. Sie können über Familie, Arbeit und tägliche Routinen mit kurzen und einfachen Sätzen sprechen.",
+        "duration": "4 Wochen",
+        "intensity": "2 Sitzungen/Woche (jeweils 3 Stunden)"
+      }
+    }
   },
   {
     "key": "A1.3",
@@ -24,7 +56,23 @@
     "headline": "Foundation Completion",
     "summary": "Learners strengthen their basics and can manage simple interactions such as ordering food, shopping, and asking for directions.",
     "duration": "4 Weeks",
-    "intensity": "2 sessions/week (3 hours each)"
+    "intensity": "2 sessions/week (3 hours each)",
+    "translations": {
+      "ar": {
+        "badge": "مبتدئ",
+        "headline": "إكمال التأسيس",
+        "summary": "يقوي المتعلمون أساسياتهم ويمكنهم إدارة التفاعلات البسيطة مثل طلب الطعام والتسوق والسؤال عن الاتجاهات.",
+        "duration": "4 أسابيع",
+        "intensity": "جلستين في الأسبوع (3 ساعات لكل منهما)"
+      },
+      "de": {
+        "badge": "Anfänger",
+        "headline": "Abschluss der Grundlagen",
+        "summary": "Die Lernenden stärken ihre Grundlagen und können einfache Interaktionen wie Essensbestellungen, Einkäufe und Wegbeschreibungen bewältigen.",
+        "duration": "4 Wochen",
+        "intensity": "2 Sitzungen/Woche (jeweils 3 Stunden)"
+      }
+    }
   },
   {
     "key": "A2.1",
@@ -33,7 +81,23 @@
     "headline": "Expanding Basics",
     "summary": "Learners can describe daily life, people, and places. They start expressing needs and opinions more clearly.",
     "duration": "4 Weeks",
-    "intensity": "2 sessions/week (3 hours each)"
+    "intensity": "2 sessions/week (3 hours each)",
+    "translations": {
+      "ar": {
+        "badge": "أولي",
+        "headline": "توسيع الأساسيات",
+        "summary": "يمكن للمتعلمين وصف الحياة اليومية والأشخاص والأماكن. يبدأون في التعبير عن الاحتياجات والآراء بوضوح أكبر.",
+        "duration": "4 أسابيع",
+        "intensity": "جلستين في الأسبوع (3 ساعات لكل منهما)"
+      },
+      "de": {
+        "badge": "Elementarstufe",
+        "headline": "Erweiterung der Grundlagen",
+        "summary": "Die Lernenden können das tägliche Leben, Personen und Orte beschreiben. Sie beginnen, Bedürfnisse und Meinungen klarer auszudrücken.",
+        "duration": "4 Wochen",
+        "intensity": "2 Sitzungen/Woche (jeweils 3 Stunden)"
+      }
+    }
   },
   {
     "key": "A2.2",
@@ -42,7 +106,23 @@
     "headline": "Improving Fluency",
     "summary": "Learners gain more confidence in speaking. They can participate in simple conversations and talk about past events in a basic way.",
     "duration": "4 Weeks",
-    "intensity": "2 sessions/week (3 hours each)"
+    "intensity": "2 sessions/week (3 hours each)",
+    "translations": {
+      "ar": {
+        "badge": "أولي",
+        "headline": "تحسين الطلاقة",
+        "summary": "يكتسب المتعلمون مزيداً من الثقة في التحدث. يمكنهم المشاركة في محادثات بسيطة والتحدث عن أحداث ماضية بطريقة أساسية.",
+        "duration": "4 أسابيع",
+        "intensity": "جلستين في الأسبوع (3 ساعات لكل منهما)"
+      },
+      "de": {
+        "badge": "Elementarstufe",
+        "headline": "Verbesserung der Geläufigkeit",
+        "summary": "Die Lernenden gewinnen mehr Sicherheit beim Sprechen. Sie können an einfachen Gesprächen teilnehmen und in Grundzügen über vergangene Ereignisse sprechen.",
+        "duration": "4 Wochen",
+        "intensity": "2 Sitzungen/Woche (jeweils 3 Stunden)"
+      }
+    }
   },
   {
     "key": "A2.3",
@@ -51,7 +131,23 @@
     "headline": "Pre-Intermediate Transition",
     "summary": "Learners understand longer conversations and express themselves more comfortably in everyday situations.",
     "duration": "4 Weeks",
-    "intensity": "2 sessions/week (3 hours each)"
+    "intensity": "2 sessions/week (3 hours each)",
+    "translations": {
+      "ar": {
+        "badge": "أولي",
+        "headline": "الانتقال إلى ما قبل المتوسط",
+        "summary": "يفهم المتعلمون المحادثات الأطول ويعبرون عن أنفسهم بشكل أكثر راحة في المواقف اليومية.",
+        "duration": "4 أسابيع",
+        "intensity": "جلستين في الأسبوع (3 ساعات لكل منهما)"
+      },
+      "de": {
+        "badge": "Elementarstufe",
+        "headline": "Übergang zur Mittelstufe",
+        "summary": "Die Lernenden verstehen längere Gespräche und drücken sich in Alltagssituationen sicherer aus.",
+        "duration": "4 Wochen",
+        "intensity": "2 Sitzungen/Woche (jeweils 3 Stunden)"
+      }
+    }
   },
   {
     "key": "B1.1",
@@ -60,7 +156,23 @@
     "headline": "Independent User Start",
     "summary": "Learners can communicate in a wider range of topics such as work, travel, and education. They begin to describe experiences and tell stories.",
     "duration": "4 Weeks",
-    "intensity": "2 sessions/week (3 hours each)"
+    "intensity": "2 sessions/week (3 hours each)",
+    "translations": {
+      "ar": {
+        "badge": "متوسط",
+        "headline": "بداية المستخدم المستقل",
+        "summary": "يمكن للمتعلمين التواصل في مجموعة أوسع من المواضيع مثل العمل والسفر والتعليم. يبدأون في وصف التجارب ورواية القصص.",
+        "duration": "4 أسابيع",
+        "intensity": "جلستين في الأسبوع (3 ساعات لكل منهما)"
+      },
+      "de": {
+        "badge": "Mittelstufe",
+        "headline": "Beginn der selbstständigen Sprachanwendung",
+        "summary": "Die Lernenden können über ein breiteres Spektrum an Themen wie Arbeit, Reisen und Bildung kommunizieren. Sie beginnen, Erfahrungen zu beschreiben und Geschichten zu erzählen.",
+        "duration": "4 Wochen",
+        "intensity": "2 Sitzungen/Woche (jeweils 3 Stunden)"
+      }
+    }
   },
   {
     "key": "B1.2",
@@ -69,7 +181,23 @@
     "headline": "Confidence Building",
     "summary": "Learners can express opinions clearly, engage in discussions, and handle most everyday situations independently.",
     "duration": "4 Weeks",
-    "intensity": "2 sessions/week (3 hours each)"
+    "intensity": "2 sessions/week (3 hours each)",
+    "translations": {
+      "ar": {
+        "badge": "متوسط",
+        "headline": "بناء الثقة",
+        "summary": "يمكن للمتعلمين التعبير عن آرائهم بوضوح، والمشاركة في المناقشات، والتعامل مع معظم المواقف اليومية بشكل مستقل.",
+        "duration": "4 أسابيع",
+        "intensity": "جلستين في الأسبوع (3 ساعات لكل منهما)"
+      },
+      "de": {
+        "badge": "Mittelstufe",
+        "headline": "Aufbau von Vertrauen",
+        "summary": "Die Lernenden können ihre Meinung klar ausdrücken, an Diskussionen teilnehmen und die meisten Alltagssituationen selbstständig meistern.",
+        "duration": "4 Wochen",
+        "intensity": "2 Sitzungen/Woche (jeweils 3 Stunden)"
+      }
+    }
   },
   {
     "key": "B1.3",
@@ -78,7 +206,23 @@
     "headline": "Exam Preparation Level",
     "summary": "Learners are close to the B1 exam level. They can understand longer texts and communicate with reasonable fluency.",
     "duration": "4 Weeks",
-    "intensity": "2 sessions/week (3 hours each)"
+    "intensity": "2 sessions/week (3 hours each)",
+    "translations": {
+      "ar": {
+        "badge": "متوسط",
+        "headline": "مستوى التحضير للامتحان",
+        "summary": "يقترب المتعلمون من مستوى امتحان B1. يمكنهم فهم النصوص الأطول والتواصل بطلاقة معقولة.",
+        "duration": "4 أسابيع",
+        "intensity": "جلستين في الأسبوع (3 ساعات لكل منهما)"
+      },
+      "de": {
+        "badge": "Mittelstufe",
+        "headline": "Prüfungsvorbereitungsstufe",
+        "summary": "Die Lernenden sind nah am B1-Prüfungsniveau. Sie können längere Texte verstehen und mit angemessener Geläufigkeit kommunizieren.",
+        "duration": "4 Wochen",
+        "intensity": "2 Sitzungen/Woche (jeweils 3 Stunden)"
+      }
+    }
   },
   {
     "key": "B2.1",
@@ -87,7 +231,23 @@
     "headline": "Advanced Communication",
     "summary": "Learners can discuss more complex topics, express detailed opinions, and understand more advanced content.",
     "duration": "8 Weeks",
-    "intensity": "2 sessions/week (3 hours each)"
+    "intensity": "2 sessions/week (3 hours each)",
+    "translations": {
+      "ar": {
+        "badge": "فوق المتوسط",
+        "headline": "التواصل المتقدم",
+        "summary": "يمكن للمتعلمين مناقشة مواضيع أكثر تعقيداً، والتعبير عن آراء مفصلة، وفهم محتوى أكثر تقدماً.",
+        "duration": "8 أسابيع",
+        "intensity": "جلستين في الأسبوع (3 ساعات لكل منهما)"
+      },
+      "de": {
+        "badge": "Obere Mittelstufe",
+        "headline": "Fortgeschrittene Kommunikation",
+        "summary": "Die Lernenden können komplexere Themen diskutieren, detaillierte Meinungen ausdrücken und fortgeschrittenere Inhalte verstehen.",
+        "duration": "8 Wochen",
+        "intensity": "2 Sitzungen/Woche (jeweils 3 Stunden)"
+      }
+    }
   },
   {
     "key": "B2.2",
@@ -96,6 +256,22 @@
     "headline": "Fluency & Precision",
     "summary": "Learners communicate fluently and naturally. They can handle in-depth discussions and use the language with a high level of accuracy.",
     "duration": "8 Weeks",
-    "intensity": "2 sessions/week (3 hours each)"
+    "intensity": "2 sessions/week (3 hours each)",
+    "translations": {
+      "ar": {
+        "badge": "فوق المتوسط",
+        "headline": "الطلاقة والدقة",
+        "summary": "يتواصل المتعلمون بطلاقة وطبيعية. يمكنهم إدارة مناقشات متعمقة واستخدام اللغة بمستوى عالٍ من الدقة.",
+        "duration": "8 أسابيع",
+        "intensity": "جلستين في الأسبوع (3 ساعات لكل منهما)"
+      },
+      "de": {
+        "badge": "Obere Mittelstufe",
+        "headline": "Geläufigkeit & Präzision",
+        "summary": "Die Lernenden kommunizieren fließend und natürlich. Sie können tiefgründige Diskussionen führen und die Sprache mit hoher Genauigkeit anwenden.",
+        "duration": "8 Wochen",
+        "intensity": "2 Sitzungen/Woche (jeweils 3 Stunden)"
+      }
+    }
   }
 ]

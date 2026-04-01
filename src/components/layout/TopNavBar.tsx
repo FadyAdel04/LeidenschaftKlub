@@ -2,28 +2,31 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
+import { useAutoTranslate } from 'react-autolocalise';
 import logo from '../../assets/logo.jpg';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../lib/supabase';
 import ToastStack from '../shared/ToastStack';
 import { usePWAInstall } from '../../hooks/usePWAInstall';
+import LanguageSwitcher from '../shared/LanguageSwitcher';
 
 export default function TopNavBar() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
+  const { t } = useAutoTranslate();
   const [isOpen, setIsOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('hero');
-  const [dbRole, setDbRole] = useState<'student' | 'admin' | 'instructor' | null>(null);
+  const [dbRole, setDbRole] = useState<'student' | 'admin' | 'instructor' | 'secretary' | null>(null);
   const { deferredPrompt, installApp: handleInstallApp } = usePWAInstall();
 
   const navItems = [
-    { name: 'Home', id: 'hero' },
-    { name: 'Philosophy', id: 'philosophy' },
-    { name: 'Courses', id: 'courses' },
-    { name: 'Our Spaces', id: 'spaces' },
-    { name: 'Events', id: 'events' },
-    { name: 'Contact', id: 'contact' },
+    { name: t('Home'), id: 'hero' },
+    { name: t('Philosophy'), id: 'philosophy' },
+    { name: t('Courses'), id: 'courses' },
+    { name: t('Our Spaces'), id: 'spaces' },
+    { name: t('Events'), id: 'events' },
+    { name: t('Contact'), id: 'contact' },
   ];
 
   useEffect(() => {
@@ -66,10 +69,10 @@ export default function TopNavBar() {
       if (cancelled) return;
 
       const role = data?.role;
-      if (role === 'student' || role === 'admin' || role === 'instructor') {
+      if (role === 'student' || role === 'admin' || role === 'instructor' || role === 'secretary') {
         setDbRole(role);
       } else {
-        setDbRole(user.role);
+        setDbRole(user.role as any);
       }
     }
 
@@ -82,15 +85,18 @@ export default function TopNavBar() {
   const resolvedRole = dbRole ?? user?.role ?? null;
   const isSignedIn = Boolean(user);
   
-  let portalLabel = 'Student Portal';
+  let portalLabel = t('Student Portal');
   let portalPath = '/student';
 
   if (resolvedRole === 'admin') {
-    portalLabel = 'Admin Dashboard';
+    portalLabel = t('Admin Dashboard');
     portalPath = '/admin';
   } else if (resolvedRole === 'instructor') {
-    portalLabel = 'Instructor Dashboard';
+    portalLabel = t('Instructor Dashboard');
     portalPath = '/instructor';
+  } else if (resolvedRole === 'secretary') {
+    portalLabel = t('Secretary Portal');
+    portalPath = '/secretary/attendance';
   }
 
   const handleScroll = (id: string) => {
@@ -148,10 +154,10 @@ export default function TopNavBar() {
                 }}
               />
               <span className="relative z-10 text-[#C62828] text-xl lg:text-2xl font-black tracking-tighter drop-shadow-sm">
-                Leidenschaft
+                {t('Leidenschaft')}
               </span>
               <span className="relative z-10 text-[#1A1A1A] ml-1 lg:ml-2 text-xl lg:text-2xl font-black tracking-tighter drop-shadow-sm">
-                Klub
+                {t('Klub')}
               </span>
             </div>
           </div>
@@ -200,9 +206,10 @@ export default function TopNavBar() {
                 onClick={handleInstallApp}
                 className="hidden xl:flex items-center gap-2 text-[#C62828] font-black text-[10px] uppercase tracking-[0.2em] border border-[#C62828]/20 px-4 py-2 rounded-xl hover:bg-[#C62828] hover:text-white transition-all"
               >
-                Install App
+                {t('Install App')}
               </button>
             )}
+            <LanguageSwitcher />
             {isSignedIn ? (
               <button
                 onClick={() => navigate(portalPath)}
@@ -216,13 +223,13 @@ export default function TopNavBar() {
                   onClick={() => navigate('/login')}
                   className="text-[#1A1A1A] font-black text-[11px] uppercase tracking-[0.2em] hover:text-[#C62828] transition-all"
                 >
-                  Sign In
+                  {t('Sign In')}
                 </button>
                 <button
                   onClick={() => navigate('/register')}
                   className="bg-[#C62828] text-white px-8 py-3 rounded-xl font-black text-[11px] uppercase tracking-[0.2em] hover:shadow-2xl hover:shadow-[#C62828]/20 hover:-translate-y-0.5 active:scale-95 transition-all shadow-xl shadow-[#C62828]/10"
                 >
-                  Apply Now
+                  {t('Apply Now')}
                 </button>
               </>
             )}
@@ -289,8 +296,8 @@ export default function TopNavBar() {
                   <img src={logo} alt="" width={48} height={48} className="w-full h-full object-cover" />
                 </div>
                 <div className="relative z-10">
-                  <span className="text-base font-black text-[#C62828] block">Leidenschaft</span>
-                  <span className="text-sm font-black text-[#1A1A1A]">Klub</span>
+                  <span className="text-base font-black text-[#C62828] block">{t('Leidenschaft')}</span>
+                  <span className="text-sm font-black text-[#1A1A1A]">{t('Klub')}</span>
                 </div>
               </div>
               {/* Close button inside menu */}
@@ -328,6 +335,11 @@ export default function TopNavBar() {
               ))}
             </div>
 
+            {/* Language Switcher - Mobile */}
+            <div className="w-full pt-4 flex justify-center">
+              <LanguageSwitcher />
+            </div>
+
             {/* Auth Actions - Mobile */}
             <div className="w-full pt-6 mt-4 border-t border-[#1A1A1A]/10 space-y-3">
               {deferredPrompt && (
@@ -338,7 +350,7 @@ export default function TopNavBar() {
                   onClick={handleInstallApp}
                   className="w-full py-4 text-[#C62828] font-black uppercase tracking-wider text-sm border-2 border-[#C62828] rounded-2xl hover:bg-[#C62828] hover:text-white transition-all flex items-center justify-center gap-2"
                 >
-                  Download Mobile App
+                  {t('Download Mobile App')}
                 </motion.button>
               )}
               {isSignedIn ? (
@@ -352,7 +364,7 @@ export default function TopNavBar() {
                   {portalLabel}
                 </motion.button>
               ) : (
-                <>
+                 <>
                   <motion.button
                     initial={{ y: 20, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
@@ -360,7 +372,7 @@ export default function TopNavBar() {
                     onClick={() => { navigate('/login'); setIsOpen(false); }}
                     className="w-full py-4 text-[#1A1A1A] font-black uppercase tracking-wider text-sm border-2 border-[#1A1A1A] rounded-2xl hover:bg-[#1A1A1A] hover:text-white transition-all"
                   >
-                    Sign In
+                    {t('Sign In')}
                   </motion.button>
                   <motion.button
                     initial={{ y: 20, opacity: 0 }}
@@ -369,7 +381,7 @@ export default function TopNavBar() {
                     onClick={() => { navigate('/register'); setIsOpen(false); }}
                     className="w-full py-4 bg-[#C62828] text-white font-black uppercase tracking-wider text-sm rounded-2xl shadow-xl shadow-[#C62828]/20 hover:shadow-2xl hover:-translate-y-0.5 transition-all"
                   >
-                    Apply Now
+                    {t('Apply Now')}
                   </motion.button>
                 </>
               )}

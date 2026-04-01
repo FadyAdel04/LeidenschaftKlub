@@ -33,7 +33,8 @@ const AdminResults       = lazy(() => import('../pages/admin/AdminResults'));
 const AdminWebsite       = lazy(() => import('../pages/admin/AdminWebsite'));
 const AdminNotifications = lazy(() => import('../pages/admin/AdminNotifications'));
 const AdminGroups        = lazy(() => import('../pages/admin/AdminGroups'));
-
+const AdminAttendance    = lazy(() => import('../pages/admin/AdminAttendance'));
+const AdminCalendar      = lazy(() => import('../pages/admin/AdminCalendar'));
 const InstructorDashboard   = lazy(() => import('../pages/instructor/InstructorDashboard'));
 const InstructorGroups      = lazy(() => import('../pages/instructor/InstructorGroups'));
 const InstructorStudents    = lazy(() => import('../pages/instructor/InstructorStudents'));
@@ -41,6 +42,12 @@ const InstructorAssignments = lazy(() => import('../pages/instructor/InstructorA
 const InstructorExams       = lazy(() => import('../pages/instructor/InstructorExams'));
 const InstructorExamReview  = lazy(() => import('../pages/instructor/InstructorExamReviewPage'));
 const InstructorProfile     = lazy(() => import('../pages/instructor/InstructorProfile'));
+
+const SecretaryAttendance    = lazy(() => import('../pages/secretary/SecretaryAttendance'));
+const SecretaryDashboard     = lazy(() => import('../pages/secretary/SecretaryDashboard'));
+const SecretaryLevels        = lazy(() => import('../pages/secretary/SecretaryLevels'));
+const SecretaryGroups        = lazy(() => import('../pages/secretary/SecretaryGroups'));
+const SecretaryEnrollment    = lazy(() => import('../pages/secretary/SecretaryEnrollment'));
 
 const Spinner = () => (
   <div className="flex h-screen w-screen items-center justify-center bg-[#F5F5F0]">
@@ -96,6 +103,8 @@ export default function AppRoutes() {
             <Route path="website"          element={<AdminWebsite />} />
             <Route path="Notifications"   element={<AdminNotifications />} />
             <Route path="groups"          element={<AdminGroups />} />
+            <Route path="attendance"      element={<AdminAttendance />} />
+            <Route path="calendar"        element={<AdminCalendar />} />
           </Route>
         </Route>
 
@@ -109,6 +118,17 @@ export default function AppRoutes() {
             <Route path="exams"            element={<InstructorExams />} />
             <Route path="exams/:examId/review/:studentId" element={<InstructorExamReview />} />
             <Route path="profile"          element={<InstructorProfile />} />
+          </Route>
+        </Route>
+
+        {/* ── Secretary (protected: role = secretary) ──────────── */}
+        <Route element={<ProtectedRoute allowedRoles={['secretary']} />}>
+          <Route path="/secretary">
+            <Route index                   element={<SecretaryDashboard />} />
+            <Route path="attendance"       element={<SecretaryAttendance />} />
+            <Route path="levels"           element={<SecretaryLevels />} />
+            <Route path="enrollment"       element={<SecretaryEnrollment />} />
+            <Route path="groups"           element={<SecretaryGroups />} />
           </Route>
         </Route>
 

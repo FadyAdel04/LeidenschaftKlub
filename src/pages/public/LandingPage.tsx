@@ -2,6 +2,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useEffect, useMemo, useState } from 'react';
 import { ArrowRight, MapPin, Mail, Calendar, Users, ChevronRight } from 'lucide-react';
+import { useAutoTranslate } from 'react-autolocalise';
 import TopNavBar from '../../components/layout/TopNavBar';
 import Footer from '../../components/layout/Footer';
 import logo from '../../assets/logo.jpg';
@@ -24,6 +25,7 @@ export default function LandingPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
+  const { t } = useAutoTranslate();
   const [spaces, setSpaces] = useState<WebsiteSpace[]>([]);
   const [events, setEvents] = useState<WebsiteEvent[]>([]);
   const [bookingOpen, setBookingOpen] = useState(false);
@@ -288,14 +290,14 @@ export default function LandingPage() {
               variants={containerVariants}
               className="text-4xl sm:text-5xl md:text-7xl lg:text-9xl font-black text-[#1A1A1A] tracking-tighter leading-[0.85] mb-4 sm:mb-6 md:mb-8"
             >
-              Leidenschaft <br className="sm:hidden" /> <span className="text-[#C62828]">Klub</span>
+              {t('Leidenschaft')} <br className="sm:hidden" /> <span className="text-[#C62828]">{t('Klub')}</span>
             </motion.h1>
             
             <motion.p 
               variants={containerVariants}
               className="text-base sm:text-lg md:text-2xl lg:text-3xl text-[#1A1A1A]/60 font-medium tracking-tight mb-8 sm:mb-10 md:mb-16 max-w-3xl mx-auto px-2 sm:px-4"
             >
-              Experience the precision and heart of German language mastery. From passion to professionalism.
+              {t('Experience the precision and heart of German language mastery. From passion to professionalism.')}
             </motion.p>
             
             <motion.div variants={containerVariants} className="flex flex-col sm:flex-row gap-3 sm:gap-4 md:gap-6 justify-center px-2 sm:px-4 w-full max-w-md mx-auto sm:max-w-none">
@@ -303,13 +305,13 @@ export default function LandingPage() {
                 onClick={() => navigate('/register')}
                 className="w-full sm:w-auto bg-[#C62828] text-white px-6 sm:px-8 md:px-12 py-3 sm:py-4 md:py-5 rounded-2xl font-black text-base sm:text-lg md:text-xl hover:shadow-[0_20px_40px_rgba(198,40,40,0.25)] hover:-translate-y-1 transition-all active:scale-95 shadow-xl shadow-[#C62828]/20"
               >
-                Join the Klub
+                {t('Join the Klub')}
               </button>
               <button 
                 onClick={() => scrollToId('courses')}
                 className="w-full sm:w-auto bg-white border-2 border-[#1A1A1A] text-[#1A1A1A] px-6 sm:px-8 md:px-12 py-3 sm:py-4 md:py-5 rounded-2xl font-black text-base sm:text-lg md:text-xl hover:bg-[#1A1A1A] hover:text-white transition-all active:scale-95"
               >
-                Explore Courses
+                {t('Explore Courses')}
               </button>
             </motion.div>
           </motion.div>
@@ -344,7 +346,7 @@ export default function LandingPage() {
               >
                 <div className="text-4xl sm:text-6xl font-serif mb-3 sm:mb-6 opacity-30">"</div>
                 <p className="text-lg sm:text-xl md:text-2xl leading-relaxed font-bold italic">
-                  Language is the road map of a culture.
+                  {t('Language is the road map of a culture.')}
                 </p>
               </motion.div>
             </motion.div>
@@ -355,16 +357,16 @@ export default function LandingPage() {
               viewport={{ once: true }}
               transition={{ duration: 1 }}
             >
-              <h4 className="text-[#D4A373] font-black uppercase tracking-[0.3em] text-xs md:text-sm mb-4 md:mb-6">Our Philosophy</h4>
+              <h4 className="text-[#D4A373] font-black uppercase tracking-[0.3em] text-xs md:text-sm mb-4 md:mb-6">{t('Our Philosophy')}</h4>
               <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-[#1A1A1A] tracking-tighter mb-6 sm:mb-8 md:mb-10 leading-tight">
-                A community where <br/><span className="text-[#C62828]">language meets culture.</span>
+                {t('A community where')} <br/><span className="text-[#C62828]">{t('language meets culture.')}</span>
               </h2>
               <div className="space-y-4 sm:space-y-6 md:space-y-8 text-base sm:text-lg md:text-xl text-[#1A1A1A]/70 leading-relaxed font-medium">
                 <p>
-                  At Leidenschaft Klub, we believe learning German is more than memorizing grammar rules. It's about unlocking a new worldview.
+                  {t("At Leidenschaft Klub, we believe learning German is more than memorizing grammar rules. It's about unlocking a new worldview.")}
                 </p>
                 <p>
-                  Our philosophy centers on <span className="text-[#1A1A1A] font-bold underline decoration-[#C62828] decoration-4 underline-offset-4">'Leidenschaft'</span> — the passionate pursuit of excellence. transform enthusiasm into expertise.
+                  {t("Our philosophy centers on")} <span className="text-[#1A1A1A] font-bold underline decoration-[#C62828] decoration-4 underline-offset-4">{t('Leidenschaft')}</span> {t("— the passionate pursuit of excellence. transform enthusiasm into expertise.")}
                 </p>
               </div>
               
@@ -380,7 +382,7 @@ export default function LandingPage() {
                     className="transition-colors"
                   >
                     <div className="text-3xl sm:text-4xl md:text-5xl font-black text-[#1A1A1A]">{stat.val}</div>
-                    <div className="text-xs uppercase tracking-widest font-black text-[#D4A373] mt-2">{stat.label}</div>
+                    <div className="text-xs uppercase tracking-widest font-black text-[#D4A373] mt-2">{t(stat.label)}</div>
                   </motion.div>
                 ))}
               </div>
@@ -397,7 +399,7 @@ export default function LandingPage() {
               viewport={{ once: true }}
               className="mb-10 sm:mb-16 md:mb-24 text-center"
             >
-              <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tighter text-[#1A1A1A]">Curated Path</h2>
+              <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tighter text-[#1A1A1A]">{t('Curated Path')}</h2>
               <div className="h-2 w-20 sm:w-24 md:w-32 bg-[#C62828] mt-4 sm:mt-6 md:mt-8 mx-auto rounded-full"></div>
             </motion.div>
 
@@ -413,15 +415,15 @@ export default function LandingPage() {
                     viewport={{ once: true }}
                     transition={{ delay: idx * 0.05 }}
                     onClick={() => navigate(`/levels/${encodeURIComponent(lvl.name)}`)}
-                    className={`${colClass} bg-[#F5F5F0] p-6 sm:p-8 md:p-10 rounded-3xl sm:rounded-4xl border-l-8 border-[#C62828] group cursor-pointer transition-all hover:bg-[#1A1A1A] hover:border-[#D4A373] hover:shadow-2xl hover:shadow-[#1A1A1A]/20`}
+                    className={`${colClass} bg-[#F5F5F0] p-6 sm:p-8 md:p-10 rounded-3xl sm:rounded-4xl border-l-8 border-[#C62828] group cursor-pointer transition-all hover:bg-[#F97316] hover:border-[#D4A373] hover:shadow-2xl hover:shadow-[#1A1A1A]/20`}
                   >
                     <div className="flex justify-between items-start mb-4 sm:mb-6 md:mb-8">
-                      <span className="text-4xl sm:text-5xl md:text-6xl font-black text-[#1A1A1A]/10 group-hover:text-white/20 transition-colors">{lvl.name}</span>
+                      <span className="text-4xl sm:text-5xl md:text-6xl font-black text-[#1A1A1A]/10 group-hover:text-black transition-colors">{lvl.name}</span>
                       <ArrowRight className="text-[#C62828] group-hover:text-[#D4A373] group-hover:translate-x-2 transition-all w-6 h-6 sm:w-8 sm:h-8" />
                     </div>
-                    <h3 className="text-2xl sm:text-3xl font-black mb-2 sm:mb-4 group-hover:text-white transition-colors">{lvl.headline || lvl.name}</h3>
+                    <h3 className="text-2xl sm:text-3xl font-black mb-2 sm:mb-4 group-hover:text-white transition-colors">{t(lvl.headline || lvl.name)}</h3>
                     <p className="text-sm sm:text-base text-[#1A1A1A]/60 group-hover:text-white/60 transition-colors font-medium">
-                      {lvl.summary || "Standardized excellence based on CEFR frameworks."}
+                      {t(lvl.summary || "Standardized excellence based on CEFR frameworks.")}
                     </p>
                   </motion.div>
                 );
@@ -440,12 +442,12 @@ export default function LandingPage() {
               viewport={{ once: true }}
               className="text-center mb-10 sm:mb-16"
             >
-              <h4 className="text-[#D4A373] font-black uppercase tracking-[0.3em] text-[10px] md:text-sm mb-3 sm:mb-4">Our Spaces</h4>
+              <h4 className="text-[#D4A373] font-black uppercase tracking-[0.3em] text-[10px] md:text-sm mb-3 sm:mb-4">{t('Our Spaces')}</h4>
               <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-black tracking-tighter text-[#1A1A1A] mb-4 sm:mb-6">
-                Where Learning <span className="text-[#C62828]">Comes Alive</span>
+                {t('Where Learning')} <span className="text-[#C62828]">{t('Comes Alive')}</span>
               </h2>
               <p className="text-base sm:text-lg md:text-xl text-[#1A1A1A]/60 max-w-3xl mx-auto px-2 sm:px-4">
-                Discover our state-of-the-art facilities designed for immersive language learning
+                {t('Discover our state-of-the-art facilities designed for immersive language learning')}
               </p>
             </motion.div>
 
@@ -478,11 +480,11 @@ export default function LandingPage() {
                     {/* Image Overlay Content */}
                     <div className="absolute inset-0 p-4 sm:p-6 flex flex-col justify-end transform translate-y-full group-hover:translate-y-0 transition-transform duration-500">
                       <div className="bg-white/90 backdrop-blur-sm p-3 sm:p-4 rounded-xl sm:rounded-2xl">
-                        <span className="text-xs font-black text-[#C62828] uppercase tracking-wider">{image.category}</span>
-                        <h3 className="text-lg sm:text-xl font-bold text-[#1A1A1A] mt-1">{image.title}</h3>
-                        <p className="text-xs sm:text-sm text-[#1A1A1A]/60 mt-1 sm:mt-2">{image.description}</p>
+                        <span className="text-xs font-black text-[#C62828] uppercase tracking-wider">{t(image.category || '')}</span>
+                        <h3 className="text-lg sm:text-xl font-bold text-[#1A1A1A] mt-1">{t(image.title)}</h3>
+                        <p className="text-xs sm:text-sm text-[#1A1A1A]/60 mt-1 sm:mt-2">{t(image.description || '')}</p>
                         <div className="flex items-center gap-2 mt-2 sm:mt-3 text-[#C62828] text-sm font-semibold">
-                          Explore <ChevronRight className="w-4 h-4" />
+                          {t('Explore')} <ChevronRight className="w-4 h-4" />
                         </div>
                       </div>
                     </div>
@@ -510,13 +512,13 @@ export default function LandingPage() {
             >
               <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full mb-4 sm:mb-6">
                 <Calendar className="w-4 h-4 text-[#D4A373]" />
-                <span className="text-xs font-black uppercase tracking-wider">Don't Miss Out</span>
+                <span className="text-xs font-black uppercase tracking-wider">{t("Don't Miss Out")}</span>
               </div>
               <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-black tracking-tighter mb-4 sm:mb-6 px-2 sm:px-4">
-                Upcoming <span className="text-[#C62828]">Events</span>
+                {t('Upcoming')} <span className="text-[#C62828]">{t('Events')}</span>
               </h2>
               <p className="text-base sm:text-lg md:text-xl text-white/60 max-w-3xl mx-auto px-4 sm:px-6">
-                Join our community events and take your language journey to the next level
+                {t('Join our community events and take your language journey to the next level')}
               </p>
             </motion.div>
 
@@ -541,7 +543,7 @@ export default function LandingPage() {
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />
                     <div className="absolute top-3 left-3 sm:top-4 sm:left-4 bg-[#C62828] text-white px-2 sm:px-3 py-1 rounded-full text-xs font-black uppercase">
-                      {event.type ?? 'Event'}
+                      {t(event.type ?? 'Event')}
                     </div>
                     <div className="absolute top-3 right-3 sm:top-4 sm:right-4 bg-black/50 backdrop-blur-sm px-2 sm:px-3 py-1 rounded-full text-xs font-bold">
                       {event.price ?? '—'}
@@ -550,10 +552,10 @@ export default function LandingPage() {
                   
                   <div className="p-4 sm:p-6">
                     <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3 group-hover:text-[#D4A373] transition-colors">
-                      {event.title}
+                      {t(event.title)}
                     </h3>
                     {event.description && (
-                      <p className="text-xs sm:text-sm text-white/60 mb-3 line-clamp-2">{event.description}</p>
+                      <p className="text-xs sm:text-sm text-white/60 mb-3 line-clamp-2">{t(event.description)}</p>
                     )}
                     
                     <div className="space-y-1.5 sm:space-y-2 mb-3 sm:mb-4">
@@ -565,11 +567,11 @@ export default function LandingPage() {
                       </div>
                       <div className="flex items-center gap-2 text-xs sm:text-sm text-white/60">
                         <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
-                        <span className="truncate">{event.location ?? '—'}</span>
+                        <span className="truncate">{t(event.location ?? '—')}</span>
                       </div>
                       <div className="flex items-center gap-2 text-xs sm:text-sm text-white/60">
                         <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
-                        <span>{event.capacity ?? 0} spots available</span>
+                        <span>{event.capacity ?? 0} {t('spots available')}</span>
                       </div>
                     </div>
                     
@@ -577,7 +579,7 @@ export default function LandingPage() {
                       onClick={() => openBooking(event)}
                       className="w-full mt-2 sm:mt-4 bg-white/10 hover:bg-[#C62828] py-2.5 sm:py-3 rounded-xl font-bold text-xs sm:text-sm transition-all group-hover:translate-x-1"
                     >
-                      Enroll Now
+                      {t('Enroll Now')}
                     </button>
                   </div>
                 </motion.div>
@@ -602,10 +604,10 @@ export default function LandingPage() {
               className="px-0 sm:px-2 md:px-4"
             >
               <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-black tracking-tighter mb-6 sm:mb-8 md:mb-10 leading-[0.85]">
-                Start your <br/>journey <span className="text-[#C62828]">today.</span>
+                {t('Start your')} <br/>{t('journey')} <span className="text-[#C62828]">{t('today.')}</span>
               </h2>
               <p className="text-white/60 text-lg sm:text-xl md:text-2xl mb-8 sm:mb-10 md:mb-12 lg:mb-16 max-w-lg font-medium">
-                Our advisors are ready to help you find the perfect path for your linguistic ambitions.
+                {t('Our advisors are ready to help you find the perfect path for your linguistic ambitions.')}
               </p>
               
               <div className="space-y-6 sm:space-y-8 md:space-y-10">
@@ -634,15 +636,15 @@ export default function LandingPage() {
             >
               <div className="flex items-center justify-between gap-4 mb-5">
                 <div>
-                  <p className="text-xs uppercase font-black tracking-[0.2em] text-[#D4A373]">find us</p>
-                  <p className="text-2xl md:text-3xl font-black tracking-tighter">Alexandria, Egypt</p>
+                  <p className="text-xs uppercase font-black tracking-[0.2em] text-[#D4A373]">{t('find us')}</p>
+                  <p className="text-2xl md:text-3xl font-black tracking-tighter">{t('Alexandria, Egypt')}</p>
                   <p className="text-white/60 text-sm md:text-base font-bold mt-1">
-                    261 Portsaid street Cleopatra, Sidi Gaber
+                    {t('261 Portsaid street Cleopatra, Sidi Gaber')}
                   </p>
                 </div>
                 <div className="hidden sm:flex items-center gap-2 bg-white/10 px-4 py-3 rounded-2xl border border-white/10">
                   <MapPin className="w-5 h-5 text-[#D4A373]" />
-                  <span className="text-[10px] font-black uppercase tracking-[0.25em] text-white/70">Google Maps</span>
+                  <span className="text-[10px] font-black uppercase tracking-[0.25em] text-white/70">{t('Google Maps')}</span>
                 </div>
               </div>
 
@@ -672,29 +674,29 @@ export default function LandingPage() {
           <div className="relative w-full max-w-lg bg-white rounded-3xl p-6 sm:p-8 border border-[#1A1A1A]/10 shadow-2xl">
             <div className="flex items-start justify-between gap-4 mb-4">
               <div>
-                <p className="text-[9px] font-black uppercase tracking-[0.35em] text-[#D4A373]">Event booking</p>
-                <h3 className="text-2xl font-black tracking-tight text-[#1A1A1A]">{bookingEvent.title}</h3>
+                <p className="text-[9px] font-black uppercase tracking-[0.35em] text-[#D4A373]">{t('Event booking')}</p>
+                <h3 className="text-2xl font-black tracking-tight text-[#1A1A1A]">{t(bookingEvent.title)}</h3>
               </div>
               <button className="w-10 h-10 rounded-xl bg-[#F5F5F0]" onClick={() => setBookingOpen(false)}>✕</button>
             </div>
 
             <div className="space-y-3">
-              <input value={bName} onChange={e => setBName(e.target.value)} placeholder="Full name"
+              <input value={bName} onChange={e => setBName(e.target.value)} placeholder={t("Full name")}
                 className="w-full px-4 py-3 rounded-2xl bg-[#F5F5F0] font-black text-sm outline-none" />
-              <input value={bEmail} onChange={e => setBEmail(e.target.value)} placeholder="Email"
+              <input value={bEmail} onChange={e => setBEmail(e.target.value)} placeholder={t("Email")}
                 className="w-full px-4 py-3 rounded-2xl bg-[#F5F5F0] font-black text-sm outline-none" />
-              <input type="number" value={bSeats} onChange={e => setBSeats(e.target.value)} min={1} max={10} placeholder="Seats"
+              <input type="number" value={bSeats} onChange={e => setBSeats(e.target.value)} min={1} max={10} placeholder={t("Seats")}
                 className="w-full px-4 py-3 rounded-2xl bg-[#F5F5F0] font-black text-sm outline-none" />
             </div>
 
-            {bookingError && <p className="mt-4 text-sm font-bold text-[#C62828]">{bookingError}</p>}
-            {bookingSuccess && <p className="mt-4 text-sm font-bold text-green-700">{bookingSuccess}</p>}
+            {bookingError && <p className="mt-4 text-sm font-bold text-[#C62828]">{t(bookingError)}</p>}
+            {bookingSuccess && <p className="mt-4 text-sm font-bold text-green-700">{t(bookingSuccess)}</p>}
 
             <div className="mt-6 flex justify-end gap-3">
-              <button onClick={() => setBookingOpen(false)} className="px-5 py-3 rounded-2xl bg-[#F5F5F0] font-black text-xs uppercase tracking-widest">Cancel</button>
+              <button onClick={() => setBookingOpen(false)} className="px-5 py-3 rounded-2xl bg-[#F5F5F0] font-black text-xs uppercase tracking-widest">{t('Cancel')}</button>
               <button onClick={handleBook} disabled={bookingSubmitting}
                 className="px-6 py-3 rounded-2xl bg-[#C62828] text-white font-black text-xs uppercase tracking-widest disabled:opacity-60">
-                {bookingSubmitting ? 'Booking…' : 'Confirm booking'}
+                {bookingSubmitting ? t('Booking…') : t('Confirm booking')}
               </button>
             </div>
           </div>

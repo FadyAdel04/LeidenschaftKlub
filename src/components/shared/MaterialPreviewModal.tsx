@@ -87,11 +87,11 @@ export default function MaterialPreviewModal({ open, material, onClose }: Materi
             {watermark}
           </div>
           {fileType === 'pdf' && (
-            <div className="w-full h-full relative group/pdf">
+            <div className="w-full h-full relative group/pdf overflow-hidden">
               <iframe
-                src={`${material.file_url}#toolbar=0&navpanes=0&scrollbar=1`}
+                src={`https://docs.google.com/viewer?url=${encodeURIComponent(material.file_url)}&embedded=true`}
                 title={material.title}
-                className="w-full h-full pointer-events-auto"
+                className="w-full h-full border-0 pointer-events-auto"
               />
               <div className="absolute top-0 right-0 left-0 h-14 bg-transparent z-10 pointer-events-auto" onContextMenu={e => e.preventDefault()} />
             </div>

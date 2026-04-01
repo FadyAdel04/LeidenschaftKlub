@@ -25,6 +25,9 @@ export interface LevelProgress {
   completedItems: number;
   percentage: number;
   levelName: string;
+  attendance_p?: number;
+  assignments_p?: number;
+  exams_p?: number;
 }
 
 // ─── Auth User (full metadata from Supabase Auth) ─────────────────────────────
@@ -995,44 +998,107 @@ export async function fetchLevelProgress(studentId: string): Promise<LevelProgre
     const levelId = mapping.level_id;
     const levelName = (mapping.levels as any)?.name || 'Unknown Level';
 
-    // 2. Total Assignments in this level
-    const { count: totalAsgn } = await supabase
-      .from('assignments')
+    // 2. Attendance (25%) -> 8 sessions
+    const { count: attendedCount } = await supabase
+      .from('attendance')
       .select('*', { count: 'exact', head: true })
-      .eq('level_id', levelId);
+      .eq('student_id', studentId)
+      .eq('level_id', levelId)
+      .eq('status', 'present');
+    
+    const attendanceProgress = Math.min((attendedCount || 0) / 8, 1) * 25;
 
-    // 3. Completed Assignments (submissions)
+    // 3. Assignments (25%) -> 8 assignments
+    const { data: assignmentsInLevel } = await supabase
+      .from('assignments')
+      .select('id')
+      .eq('level_id', levelId)
+      .order('created_at', { ascending: true })
+      .limit(8);
+
+    const asgnIds = assignmentsInLevel?.map(a => a.id) || [];
     const { count: completedAsgn } = await supabase
       .from('submissions')
       .select('*', { count: 'exact', head: true })
       .eq('student_id', studentId)
-      .in('assignment_id', (await supabase.from('assignments').select('id').eq('level_id', levelId)).data?.map(a => a.id) || []);
+      .in('assignment_id', asgnIds);
 
-    // 4. Total Exams in this level
-    const { count: totalExams } = await supabase
+    const assignmentProgress = Math.min((completedAsgn || 0) / 8, 1) * 25;
+
+    // 4. Exams (50%) -> 3 exams (15%, 15%, 20%)
+    const { data: examsInLevel } = await supabase
       .from('exams')
-      .select('*', { count: 'exact', head: true })
-      .eq('level_id', levelId);
+      .select('id')
+      .eq('level_id', levelId)
+      .order('created_at', { ascending: true })
+      .limit(3);
 
-    // 5. Completed Exams (results)
-    const { count: completedExams } = await supabase
+    const examIds = examsInLevel?.map(e => e.id) || [];
+    const { data: completedResults } = await supabase
       .from('results')
-      .select('*', { count: 'exact', head: true })
+      .select('exam_id, passed')
       .eq('student_id', studentId)
-      .in('exam_id', (await supabase.from('exams').select('id').eq('level_id', levelId)).data?.map(e => e.id) || []);
+      .in('exam_id', examIds);
 
-    const total = (totalAsgn || 0) + (totalExams || 0);
-    const completed = (completedAsgn || 0) + (completedExams || 0);
-    const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+    const completedExamIds = new Set(completedResults?.map(r => r.exam_id) || []);
+    
+    let examProgress = 0;
+    if (examIds.length > 0 && completedExamIds.has(examIds[0])) examProgress += 15;
+    if (examIds.length > 1 && completedExamIds.has(examIds[1])) examProgress += 15;
+    if (examIds.length > 2 && completedExamIds.has(examIds[2])) examProgress += 20;
+
+    const percentage = Math.round(attendanceProgress + assignmentProgress + examProgress);
 
     return {
-      totalItems: total,
-      completedItems: completed,
+      totalItems: 8 + 8 + 3, // 8 sessions + 8 assignments + 3 exams
+      completedItems: (attendedCount || 0) + (completedAsgn || 0) + (completedExamIds.size || 0),
       percentage,
-      levelName
+      levelName,
+      attendance_p: Math.round(attendanceProgress),
+      assignments_p: Math.round(assignmentProgress),
+      exams_p: Math.round(examProgress)
     };
   } catch (err) {
     console.error('Error fetching progress:', err);
+    return null;
+  }
+}
+export interface AttendanceSummary {
+  totalSessions: number;
+  attendedSessions: number;
+  absentSessions: number;
+  records: any[];
+}
+
+/**
+ * Fetch attendance summaries + specific session log for current student.
+ */
+export async function fetchStudentAttendance(studentId: string, levelId?: string): Promise<AttendanceSummary | null> {
+  try {
+    let query = supabase
+      .from('attendance')
+      .select('*')
+      .eq('student_id', studentId);
+      
+    if (levelId) {
+      query = query.eq('level_id', levelId);
+    }
+
+    const { data: records, error } = await query;
+
+    if (error) throw error;
+
+    const attended = (records || []).filter(r => r.status === 'present').length;
+    const absent = (records || []).filter(r => r.status === 'absent').length;
+
+    return {
+      totalSessions: 8,
+      attendedSessions: attended,
+      absentSessions: absent,
+      records: records || []
+    };
+  } catch (err) {
+    console.error('Error fetching student attendance:', err);
     return null;
   }
 }

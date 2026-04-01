@@ -178,6 +178,8 @@ export default function AdminDashboard() {
                 { label: 'Assignments', to: '/admin/assignments' },
                 { label: 'Exams',       to: '/admin/exams' },
                 { label: 'Students',    to: '/admin/students' },
+                { label: 'Attendance',  to: '/admin/attendance' },
+                { label: 'Calendar',    to: '/admin/calendar' },
               ].map(link => (
                 <button
                   key={link.to}
