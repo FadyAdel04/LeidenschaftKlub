@@ -36,9 +36,9 @@ export type LevelDetails = {
     role?: string;
     initials?: string;
   };
-  highlights: string[];
-  outcomes: string[];
-  curriculum: Array<{ title: string; items: string[] }>;
+  highlights?: string[];
+  outcomes?: string[];
+  curriculum?: Array<{ title: string; items: string[] }>;
   curriculumHighlights?: Array<{
     title: string;
     subtitle?: string;
@@ -66,7 +66,7 @@ export type LevelDetails = {
       role: string;
     };
   };
-  assessment: {
+  assessment?: {
     format: string;
     passingScore: number;
     notes: string;
