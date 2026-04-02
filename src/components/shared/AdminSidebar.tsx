@@ -1,7 +1,7 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
-import { FiUsers, FiLogOut, FiX, FiMenu, FiGrid, FiImage, FiBell, FiDownload, FiCheckSquare } from 'react-icons/fi';
+import { FiUsers, FiLogOut, FiX, FiMenu, FiGrid, FiImage, FiBell, FiDownload, FiCheckSquare, FiBookOpen, FiFileText, FiAward } from 'react-icons/fi';
 import { RiDashboardLine } from 'react-icons/ri';
 import { useAuth } from '../../context/AuthContext';
 import { fetchAuthUser, type AuthUserInfo } from '../../services/studentService';
@@ -12,6 +12,9 @@ const navLinks = [
   { to: '/admin/students',     label: 'Students',    icon: FiUsers },
   { to: '/admin/groups',       label: 'Groups',      icon: FiGrid },
   { to: '/admin/levels',       label: 'Levels',      icon: FiMenu },
+  { to: '/admin/materials',    label: 'Materials',   icon: FiBookOpen },
+  { to: '/admin/assignments',  label: 'Assignments', icon: FiFileText },
+  { to: '/admin/exams',        label: 'Exams',       icon: FiAward },
   { to: '/admin/attendance',   label: 'Attendance',  icon: FiCheckSquare },
   { to: '/admin/website',      label: 'Website',     icon: FiImage },
   { to: '/admin/notifications', label: 'Notifications', icon: FiBell },
